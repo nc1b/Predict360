@@ -2,7 +2,7 @@
 // round icon buttons and a sun/moon theme switch.
 
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Code, FlaskConical, Moon, Sun } from 'lucide-react';
+import { ArrowRight, BookOpen, Code, Download, FlaskConical, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { LogoMark } from '@/components/logo';
 import { buttonClass } from '@/components/ui/button';
@@ -14,6 +14,7 @@ const linkClass = 'block text-muted-foreground transition-colors hover:text-fore
 
 const EXPLORE = [
   { label: 'Source code', icon: Code, href: REPO_URL },
+  { label: 'Download for Windows', icon: Download, href: `${REPO_URL}/releases` },
   { label: 'Scoring rules', icon: BookOpen, href: `${REPO_URL}#scoring-rules` },
   { label: 'Test results', icon: FlaskConical, href: `${REPO_URL}#measured-results` },
 ];

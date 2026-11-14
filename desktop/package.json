@@ -17,7 +17,6 @@
     "appId": "app.predict360.desktop",
     "productName": "Predict 360",
     "directories": { "output": "release" },
-    "win": { "target": ["portable", "nsis"] },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+    "win": { "target": ["portable"], "signAndEditExecutable": false }
   }
 }
