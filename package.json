@@ -1,23 +1,30 @@
 {
   "name": "predict360-backend",
   "version": "0.1.0",
-  "description": "Predict 360 hackathon prototype: typing-timing features for a two-sentence morning check-in.",
+  "description": "Opt-in desktop activity tracking, account sync, and experimental typing check-ins.",
   "private": true,
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "build": "npm run build --prefix web",
     "dev:web": "npm run dev --prefix web",
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "cd test && node --test",
     "test:web": "npm test --prefix web",
     "fixtures": "node scripts/write-fixtures.js",
     "evaluate": "node scripts/evaluate.js",
-    "robustness": "node scripts/robustness.js"
+    "robustness": "node scripts/robustness.js",
+    "research": "python scripts/build-research.py",
+    "prepare:desktop": "node scripts/prepare-desktop.js",
+    "prepare:cloud": "node scripts/prepare-cloud.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "png-to-ico": "3.0.2",
+    "sharp": "0.35.5"
   }
 }

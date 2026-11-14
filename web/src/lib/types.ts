@@ -25,7 +25,7 @@ export interface Comparison {
   sessionMs: number;
   baselineMs: number;
   deltaMs: number;
-  ratio: number;
+  ratio: number | null;
   pointsDeducted: number;
   flag: Flag | null;
 }
@@ -40,7 +40,7 @@ export interface AnalyzeResponse {
     features: Record<FeatureName, { value: number | null; sessionsUsed: number; minSessions: number; valid: boolean }>;
   } | null;
   comparisons: Record<FeatureName, Comparison | null>;
-  drivers: { feature: FeatureName; flag: Flag; pointsDeducted: number; ratio: number }[];
+  drivers: { feature: FeatureName; flag: Flag; pointsDeducted: number; ratio: number | null }[];
   flags: Flag[];
   experimental: boolean;
   disclaimer: string;

@@ -2,21 +2,62 @@
   "name": "predict360-desktop",
   "version": "0.1.0",
   "private": true,
-  "description": "Predict 360 as a downloadable desktop app: a dedicated window for the morning check-in.",
+  "description": "Opt-in daily activity tracking with website account sync.",
   "main": "main.js",
   "scripts": {
+    "prestart": "node ../scripts/prepare-desktop.js",
     "start": "electron .",
+    "predist": "node ../scripts/prepare-desktop.js",
     "dist": "electron-builder --win",
     "dist:portable": "electron-builder --win portable"
   },
   "devDependencies": {
-    "electron": "^33.2.1",
-    "electron-builder": "^25.1.8"
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0"
   },
   "build": {
     "appId": "app.predict360.desktop",
     "productName": "Predict 360",
-    "directories": { "output": "release" },
-    "win": { "target": ["portable"], "signAndEditExecutable": false }
+    "protocols": [
+      {
+        "name": "Predict 360 sign-in",
+        "schemes": [
+          "predict360"
+        ]
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "activity.js",
+      "store.js",
+      "renderer.js",
+      "styles.css",
+      "index.html",
+      "assets/**",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/uiohook-napi/**"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Predict360-${version}-Windows.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "dependencies": {
+    "uiohook-napi": "1.5.5"
   }
 }

@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "dataPolicy": "Only public research datasets; no app-user records.",
+  "clinicalValidation": false,
+  "datasets": [
+    {
+      "id": "cmu",
+      "name": "CMU Keystroke Dynamics Benchmark",
+      "source": "https://www.cs.cmu.edu/~keystroke/",
+      "status": "computed",
+      "license": "Public research dataset; cite Killourhy & Maxion (2009).",
+      "records": 20400,
+      "participants": 51,
+      "sha256": "b11d23538b1865fa6ecf4e8b78567caa312e9c1027604bb022fcc6ad7eaa7a33",
+      "metrics": {
+        "dwellMs": {
+          "n": 51,
+          "p10": 60.5,
+          "median": 88.1,
+          "p90": 110.9
+        }
+      },
+      "method": "Median H.* hold time per participant, then equal-weight participant percentiles; seconds converted to ms.",
+      "limits": "Fixed-password authentication task. No disease or fatigue labels. Context only; not a healthy-person or clinical threshold."
+    },
+    {
+      "id": "tappy",
+      "name": "Tappy Keystroke Data v1.0.0",
+      "source": "https://physionet.org/content/tappy/1.0.0/",
+      "status": "computed",
+      "license": "Open Data Commons Attribution License v1.0",
+      "participants": 192,
+      "records": 8999392,
+      "rejectedEvents": 316804,
+      "sha256": {
+        "users": "a15f5eeac9004aaba0aa3c31b81d791256b6012bc8ae64f6fc556cd607df77fd",
+        "data": "d5fb550625211deed5a712705316bb4c79593d752f8403d9dc25e58c8230e580"
+      },
+      "metrics": {
+        "dwellMs": {
+          "n": 192,
+          "p10": 78.1,
+          "median": 115.25,
+          "p90": 163.71
+        }
+      },
+      "offlineAudit": {
+        "selfReportedPd": {
+          "n": 143,
+          "p10": 78.1,
+          "median": 117.2,
+          "p90": 167.61
+        },
+        "selfReportedNoPd": {
+          "n": 49,
+          "p10": 78.1,
+          "median": 109.4,
+          "p90": 146.48
+        },
+        "central80PercentOverlapMs": 68.38
+      },
+      "method": "Median valid hold time per participant (at least 100 events; 0 < hold <= 1000 ms), then equal-weight participant percentiles.",
+      "limits": "Self-reported labels, uncontrolled devices and tasks, selection and medication confounders. Pooled cohort reference only in the app; no diagnostic cutoff or accuracy claim."
+    },
+    {
+      "id": "swell",
+      "name": "SWELL-KW computer-interaction minute features",
+      "source": "https://doi.org/10.17026/dans-x55-69zp",
+      "status": "computed",
+      "license": "CC BY-NC-SA 4.0 (research benchmark artifact only; noncommercial share-alike attribution applies).",
+      "records": 3139,
+      "participants": 25,
+      "sha256": "b9799737fc6d86b40776079e0c755465ba8ce5b3d1796010954805fd7ba09f44",
+      "conditions": {
+        "neutral": {
+          "keyboardEventsPerMinute": {
+            "n": 25,
+            "p10": 38.67,
+            "median": 78.4,
+            "p90": 120.95
+          },
+          "leftClicksPerMinute": {
+            "n": 25,
+            "p10": 2.63,
+            "median": 5.91,
+            "p90": 10.09
+          },
+          "scrollEventsPerMinute": {
+            "n": 25,
+            "p10": 1.07,
+            "median": 4.07,
+            "p90": 6.72
+          }
+        },
+        "interruptions": {
+          "keyboardEventsPerMinute": {
+            "n": 25,
+            "p10": 20.63,
+            "median": 94.43,
+            "p90": 175.57
+          },
+          "leftClicksPerMinute": {
+            "n": 25,
+            "p10": 5.55,
+            "median": 7.6,
+            "p90": 17.68
+          },
+          "scrollEventsPerMinute": {
+            "n": 25,
+            "p10": 1.8,
+            "median": 4.5,
+            "p90": 7.0
+          }
+        },
+        "time_pressure": {
+          "keyboardEventsPerMinute": {
+            "n": 25,
+            "p10": 35.58,
+            "median": 98.63,
+            "p90": 152.96
+          },
+          "leftClicksPerMinute": {
+            "n": 25,
+            "p10": 3.85,
+            "median": 6.93,
+            "p90": 10.89
+          },
+          "scrollEventsPerMinute": {
+            "n": 25,
+            "p10": 1.32,
+            "median": 4.19,
+            "p90": 6.07
+          }
+        }
+      },
+      "method": "Condition N/I/T rows only (relax R excluded); mean minute count per participant and condition, then equal-weight participant percentiles.",
+      "limits": "Task/context reference, not burnout, depression, migraine, or a millisecond flight-volatility label. Event definitions differ from this recorder; rates are not interchangeable."
+    }
+  ],
+  "notIncluded": [
+    {
+      "name": "Generic Kaggle fatigue/biometrics datasets",
+      "reason": "No identified, licensed dataset with matching labels and event definitions was verified."
+    },
+    {
+      "name": "Generic Hugging Face cognitive-fatigue datasets",
+      "reason": "Platform listings and reproduction results are not interchangeable with verified labeled keystroke data."
+    }
+  ]
+}

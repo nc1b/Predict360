@@ -9,9 +9,14 @@ import { Logo } from '@/components/logo';
 import { Card } from '@/components/ui/card';
 import { HERO_IMAGES } from '@/lib/site';
 
+function returnPath() {
+  const target = new URLSearchParams(window.location.search).get('returnTo');
+  return target?.startsWith('/desktop/connect?') ? target : '/app';
+}
+
 function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   const { user, loaded } = useAuth();
-  if (loaded && user) return <Navigate to="/app" replace />;
+  if (loaded && user) return <Navigate to={returnPath()} replace />;
 
   return (
     <div className="grid min-h-screen bg-background text-foreground lg:grid-cols-2">
@@ -40,7 +45,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
           </div>
 
           <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
-            Accounts are handled by Clerk. Your check-in history stays in this browser. This project is a prototype and is not
+            Accounts are handled by Clerk. Your timing summaries sync with your account. This project is a prototype and is not
             medical advice.
           </p>
         </main>
@@ -81,7 +86,7 @@ const flat = {
 export function Login() {
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to continue your morning check-ins.">
-      <SignIn routing="path" path="/login" signUpUrl="/signup" fallbackRedirectUrl="/app" appearance={flat} />
+      <SignIn routing="path" path="/login" signUpUrl={`/signup?returnTo=${encodeURIComponent(returnPath())}`} forceRedirectUrl={returnPath()} appearance={flat} />
     </AuthShell>
   );
 }
@@ -89,7 +94,7 @@ export function Login() {
 export function Signup() {
   return (
     <AuthShell title="Create your account" subtitle="Three check-ins teach it your usual typing.">
-      <SignUp routing="path" path="/signup" signInUrl="/login" fallbackRedirectUrl="/app" appearance={flat} />
+      <SignUp routing="path" path="/signup" signInUrl={`/login?returnTo=${encodeURIComponent(returnPath())}`} forceRedirectUrl={returnPath()} appearance={flat} />
     </AuthShell>
   );
 }

@@ -1,44 +1,49 @@
-# Predict 360 desktop app
+# Predict 360 desktop
 
-A downloadable desktop version of Predict 360 for Windows. It opens a dedicated
-window showing the check-in, and you do a check-in by typing your two sentences
-into that window, exactly as on the website.
+An opt-in activity tracker across applications, connected to your website account. The app and Windows installer use the website's logo.
 
-## What it does and does not do
+## Use it
 
-- It measures the timing of the keys you press **in the check-in box**, while that
-  box is focused — the same as the web app.
-- It does **not** run in the background, and it does **not** record or monitor
-  anything you type in other applications. It is a focused check-in app, not a
-  system-wide keyboard monitor.
+1. Download the Windows installer from the website. It is served from Supabase Storage; you stay on the website.
+2. Install and open Predict 360. Tracking starts **paused**.
+3. Choose **Connect account**. Your browser opens the website's sign-in page.
+4. Sign in with your usual account, choose **Connect this account**, then **Return to desktop**. Allow the browser to open Predict 360.
+5. Choose **Start tracking**. Pause at any time in the window or system tray.
 
-## Run it (needs Node.js)
+The dashboard shows clicks, key presses, scroll counts, and active/idle time. Activity is grouped by local day and hour, saved locally, and synced about once a minute. The website dashboard refreshes about once a minute. **Explain my day** uses the existing Hack Club AI integration on the website, with numeric summaries and public research context.
 
-```bash
-npm install
+The app never saves typed words, key values, pointer coordinates, screenshots, or application names. Mouse movement marks activity. No input for 60 seconds counts as idle. Tracking pauses on sleep or screen lock, and remains paused when the app restarts. Closing the window while tracking leaves the app in the system tray; **Quit and stop tracking** ends it.
+
+Desktop credentials are encrypted using the operating system's credential facility when one is available. If secure storage is unavailable, the app requires sign-in again after restart. Disconnecting first syncs your activity and revokes this desktop session. Deleting activity revokes every desktop connection; reconnecting starts from the cloud's remaining history so deleted local queues do not restore deleted data.
+
+## Develop
+
+From the repository root:
+
+```sh
+npm ci
+npm ci --prefix desktop
+npm start --prefix desktop
 ```
 
-```bash
-npm start
+For a local website/backend, set `PREDICT360_URL=http://localhost:3000` before starting. The hosted Supabase sync service allows `localhost:3000` and `localhost:5173` website origins; the local website still uses the same Clerk account instance.
+
+A desktop environment is required for the global hook. Windows is the supported packaged target. macOS requires Accessibility permission. Linux requires X11; Wayland global input capture is not supported. A failed permission check leaves recording paused.
+
+```sh
+npm run dist --prefix desktop
 ```
 
-This opens the window pointed at the live app (https://predict360.vercel.app), so
-it needs an internet connection. To point it at a local backend instead:
+This generates the website-derived icon and shared local analytics module, then builds `desktop/release/Predict360-<version>-Windows.exe`. The NSIS installer registers the `predict360://` sign-in callback. The app does not enable automatic startup at login.
 
-```bash
-set PREDICT360_URL=http://localhost:3000 && npm start
-```
+## Release
 
-## Build a downloadable `.exe`
+Run **Desktop app (Windows)** in GitHub Actions. It installs locked dependencies, builds the installer, saves a workflow artifact, then publishes it to Supabase Storage. GitHub OIDC authenticates the upload; no Supabase service-role key is stored in GitHub. The Edge Function permits only this repository and release workflow, with a push or manual-dispatch event.
 
-```bash
-npm run dist
-```
+Release files are split into 40 MiB objects so the free Supabase per-object limit is respected. The manifest is updated after every chunk succeeds. The website assembles and SHA-256 checks the installer before saving it. Old versioned chunks remain available for rollback and should be removed when no longer needed.
 
-This produces, in `desktop/release/`:
+The website's `/desktop/connect` route and `/api/activity/explain` endpoint must be deployed from the same change before distributing the new desktop app. Production defaults to `https://predict360.vercel.app`.
 
-- `Predict 360 <version>.exe` — a portable single file you can double-click.
-- `Predict 360 Setup <version>.exe` — an installer.
+## Verification limits
 
-`electron-builder` downloads its Windows build tools on first run, so the first
-build needs an internet connection and a few minutes.
+The native hook was tested on isolated Linux X11 input and counted three synthetic key presses and one click. The Electron UI was exercised for paused startup and logo rendering. Windows packaging is checked by the release workflow. Full sign-in with a real website account requires a release check; no live test account or credential was created.

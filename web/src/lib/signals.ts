@@ -43,7 +43,7 @@ export const SIGNALS: Signal[] = [
     icon: AudioLines,
     measures: 'How uneven the gaps between key presses are inside a sentence. The pause between sentences is left out.',
     why: 'Even typing and stop-start typing can have the same speed. This tells them apart.',
-    evidence: 'Reliable from about 1.4x more variation (295 of 300); only 77 of 300 at 1.2x.',
+    evidence: 'Reliable from about 1.4x more variation (295 of 300); only 83 of 300 at 1.2x.',
     limits: 'The least sensitive signal. Small changes are often missed.',
     flag: 'A less even typing rhythm',
   },

@@ -1,10 +1,9 @@
 // Thin wrapper around Clerk so pages depend on one small hook.
-// Clerk handles accounts and sessions. The Predict 360 backend never receives a
-// user identifier: the Clerk user id is only used as a key for history stored in
-// this browser.
+// Clerk handles accounts and sessions. The sync service verifies session tokens
+// before accessing account-scoped summaries; the stateless analyzer gets timing only.
 
 import * as React from 'react';
-import { ClerkProvider, useUser } from '@clerk/react';
+import { ClerkProvider, useUser, useSession } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 
 export const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -17,9 +16,11 @@ export interface AppUser {
 interface AuthState {
   user: AppUser | null;
   loaded: boolean;
+  getToken: () => Promise<string | null>;
 }
 
-const AuthContext = React.createContext<AuthState>({ user: null, loaded: true });
+const signedOut: AuthState = { user: null, loaded: true, getToken: async () => null };
+const AuthContext = React.createContext<AuthState>(signedOut);
 
 export function useAuth(): AuthState {
   return React.useContext(AuthContext);
@@ -27,15 +28,17 @@ export function useAuth(): AuthState {
 
 function ClerkBridge({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, user } = useUser();
+  const { session } = useSession();
   const value = React.useMemo<AuthState>(
     () => ({
       loaded: isLoaded,
+      getToken: async () => session?.getToken() ?? null,
       user:
         isLoaded && isSignedIn && user
           ? { id: user.id, name: user.firstName || user.username || user.primaryEmailAddress?.emailAddress || 'there' }
           : null,
     }),
-    [isLoaded, isSignedIn, user]
+    [isLoaded, isSignedIn, user, session]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -63,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   if (!CLERK_KEY) {
     // No key configured: the site still renders, signed out.
-    return <AuthContext.Provider value={{ user: null, loaded: true }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={signedOut}>{children}</AuthContext.Provider>;
   }
   return (
     <ClerkProvider

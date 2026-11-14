@@ -1,4 +1,5 @@
 import type { AnalyzeRequest, AnalyzeResponse } from './types';
+import type { WeatherContext } from '@/components/weather-context';
 
 const BASE = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
 
@@ -14,6 +15,7 @@ export async function analyze(body: AnalyzeRequest): Promise<AnalyzeResponse> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
     });
   } catch {
     throw new ApiError("Can't reach the Predict 360 backend. Start it with npm start, then try again.");
@@ -41,7 +43,7 @@ export async function analyze(body: AnalyzeRequest): Promise<AnalyzeResponse> {
  * the three feature values and their comparison with the user's usual. No text,
  * no keystrokes. Returns a short plain-language explanation from the AI proxy.
  */
-export async function explain(result: AnalyzeResponse): Promise<string> {
+export async function explain(result: AnalyzeResponse, weather: WeatherContext | null | undefined, token: string): Promise<string> {
   const summary = {
     readinessScore: result.readinessScore,
     status: result.status,
@@ -57,8 +59,9 @@ export async function explain(result: AnalyzeResponse): Promise<string> {
   try {
     res = await fetch(`${BASE}/api/explain`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ summary }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ summary, ...(weather ? { weather: { meanHpa: weather.meanHpa, minHpa: weather.minHpa, maxHpa: weather.maxHpa, changeHpa: weather.changeHpa } } : {}) }),
+      signal: AbortSignal.timeout(25000),
     });
   } catch {
     throw new ApiError("Can't reach the backend for an explanation.");
@@ -72,7 +75,7 @@ export async function explain(result: AnalyzeResponse): Promise<string> {
   if (!res.ok) {
     const code = (json as { error?: { code?: string; message?: string } } | null)?.error?.code;
     const message = (json as { error?: { message?: string } } | null)?.error?.message;
-    if (res.status === 503 || code === 'ai_unconfigured') {
+    if (code === 'ai_unconfigured') {
       throw new AiUnconfiguredError(message ?? 'AI explanations are not configured.');
     }
     throw new ApiError(message ?? "Couldn't get an explanation right now.");

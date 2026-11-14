@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { analyze, pointsFor, naiveAnalyze } = require('../src/scoring');
+const { analyze, pointsFor, naiveAnalyze, scoreSession, buildBaseline } = require('../src/scoring');
 const { extractFeatures } = require('../src/features');
 const { fixture, requestFor, baselineSessions, generateSession } = require('../fixtures/synthetic');
 const { evaluate } = require('../scripts/evaluate');
@@ -38,6 +38,31 @@ test('points are linear between tolerance and fullAt', () => {
   assert.equal(pointsFor('sentencePauseMs', 4), 35);
   assert.equal(pointsFor('sentencePauseMs', 40), 35);
   assert.equal(pointsFor('dwellMs', 0.5), 0); // faster than usual is not penalised
+});
+
+test('deductions use the original ratio, not the rounded display ratio', () => {
+  const features = extractFeatures(fixture('ordinary').keystrokes);
+  features.dwellMs.value = 115.4;
+  const prior = { ...features, dwellMs: { ...features.dwellMs, value: 100 } };
+  const result = scoreSession(features, buildBaseline([prior, prior, prior]));
+  assert.equal(result.comparisons.dwellMs.ratio, 1.15);
+  assert.equal(result.comparisons.dwellMs.pointsDeducted, 0.2);
+  assert.deepEqual(result.flags, ['long_key_hold']);
+});
+
+test('a zero-variation baseline scores unchanged rhythm and serializes an increase safely', () => {
+  const keystrokes = generateSession({ seed: 11, flightJitter: 0 });
+  const features = extractFeatures(keystrokes);
+  assert.equal(features.flightVolatilityMs.value, 0);
+  const baseline = { sessions: Array.from({ length: 3 }, () => ({ features })) };
+  const unchanged = analyze({ keystrokes, baseline });
+  assert.equal(unchanged.readinessScore, 100);
+  assert.equal(unchanged.comparisons.flightVolatilityMs.ratio, 1);
+  const changed = analyze({ keystrokes: fixture('ordinary').keystrokes, baseline });
+  assert.equal(changed.readinessScore, 70);
+  assert.equal(changed.comparisons.flightVolatilityMs.ratio, null);
+  assert.deepEqual(changed.flags, ['uneven_typing_rhythm']);
+  assert.deepEqual(JSON.parse(JSON.stringify(changed)), changed);
 });
 
 test('score clamps to 0 when all three features are far above baseline', () => {

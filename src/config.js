@@ -37,6 +37,7 @@ const STATUS_BANDS = [
 
 const LIMITS = {
   maxBodyBytes: 256 * 1024,
+  maxExplainBodyBytes: 32 * 1024,
   maxEvents: 5000,
   maxBaselineSessions: 30,
   maxTimestampMs: 60 * 60 * 1000, // one hour

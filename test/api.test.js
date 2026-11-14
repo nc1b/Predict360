@@ -157,7 +157,7 @@ test('logs never contain request bodies', async () => {
   await post('{"keystrokes": [journal-text', { raw: true });
   assert.ok(logs.length > 0);
   for (const line of logs) {
-    assert.match(line, /^(GET|POST|OPTIONS) \/[a-z/]* \d{3} \d+ms$/);
+    assert.match(line, /^(GET|POST|OPTIONS) (\/[a-z/]*|\[unmatched\]) \d{3} \d+ms$/);
   }
 });
 
@@ -181,8 +181,61 @@ test('optional static serving: pages fall back to index.html, API routes still 4
     const missingApi = await fetch(`${origin}/api/nope`, { headers: { Accept: 'text/html' } });
     assert.equal(missingApi.status, 404);
     assert.equal((await missingApi.json()).error.code, 'not_found');
+    const missingAsset = await fetch(`${origin}/assets/missing.js`, { headers: { Accept: 'text/html' } });
+    assert.equal(missingAsset.status, 404);
+    assert.equal((await missingAsset.json()).error.code, 'not_found');
   } finally {
     await new Promise((resolve) => s.close(resolve));
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('rejects impossible or contradictory baseline summaries without producing a score', async () => {
+  const { extractFeatures } = require('../src/features');
+  const good = extractFeatures(fixture('ordinary').keystrokes);
+  for (const change of [
+    { value: 1e308 }, { samples: 5001 }, { samples: 0 },
+    { value: null }, { sufficient: false }, { minSamples: 1 },
+  ]) {
+    const features = { ...good, dwellMs: { ...good.dwellMs, ...change } };
+    const { status, json } = await post({
+      keystrokes: fixture('ordinary').keystrokes,
+      baseline: { sessions: [{ features }] },
+    });
+    assert.equal(status, 400, JSON.stringify(change));
+    assert.equal(json.error.code, 'invalid_request');
+    assert.match(json.error.details[0].path, /features.dwellMs/);
+  }
+});
+
+test('unsupported character sets and compressed uploads produce 415 JSON errors', async () => {
+  for (const headers of [
+    { 'Content-Type': 'application/json; charset=iso-8859-1' },
+    { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' },
+  ]) {
+    const { status, json } = await post('{}', { raw: true, headers });
+    assert.equal(status, 415);
+    assert.equal(json.error.code, 'unsupported_media_type');
+  }
+});
+
+test('primitive JSON receives schema validation errors', async () => {
+  for (const body of [null, 42, 'private words', true]) {
+    const { status, json } = await post(body);
+    assert.equal(status, 400);
+    assert.equal(json.error.code, 'invalid_request');
+    assert.ok(!JSON.stringify(json).includes('private words'));
+  }
+});
+
+test('personal results are not cacheable and unknown URLs are not logged', async () => {
+  const res = await fetch(`${base}/api/analyze`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestFor('ordinary')),
+  });
+  assert.equal(res.headers.get('cache-control'), 'no-store');
+  assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+  await res.json();
+  await fetch(`${base}/private-journal-words?text=secret`).then((r) => r.json());
+  assert.ok(logs.every((line) => !/private-journal|secret/.test(line)));
 });

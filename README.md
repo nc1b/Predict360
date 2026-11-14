@@ -1,16 +1,10 @@
 # Predict 360
 
-Predict 360 is a hackathon prototype for a two-sentence morning check-in. It takes keystroke
-**timing** from one check-in, computes three typing features, and compares them with the same
-person's earlier check-ins. It is for anyone who wants a quick way to reflect on how their
-morning is going. This repo holds the backend (Node.js, Express) and the frontend (React,
-Tailwind, shadcn-style components) in `web/`.
+Predict 360 is an opt-in desktop activity tracker and website dashboard for a hackathon prototype. The desktop app counts clicks, key presses, scroll events, and active/idle time across applications. It syncs hourly summaries to the same Clerk account used on the website, through a protected Supabase Edge Function. The website also includes a short typing check-in that compares timing with your own earlier check-ins.
 
-This project is a prototype and is not medical advice.
+The desktop app starts paused. It never saves typed words, key values, pointer coordinates, screenshots, or application names. Tracking is visible in the system tray and pauses on screen lock or sleep.
 
-The score is an experimental comparison with the user's usual typing. The fixtures simulate
-typing changes only. They cannot establish Parkinson's, depression, burnout, migraine, clinical
-accuracy, or whether someone is ready to work.
+AI explanations use the existing **Hack Club AI** proxy and `HACKCLUB_AI_KEY` already configured in Vercel. The key stays server-side, and explanation requests require a verified website or desktop account. Public CMU, Tappy, and SWELL-KW reference summaries are reproducible from public data; optional Open-Meteo pressure is contextual only. See [Sources and research limits](SOURCES.md). No disease detector was trained, no clinical accuracy improvement is established, and computer activity cannot establish hydration or readiness to work.
 
 ## Setup
 
@@ -72,9 +66,7 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
 - **Capture**: `web/src/lib/capture.ts` pairs keydown and keyup, drops modifier keys, shortcuts
   and auto-repeat, and keeps only `kind`, `downMs` and `upMs`. The typed text is never stored
   or sent, and the box is cleared when a check-in finishes.
-- **History**: each check-in's three feature values are kept in the browser's localStorage under
-  the signed-in user's id, and sent back as the `baseline` for the next check-in. Clerk user ids
-  are never sent to the backend.
+- **History**: check-in feature summaries are cached per account on this device and synced to Supabase through a verified Clerk session. New offline check-ins are queued and retried on the next visit. Only summaries are stored; typed words and raw key timing are never persisted in the database. The latest 30 cached check-ins are available; baselines use only the current browser's device id so keyboards are not mixed.
 - **Simulated sessions**: buttons on the check-in page replay the synthetic fixtures so the
   scoring can be shown without typing.
 - **Phones**: on-screen keyboards usually do not report per-key timing, so a physical keyboard
@@ -89,17 +81,27 @@ environment (never committed).
 
 ### Desktop app
 
-`desktop/` is an [Electron](https://www.electronjs.org/) app that opens the check-in in its own
-window. It loads the deployed site, so you do a check-in by typing into the window, exactly as on
-the web. It does not run in the background and does not record typing in other applications. See
-`desktop/README.md` to run it (`npm start`) or build a downloadable `.exe` (`npm run dist`).
+`desktop/` is an Electron app for opt-in activity tracking across applications. Its logo and installer icon come from the website SVG assets. Install the Windows app, choose **Connect account**, sign in on the website, choose **Connect this account**, then **Return to desktop**. Choose **Start tracking** to begin. See [desktop/README.md](desktop/README.md).
+
+### Supabase sync and downloads
+
+The public project configuration is in `config/public.json`. The `Predict360` Supabase project was provisioned in `us-east-2` on the quoted $0/month project tier. Usage limits and future plan changes remain subject to Supabase's terms. Migrations and the deployed function source are in `supabase/`.
+
+The Edge Function verifies Clerk JWT signatures, issuer, expiry, and allowed website origins. Desktop login uses a two-minute, single-use code with PKCE and random state. Desktop sessions last 30 days and are stored encrypted with the OS credential facility where available; otherwise they last only for the current app process. No service-role key is shipped to the website, desktop, or CI.
+
+All private tables have RLS enabled and no anonymous/authenticated table access. Only the verified service can access them. Every query is scoped to the verified account. Activity writes are idempotent per device/day and revision. Deleting activity revokes desktop sessions transactionally so stale offline queues cannot recreate deleted history.
+
+Run the **Desktop app (Windows)** GitHub Actions workflow to build an NSIS installer and publish it directly to the public Supabase `app-releases` bucket. GitHub OIDC authorizes publishing for this repository and workflow; no publishing secret is required. Downloads are split into objects below the Free tier's 50 MB limit, assembled by the browser, and SHA-256 verified before saving. Users stay on the website instead of being redirected to GitHub.
 
 ## Privacy
 
-- The API accepts only `kind`, `downMs` and `upMs` per keystroke. Requests that include any
-  other field (key values, text, user ids) are rejected with a 400.
-- Requests are processed in memory and discarded. There is no database and no file output.
-- The access log records method, path, status and duration only. Request bodies are never logged.
+- The typing API accepts timing categories only; it rejects text, key values, and user identifiers.
+- The desktop persists hourly counts and durations only, capped locally at 30 daily summaries. It ignores key repeats and keeps only a transient key-pairing set. Paused input is discarded.
+- Private Supabase records contain the verified account id and feature/activity summaries. Raw typing and mouse event logs are not uploaded.
+- Activity history reads cover the last 30 days. Older activity is pruned on subsequent writes. Check-in reads return the latest 30 summaries.
+- Logs contain matched route names, status, and duration. Arbitrary URL paths, request bodies, provider errors, and credentials are not logged.
+- Optional weather lookups send the city you enter to Open-Meteo. Only pressure numbers may reach the AI; location is not added to activity history.
+- AI explanations use numeric summaries and public research aggregates. App-user records are never used by the public-data reference pipeline.
 
 ## API
 
@@ -247,7 +249,7 @@ Minimum samples per session: dwell 20, sentence pause 1, flight intervals 20.
 
 - **Baseline**: for each feature, the median across prior sessions that met that feature's
   minimum samples. At least 3 such sessions are required per feature.
-- **Ratio**: `session value / baseline value`.
+- **Ratio**: `session value / baseline value`, using the unrounded ratio for deductions. Display ratios are rounded to two decimals. If both values are zero, the ratio is 1; an increase from zero uses `ratio: null` and the maximum feature deduction. Zero-variation baselines remain usable.
 - **Points deducted** per feature: 0 at or below the tolerance ratio, the maximum at or above
   the full ratio, linear in between.
 
@@ -303,7 +305,7 @@ seeded sessions per scenario (3,600 sessions total).
 | Profile | Scenario | Sessions | Expected flag fired | Sessions with an unexpected flag | Exact match | Mean score |
 |---|---|---|---|---|---|---|
 | fast | ordinary | 300 | n/a | 0/300 | 300/300 | 100 |
-| fast | longer_key_holds | 300 | 300/300 | 0/300 | 300/300 | 73.4 |
+| fast | longer_key_holds | 300 | 300/300 | 0/300 | 300/300 | 73.3 |
 | fast | four_second_pause | 300 | 300/300 | 0/300 | 300/300 | 65 |
 | fast | uneven_typing | 300 | 300/300 | 0/300 | 300/300 | 70 |
 | average | ordinary | 300 | n/a | 0/300 | 300/300 | 100 |
@@ -328,33 +330,35 @@ How small a simulated change still raises its flag:
 | key holds x1.1 | long_key_hold | 2/300 | 100 |
 | key holds x1.2 | long_key_hold | 295/300 | 98 |
 | key holds x1.3 | long_key_hold | 300/300 | 93.9 |
-| key holds x1.5 | long_key_hold | 300/300 | 85.6 |
+| key holds x1.5 | long_key_hold | 300/300 | 85.7 |
 | sentence pause x1.2 | long_sentence_pause | 0/300 | 100 |
 | sentence pause x1.4 | long_sentence_pause | 0/300 | 100 |
 | sentence pause x1.6 | long_sentence_pause | 300/300 | 99 |
 | sentence pause x2 | long_sentence_pause | 300/300 | 93 |
 | sentence pause x3 | long_sentence_pause | 300/300 | 79 |
 | flight jitter x1.1 | uneven_typing_rhythm | 2/300 | 100 |
-| flight jitter x1.2 | uneven_typing_rhythm | 77/300 | 99.8 |
+| flight jitter x1.2 | uneven_typing_rhythm | 83/300 | 99.8 |
 | flight jitter x1.4 | uneven_typing_rhythm | 295/300 | 97.3 |
 | flight jitter x1.7 | uneven_typing_rhythm | 300/300 | 92.1 |
 | flight jitter x2 | uneven_typing_rhythm | 300/300 | 86.9 |
 
-Changes near a threshold are detected inconsistently (for example, 77 of 300 at jitter x1.2).
+Changes near a threshold are detected inconsistently (for example, 83 of 300 at jitter x1.2).
 
 ### Automated tests
 
-`npm test` runs 39 backend tests with `node:test` and `npm run test:web` runs 15 frontend tests
-with Vitest; all pass. The backend tests cover the feature maths
-(including a hand-computed example), each fixture moving only its expected feature, final
-punctuation, overlapping holds, edits, short sessions, missing and insufficient baselines,
-score clamping, request validation and error responses, log contents, the comparator
-evaluation, and the multi-profile stress test. The frontend tests cover keystroke capture
-(pairing, overlapping holds, auto-repeat, modifiers, lost keyups) and history storage.
+`npm test` covers scoring, strict validation, HTTP errors, explanation timeout/concurrency, source summaries, weather normalization, the desktop aggregate recorder, account isolation, PKCE code replay/expiry, revision ordering, deletion/revocation, and cloud check-in privacy. `npm run test:web` covers capture, history recovery and download manifest validation. The production build type-checks the frontend. CI runs application checks on Node 20 and 24.
 
-The full flow was also exercised in a browser against the running backend: three typed
-check-ins built a baseline, a fourth scored 100, and a fifth with a four-second pause between
-sentences scored 65 with `long_sentence_pause`. Those keystrokes were scripted, not a person.
+The native global hook was exercised on an isolated Linux X11 display using three synthetic key presses and one mouse click, and returned exactly those counts. The actual Electron window was checked for its logo, paused startup, and hidden start control before sign-in. Authentication/storage tests use isolated repositories; a real-account browser-to-desktop sign-in is still a required release check. A temporary live test credential was blocked by automatic approval review and was not created.
+
+### Additional APIs
+
+- `POST /api/activity/analyze`: `{ day: { date: "YYYY-MM-DD", buckets: [{ hour, clicks, keyPresses, scrollEvents, trackedMs, activeMs }] }, baseline?: { days: [...] } }`. Up to 24 unique local-hour buckets and 30 earlier days. Returns totals, hourly activity, and descriptive baseline differences after 3 earlier days with at least 15 tracked minutes and 1 active minute. Idle begins after 60 seconds without input. Multiple devices are shown as combined computer-hours on the website.
+- `POST /api/activity/explain`: the same day shape (32 KB maximum), explained with the existing Hack Club AI provider and public SWELL-KW context.
+- `GET /api/research`: public source provenance, computed aggregate reference distributions, methods, and limitations.
+- `POST /api/weather/context`: `{ city, date }`; modeled surface-pressure context from Open-Meteo, never a migraine predictor.
+- Hosted sync: `config/public.json` → `cloudUrl?route=authorize|exchange|session|activity|checkins`. All private routes require a verified Clerk bearer token or a valid desktop session. `exchange` requires a one-time code and matching PKCE verifier. Release publishing additionally requires the expected GitHub Actions OIDC identity.
+
+Explanation errors include 429 `ai_busy`, 502 `ai_error`, 503 `ai_unconfigured`, and 504 `ai_timeout`. Uncompressed UTF-8 JSON is required. Analyze and health responses are not cacheable. Unknown assets return 404 instead of the SPA HTML document.
 
 ## Known limits
 

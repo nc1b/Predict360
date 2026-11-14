@@ -20,14 +20,14 @@ function buildBaseline(sessionFeatures) {
   for (const name of FEATURES) {
     const values = sessionFeatures
       .map((f) => f[name])
-      .filter((f) => f && typeof f.value === 'number' && f.samples >= MIN_SAMPLES[name])
+      .filter((f) => f && Number.isFinite(f.value) && f.value >= 0 && f.samples >= MIN_SAMPLES[name])
       .map((f) => f.value);
     const value = round2(median(values));
     features[name] = {
       value,
       sessionsUsed: values.length,
       minSessions: MIN_BASELINE_SESSIONS,
-      valid: values.length >= MIN_BASELINE_SESSIONS && value > 0,
+      valid: values.length >= MIN_BASELINE_SESSIONS && value !== null,
     };
   }
   return { sessionsProvided: sessionFeatures.length, features };
@@ -42,8 +42,12 @@ function pointsFor(name, ratio) {
 
 function compare(name, current, base) {
   if (!base || !base.valid || current.value === null) return null;
-  const ratio = round2(current.value / base.value);
-  const pointsDeducted = current.sufficient ? pointsFor(name, ratio) : 0;
+  // A perfectly even rhythm can have a zero baseline. An unchanged zero is
+  // equal to usual; an increase has no finite ratio. Never serialize Infinity.
+  const rawRatio = base.value === 0 ? (current.value === 0 ? 1 : Infinity) : current.value / base.value;
+  const ratio = Number.isFinite(rawRatio) ? round2(rawRatio) : null;
+  // Round for display only: rounding a ratio first shifts the scoring thresholds.
+  const pointsDeducted = current.sufficient ? pointsFor(name, rawRatio) : 0;
   return {
     sessionMs: current.value,
     baselineMs: base.value,

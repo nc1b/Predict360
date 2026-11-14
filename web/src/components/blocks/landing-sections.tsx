@@ -196,7 +196,7 @@ const FAQ_ROWS: { items: FaqItem[]; duration: number; reverse?: boolean }[] = [
       },
       {
         question: 'Where is my data stored?',
-        answer: 'In this browser. Each check-in keeps three numbers on your device. The server keeps nothing after it answers, and you can delete your history at any time.',
+        answer: 'Numeric summaries are cached on your device and synced to your account in Supabase. Typed words are never saved. You can delete your activity and check-in history from your dashboard.',
       },
     ],
   },

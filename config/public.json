@@ -1,0 +1,6 @@
+{
+  "siteUrl": "https://predict360.vercel.app",
+  "cloudUrl": "https://ktrnbjkyvscvwextrzce.supabase.co/functions/v1/predict360-sync",
+  "supabaseUrl": "https://ktrnbjkyvscvwextrzce.supabase.co",
+  "publishableKey": "sb_publishable_S31aKNswPQv0MFzS8TAUiA_1yryUA-d"
+}

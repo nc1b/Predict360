@@ -1,6 +1,6 @@
 'use strict';
 
-const { KINDS, FEATURES, LIMITS } = require('./config');
+const { KINDS, FEATURES, MIN_SAMPLES, LIMITS } = require('./config');
 
 const EVENT_KEYS = ['kind', 'downMs', 'upMs'];
 const FEATURE_KEYS = ['value', 'samples', 'minSamples', 'sufficient'];
@@ -105,11 +105,19 @@ function validateFeatureSummary(features, path, c) {
     }
     const extraF = unknownKeys(f, FEATURE_KEYS);
     if (extraF.length > 0) c.add(p, `Unexpected field(s): ${extraF.join(', ')}.`);
-    if (f.value !== null && (typeof f.value !== 'number' || !Number.isFinite(f.value) || f.value < 0)) {
-      c.add(`${p}.value`, 'Must be a non-negative number of milliseconds, or null.');
+    if (f.value !== null && (typeof f.value !== 'number' || !Number.isFinite(f.value) || f.value < 0 || f.value > LIMITS.maxTimestampMs)) {
+      c.add(`${p}.value`, `Must be a number of milliseconds between 0 and ${LIMITS.maxTimestampMs}, or null.`);
     }
-    if (!Number.isInteger(f.samples) || f.samples < 0) {
-      c.add(`${p}.samples`, 'Must be a non-negative integer.');
+    if (!Number.isInteger(f.samples) || f.samples < 0 || f.samples > LIMITS.maxEvents) {
+      c.add(`${p}.samples`, `Must be an integer between 0 and ${LIMITS.maxEvents}.`);
+    } else if ((f.samples === 0) !== (f.value === null)) {
+      c.add(`${p}.value`, 'Must be null exactly when samples is 0.');
+    }
+    if (f.minSamples !== undefined && f.minSamples !== MIN_SAMPLES[name]) {
+      c.add(`${p}.minSamples`, `Must be ${MIN_SAMPLES[name]} when supplied.`);
+    }
+    if (f.sufficient !== undefined && f.sufficient !== (f.samples >= MIN_SAMPLES[name])) {
+      c.add(`${p}.sufficient`, 'Must agree with samples and the minimum sample count.');
     }
   }
 }

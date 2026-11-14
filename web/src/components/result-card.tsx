@@ -73,7 +73,7 @@ function Explanation({ result, baselineCount }: { result: AnalyzeResponse; basel
         <li key={d.flag} className="flex gap-2">
           <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground" />
           <span>
-            {FLAG_TEXT[d.flag]} <span className="text-muted-foreground">({d.ratio.toFixed(1)}x, -{Math.round(d.pointsDeducted)} points)</span>
+            {FLAG_TEXT[d.flag]} <span className="text-muted-foreground">({d.ratio === null ? 'increased from zero' : `${d.ratio.toFixed(1)}x`}, -{Math.round(d.pointsDeducted)} points)</span>
           </span>
         </li>
       ))}

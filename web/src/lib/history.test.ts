@@ -70,6 +70,38 @@ describe('history', () => {
     expect(loadHistory(s, 'u1')).toEqual([]);
   });
 
+  it('discards malformed entries without losing valid history or poisoning the baseline', () => {
+    const s = memoryStorage();
+    const [valid] = addEntry(s, 'u1', result(90));
+    s.setItem('p360.history.u1', JSON.stringify([
+      null, {}, { ...valid, at: 'not-a-date' }, { ...valid, status: 'invalid' },
+      { ...valid, features: { ...valid.features, dwellMs: { value: 1e308, samples: 50 } } },
+      { ...valid, features: { ...valid.features, dwellMs: { value: null, samples: 50 } } },
+      valid,
+    ]));
+    expect(loadHistory(s, 'u1')).toEqual([valid]);
+    expect(baselineFrom(loadHistory(s, 'u1'))?.sessions).toHaveLength(1);
+  });
+
+  it('only sends usable sessions when building the next baseline', () => {
+    const s = memoryStorage();
+    const [valid] = addEntry(s, 'u1', result(90));
+    const short = { ...valid, features: { ...valid.features, dwellMs: { value: 90, samples: 2, sufficient: false } } };
+    expect(baselineFrom([short])).toBeUndefined();
+    expect(baselineFrom([short, valid])?.sessions).toHaveLength(1);
+  });
+
+  it('keeps check-in baselines separate when account history syncs across devices', () => {
+    const first = memoryStorage(), second = memoryStorage();
+    const [a] = addEntry(first, 'u1', result(90));
+    const [b] = addEntry(second, 'u1', result(140));
+    expect(a.deviceId).not.toBe(b.deviceId);
+    expect(baselineFrom([a, b], a.deviceId)?.sessions).toHaveLength(1);
+    expect(baselineFrom([a, b], a.deviceId)?.sessions[0]).toEqual({ features: {
+      dwellMs: { value: 90, samples: 60 }, sentencePauseMs: { value: 700, samples: 1 }, flightVolatilityMs: { value: 20, samples: 55 },
+    } });
+  });
+
   it('isUsable requires every feature to have enough samples', () => {
     expect(isUsable(features(90))).toBe(true);
     expect(isUsable(features(90, false))).toBe(false);

@@ -14,6 +14,7 @@ import { KeystrokeRecorder } from '@/lib/capture';
 import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
 import {
   addEntry,
+  checkinDeviceId,
   baselineFrom,
   clearHistory,
   isUsable,
@@ -22,6 +23,9 @@ import {
   type HistoryEntry,
 } from '@/lib/history';
 import type { AnalyzeResponse } from '@/lib/types';
+import { ActivityDashboard } from '@/components/activity-dashboard';
+import { cloud, clearPending, queueCheckin, syncCheckins } from '@/lib/cloud';
+import { WeatherContextPanel, type WeatherContext } from '@/components/weather-context';
 
 function greeting(now = new Date()) {
   const h = now.getHours();
@@ -37,8 +41,9 @@ interface Shown {
 }
 
 export default function CheckIn() {
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const userId = user!.id;
+  const [deviceId] = React.useState(() => checkinDeviceId(localStorage));
 
   const recorder = React.useRef(new KeystrokeRecorder());
   const textRef = React.useRef<HTMLTextAreaElement>(null);
@@ -50,8 +55,23 @@ export default function CheckIn() {
   const { notices, push, dismiss } = useNotices();
   const [aiText, setAiText] = React.useState<string | null>(null);
   const [aiBusy, setAiBusy] = React.useState(false);
+  const [historySync, setHistorySync] = React.useState('');
+  const [weather, setWeather] = React.useState<WeatherContext | null>(null);
 
-  const usableCount = history.filter((h) => isUsable(h.features)).length;
+  React.useEffect(() => {
+    let mounted = true;
+    async function sync() {
+      try {
+        const token = await getToken(); if (!token) return;
+        const next = await syncCheckins(userId, token);
+        if (mounted) { setHistory(next); setHistorySync('Check-ins synced to your account.'); }
+      } catch { if (mounted) setHistorySync('Offline — new check-ins will retry syncing when you return.'); }
+    }
+    void sync();
+    return () => { mounted = false; };
+  }, [userId, getToken]);
+
+  const usableCount = history.filter((h) => h.deviceId === deviceId && isUsable(h.features)).length;
   const baselineReady = usableCount >= MIN_BASELINE_SESSIONS;
 
   const resetField = () => {
@@ -82,7 +102,7 @@ export default function CheckIn() {
     setAiText(null);
     setBusy(true);
     try {
-      const result = await analyze({ keystrokes, baseline: baselineFrom(history) });
+      const result = await analyze({ keystrokes, baseline: baselineFrom(history, deviceId) });
       dismiss('error');
       dismiss('empty');
       if (result.status === 'insufficient_samples') {
@@ -91,8 +111,13 @@ export default function CheckIn() {
         push({ id: 'saved', kind: 'warning', title: 'Check-in not saved', description: 'It was too short to measure. Try again with two full sentences.' });
       } else {
         const next = addEntry(localStorage, userId, result);
-        const nextUsable = next.filter((h) => isUsable(h.features)).length;
+        queueCheckin(userId, next[next.length - 1]);
+        const nextUsable = next.filter((h) => h.deviceId === deviceId && isUsable(h.features)).length;
         setHistory(next);
+        try {
+          const token = await getToken();
+          if (token) { await syncCheckins(userId, token); setHistorySync('Check-ins synced to your account.'); }
+        } catch { setHistorySync('Saved on this device. Cloud sync will retry when you return.'); }
         setShown({ result, baselineCount: nextUsable, caption: 'Compared with your usual typing' });
         push(
           result.readinessScore === null
@@ -105,7 +130,7 @@ export default function CheckIn() {
                     ? 'Your baseline is ready. Your next check-in gets a score.'
                     : 'Scores start once your baseline has 3 check-ins.',
               }
-            : { id: 'saved', kind: 'success', title: 'Check-in saved', description: 'Only three timing numbers were stored, on this device.' }
+            : { id: 'saved', kind: 'success', title: 'Check-in saved', description: 'Only timing summaries are saved. Your words stay private.' }
         );
       }
       resetField();
@@ -140,7 +165,9 @@ export default function CheckIn() {
     if (!shown) return;
     setAiBusy(true);
     try {
-      const text = await explain(shown.result);
+      const token = await getToken();
+      if (!token) throw new ApiError('Sign in again to request an explanation.');
+      const text = await explain(shown.result, weather, token);
       setAiText(text);
       dismiss('error');
     } catch (err) {
@@ -161,8 +188,11 @@ export default function CheckIn() {
     }
   }
 
-  function deleteData() {
-    if (!window.confirm('Delete your check-in history from this browser? This cannot be undone.')) return;
+  async function deleteData() {
+    if (!window.confirm('Delete your check-in history from this device and your account?')) return;
+    try { const token = await getToken(); if (!token) return; await cloud('checkins', token, 'DELETE'); }
+    catch { push({ id: 'error', kind: 'error', title: 'Could not delete history', description: 'Check your connection and try again.' }); return; }
+    clearPending(userId);
     clearHistory(localStorage, userId);
     setHistory([]);
     setShown(null);
@@ -184,7 +214,7 @@ export default function CheckIn() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Morning check-in</p>
+        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Your dashboard</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-5xl">
           {greeting()}, {user!.name}
         </h1>
@@ -195,6 +225,8 @@ export default function CheckIn() {
         </p>
 
         <NotificationStack notices={notices} onDismiss={dismiss} className="mt-6 max-w-xl" />
+
+        <div className="mt-6"><ActivityDashboard /></div>
 
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
           <div className="space-y-6">
@@ -287,8 +319,9 @@ export default function CheckIn() {
                     </p>
                   )}
                   <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
-                    AI-generated from your numbers. Not medical advice.
+                    AI-generated from your numbers and public research references. <a href="/sources" target="_blank" rel="noreferrer" className="underline">Sources & limits</a>. Not medical advice.
                   </p>
+                  <WeatherContextPanel onChange={setWeather} />
                 </Card>
               </>
             ) : (
@@ -316,14 +349,14 @@ export default function CheckIn() {
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Recent check-ins</h2>
                 {history.length > 0 && (
-                  <Button variant="destructive" size="sm" onClick={deleteData}>
+                  <Button variant="destructive" size="sm" onClick={deleteData} disabled={busy}>
                     Delete history
                   </Button>
                 )}
               </div>
               {history.length === 0 ? (
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  Your first check-in starts your baseline. History is kept in this browser only.
+                  Your first check-in starts your baseline. Timing summaries sync with your account.
                 </p>
               ) : (
                 <>
@@ -341,6 +374,8 @@ export default function CheckIn() {
                 </ul>
                 </>
               )}
+              {historySync && <p className="mt-3 text-xs text-muted-foreground" role="status">{historySync}</p>}
+              <p className="mt-2 text-xs text-muted-foreground">Scores use check-ins from this browser so different keyboards are not mixed.</p>
             </Card>
           </div>
         </div>

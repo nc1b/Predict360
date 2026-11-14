@@ -17,8 +17,8 @@ const sampleSummary = {
   drivers: [{ feature: 'sentencePauseMs', flag: 'long_sentence_pause', ratio: 5.12 }],
 };
 
-async function withServer(fn) {
-  const app = createApp();
+async function withServer(fn, options) {
+  const app = createApp({ authenticateAi: async () => true, ...options });
   const server = await new Promise((resolve) => {
     const srv = app.listen(0, '127.0.0.1', () => resolve(srv));
   });
@@ -44,6 +44,89 @@ test('buildSummaryText turns numbers into text and rejects junk', () => {
   assert.equal(buildSummaryText(null), null);
   assert.equal(buildSummaryText({}), null);
   assert.equal(buildSummaryText('hello'), null);
+});
+
+test('summary sanitization allows only known labels and bounded numbers', () => {
+  const text = buildSummaryText({
+    ...sampleSummary,
+    status: 'private_words',
+    features: { dwellMs: { value: -10 }, sentencePauseMs: { value: 1e308 }, flightVolatilityMs: { value: 12 } },
+    drivers: [{ feature: 'constructor' }, { feature: 'toString' }, { feature: 'flightVolatilityMs' }, { feature: 'flightVolatilityMs' }],
+  });
+  assert.ok(!/private_words|function|native code|-10|1e\+308/.test(text));
+  assert.match(text, /Biggest difference from usual: typing rhythm variation\./);
+  assert.equal(buildSummaryText({ readinessScore: 101 }), null);
+  assert.equal(buildSummaryText([]), null);
+});
+
+test('explanation body limit reports the actual limit', async () => {
+  await withServer(async (base) => {
+    const res = await post(base, { pad: 'x'.repeat(33 * 1024) });
+    assert.equal(res.status, 413);
+    assert.match((await res.json()).error.message, /32768 bytes/);
+  });
+});
+
+const configuredClient = (callAi) => ({ isConfigured: () => true, buildSummaryText, callAi });
+
+test('anonymous requests cannot spend the configured AI key', async () => {
+  let called = false;
+  await withServer(async (base) => {
+    const res = await post(base, { summary: sampleSummary });
+    assert.equal(res.status, 401);
+    assert.equal((await res.json()).error.code, 'unauthorized');
+    assert.equal(called, false);
+  }, { authenticateAi: require('../src/auth').verifyAiRequest, aiClient: configuredClient(async () => { called = true; return 'unexpected'; }) });
+});
+
+test('upstream failures and timeouts are sanitized and release the explanation slot', async () => {
+  for (const timeout of [false, true]) {
+    let calls = 0;
+    const aiClient = configuredClient((text, { signal }) => {
+      if (++calls > 1) return Promise.resolve('Recovered explanation.');
+      if (!timeout) throw new Error('private upstream response and credentials');
+      return new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true }));
+    });
+    await withServer(async (base) => {
+      const res = await post(base, { summary: sampleSummary });
+      assert.equal(res.status, timeout ? 504 : 502);
+      const json = await res.json();
+      assert.equal(json.error.code, timeout ? 'ai_timeout' : 'ai_error');
+      assert.ok(!JSON.stringify(json).includes('private upstream'));
+      const recovered = await post(base, { summary: sampleSummary });
+      assert.equal(recovered.status, 200);
+      assert.equal((await recovered.json()).text, 'Recovered explanation.');
+    }, { aiClient, aiTimeoutMs: 20, maxAiConcurrent: 1 });
+  }
+});
+
+test('busy explanations return 429 while health and analysis keep working', async () => {
+  let release;
+  let entered;
+  const started = new Promise((resolve) => { entered = resolve; });
+  const aiClient = configuredClient(() => {
+    entered();
+    return new Promise((resolve) => { release = resolve; });
+  });
+  await withServer(async (base) => {
+    const first = post(base, { summary: sampleSummary });
+    try {
+      await started;
+      const busy = await post(base, { summary: sampleSummary });
+      assert.equal(busy.status, 429);
+      assert.equal(busy.headers.get('retry-after'), '5');
+      assert.equal((await busy.json()).error.code, 'ai_busy');
+      assert.equal((await fetch(`${base}/health`)).status, 200);
+      const { requestFor } = require('../fixtures/synthetic');
+      const analysis = await fetch(`${base}/api/analyze`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestFor('ordinary')),
+      });
+      assert.equal((await analysis.json()).readinessScore, 100);
+    } finally {
+      release('Explanation.');
+      assert.equal((await first).status, 200);
+    }
+  }, { aiClient, maxAiConcurrent: 1 });
 });
 
 test('POST /api/explain returns 503 when no AI key is configured', async () => {

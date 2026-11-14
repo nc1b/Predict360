@@ -7,3 +7,9 @@ desktop/node_modules/
 desktop/release/
 dist/
 node_modules/
+supabase/.temp/
+supabase/functions/predict360-sync/*.cjs
+supabase/functions/predict360-sync/*.mjs
+desktop/assets/
+research/raw/
+core
