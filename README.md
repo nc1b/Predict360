@@ -63,7 +63,12 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
   are free-to-use Unsplash images loaded from Unsplash.
 - **Pages**: landing (`/`), sign in (`/login`), sign up (`/signup`), check-in (`/app`), and a 404.
 - **Sign-in**: [Clerk](https://clerk.com). Set `VITE_CLERK_PUBLISHABLE_KEY` in `web/.env.local`
-  for local development (see `web/.env.example`). There is also a guest mode that needs no account.
+  for local development (see `web/.env.example`). The check-in requires signing in.
+- **AI explanation**: the check-in page has an "Explain" button that calls `POST /api/explain`,
+  a server-side proxy to the [Hack Club AI](https://ai.hackclub.com) API. Only the numeric result
+  summary is sent (score and the three feature values vs. the user's usual) — never text or
+  keystrokes. The key lives only on the server as `HACKCLUB_AI_KEY` (see `.env.example`); it is
+  never in the browser bundle. Without the key the feature is simply unavailable.
 - **Capture**: `web/src/lib/capture.ts` pairs keydown and keyup, drops modifier keys, shortcuts
   and auto-repeat, and keeps only `kind`, `downMs` and `upMs`. The typed text is never stored
   or sent, and the box is cleared when a check-in finishes.
@@ -79,7 +84,15 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
 
 `vercel.json` builds `web/` as a static site and runs the Express app as one serverless
 function (`api/index.js`) behind `/api/*` and `/health`. The Clerk publishable key for deployed
-builds is in `web/.env.production`.
+builds is in `web/.env.production`; the `HACKCLUB_AI_KEY` secret is set in the Vercel project
+environment (never committed).
+
+### Desktop app
+
+`desktop/` is an [Electron](https://www.electronjs.org/) app that opens the check-in in its own
+window. It loads the deployed site, so you do a check-in by typing into the window, exactly as on
+the web. It does not run in the background and does not record typing in other applications. See
+`desktop/README.md` to run it (`npm start`) or build a downloadable `.exe` (`npm run dist`).
 
 ## Privacy
 
