@@ -8,6 +8,8 @@ async function main() {
   fs.copyFileSync(path.join(root, 'web/public/logo.svg'), path.join(target, 'logo.svg'));
   fs.copyFileSync(path.join(root, 'config/public.json'), path.join(target, 'public.json'));
   fs.copyFileSync(path.join(root, 'src/activity.js'), path.join(target, 'activity-analyzer.cjs'));
+  const workday = fs.readFileSync(path.join(root, 'src/workday.mjs'), 'utf8').replace('export function createWorkdayPlan', 'function createWorkdayPlan');
+  fs.writeFileSync(path.join(target, 'workday.cjs'), workday + '\nmodule.exports = { createWorkdayPlan };\n');
   const svg = fs.readFileSync(path.join(root, 'web/public/icon.svg'), 'utf8').replace(/<style>.*?<\/style>/s, '').replace('<g stroke-width', '<g stroke="#000" stroke-width');
   const png = path.join(target, 'icon.png');
   await sharp(Buffer.from(svg)).resize(256, 256).flatten({ background: '#fff' }).png().toFile(png);

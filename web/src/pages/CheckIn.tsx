@@ -26,6 +26,7 @@ import type { AnalyzeResponse } from '@/lib/types';
 import { ActivityDashboard } from '@/components/activity-dashboard';
 import { cloud, clearPending, queueCheckin, syncCheckins } from '@/lib/cloud';
 import { WeatherContextPanel, type WeatherContext } from '@/components/weather-context';
+import { DownloadDesktop } from '@/components/download-desktop';
 
 function greeting(now = new Date()) {
   const h = now.getHours();
@@ -226,6 +227,10 @@ export default function CheckIn() {
 
         <NotificationStack notices={notices} onDismiss={dismiss} className="mt-6 max-w-xl" />
 
+        <Card id="desktop-download" className="animate-element mt-6 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-5"><div className="max-w-xl"><p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Start tracking your day</p><h2 className="mt-2 text-2xl font-bold">Download the Windows app</h2><p className="mt-2 text-sm text-muted-foreground">Install Predict 360 to track clicks and keyboard activity across your applications. Sign in with this account, then choose Start tracking. Your totals will appear below.</p></div><DownloadDesktop primary /></div>
+          <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">Windows installer · Tracking starts paused · Your words are never recorded · <a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Use</a></p>
+        </Card>
         <div className="mt-6"><ActivityDashboard /></div>
 
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">

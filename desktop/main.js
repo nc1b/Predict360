@@ -8,11 +8,12 @@ const { createStore, atomicWrite, read } = require('./store');
 const assets = path.join(__dirname, 'assets');
 const config = require('./assets/public.json');
 const { validateDay, analyzeActivity } = require('./assets/activity-analyzer.cjs');
+const { createWorkdayPlan } = require('./assets/workday.cjs');
 const site = new URL(process.env.PREDICT360_URL || config.siteUrl);
 if (site.protocol !== 'https:' && !(site.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(site.hostname))) throw new Error('Use an HTTPS website URL.');
 let win, tray, store, hook, session = null, pendingLogin = null;
 let tracker = new ActivityTracker();
-let revision = 0, syncing = false, syncMessage = 'Sign in to connect your website account.', quitting = false, aiText = '', credentialsAvailable = false;
+let revision = 0, syncing = false, syncMessage = 'Sign in to connect your website account.', quitting = false, aiText = '', credentialsAvailable = false, energy = null;
 const sessionFile = () => path.join(app.getPath('userData'), 'account.enc.json');
 const sha = (value) => createHash('sha256').update(value).digest('base64url');
 const secureCredentials = () => credentialsAvailable;
@@ -31,7 +32,7 @@ function persist() {
   catch { tracker.pause(); hook?.stop(); syncMessage = 'Tracking paused: could not save activity. Check your available disk space.'; }
 }
 async function setAccount(account) {
-  tracker.pause(); session = account; aiText = '';
+  tracker.pause(); session = account; aiText = ''; energy = null;
   if (account) {
     const saved = store.load(account.userId); revision = saved.revision;
     tracker = new ActivityTracker({ days: saved.days });
@@ -43,7 +44,7 @@ function state() {
   const day = days.find((entry) => entry.date === today) || { date: today, buckets: [] };
   return { running: tracker.running, connected: !!session, userId: session?.userId || null, syncMessage,
     analytics: analyzeActivity({ day, baseline: { days: days.filter((entry) => entry.date < today) } }),
-    aiText, credentialsSaved: secureCredentials() };
+    aiText, energy, plan: createWorkdayPlan({ days, energy }), credentialsSaved: secureCredentials() };
 }
 function publish() {
   if (win && !win.isDestroyed()) win.webContents.send('activity:state', state());
@@ -142,6 +143,7 @@ else {
     });
     action('activity:get', () => {}); action('activity:start', start); action('activity:pause', pause);
     action('activity:connect', connect); action('activity:sync', sync);
+    action('activity:energy', (value) => { if (![null, 'low', 'steady', 'good'].includes(value)) throw new Error('Choose an energy option.'); energy = value; publish(); });
     action('activity:explain', async () => {
       const days = tracker.snapshot(), today = localDate(Date.now());
       const day = days.find((entry) => entry.date === today);

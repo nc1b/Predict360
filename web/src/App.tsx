@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound';
 import DesktopConnect from './pages/DesktopConnect';
 import { Fragment } from 'react';
 import Sources from './pages/Sources';
+import Legal from './pages/Legal';
 
 function Loading() {
   return (
@@ -31,6 +32,8 @@ export default function App() {
       <Route path="/signup/*" element={<Signup />} />
       <Route path="/desktop/connect" element={<DesktopConnect />} />
       <Route path="/sources" element={<Sources />} />
+      <Route path="/privacy" element={<Legal kind="privacy" />} />
+      <Route path="/terms" element={<Legal kind="terms" />} />
       <Route
         path="/app"
         element={
