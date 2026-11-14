@@ -70,13 +70,11 @@ const flat = {
     cardBox: { width: '100%', maxWidth: '100%', boxShadow: 'none', border: '1px solid var(--border)', borderRadius: '1rem' },
     card: { boxShadow: 'none', background: 'var(--card)' },
     header: { display: 'none' },
-    footer: { display: 'none' },
     socialButtonsBlockButton: { border: '1px solid var(--input)', color: 'var(--foreground)', boxShadow: 'none', height: '2.75rem' },
     socialButtonsBlockButtonText: { color: 'var(--foreground)' },
     formFieldInput: { border: '1px solid var(--input)', boxShadow: 'none', height: '2.75rem' },
     formButtonPrimary: { height: '2.75rem', boxShadow: 'none' },
     dividerLine: { background: 'var(--border)' },
-    footerAction: { display: 'flex' },
   },
 } as const;
 

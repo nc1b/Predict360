@@ -179,3 +179,9 @@
     text-underline-offset: 4px;
   }
 }
+
+/* Hide Clerk's branding and development-instance badge, but keep the
+   "Don't have an account? Sign up" link (its sibling in the footer). */
+.cl-footerItem {
+  display: none !important;
+}

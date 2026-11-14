@@ -1,0 +1,23 @@
+{
+  "name": "predict360-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Predict 360 as a downloadable desktop app: a dedicated window for the morning check-in.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "app.predict360.desktop",
+    "productName": "Predict 360",
+    "directories": { "output": "release" },
+    "win": { "target": ["portable", "nsis"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}

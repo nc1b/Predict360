@@ -1,7 +1,9 @@
-node_modules/
-dist/
+*.log
+.claude/
 .env
 .env.local
-*.log
 .vercel
-.claude/
+desktop/node_modules/
+desktop/release/
+dist/
+node_modules/
