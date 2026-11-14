@@ -1,0 +1,20 @@
+{
+  "name": "predict360-backend",
+  "version": "0.1.0",
+  "description": "Predict 360 hackathon prototype backend: typing-timing features for a two-sentence morning check-in.",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test",
+    "fixtures": "node scripts/write-fixtures.js",
+    "evaluate": "node scripts/evaluate.js",
+    "robustness": "node scripts/robustness.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
