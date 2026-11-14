@@ -1,5 +1,15 @@
 'use strict';
 
+// Load a local .env (e.g. HACKCLUB_AI_KEY) when present. On Vercel the env vars
+// come from the project settings instead, so this is a no-op there.
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // No .env file; that's fine.
+  }
+}
+
 const fs = require('node:fs');
 const path = require('node:path');
 const { createApp } = require('./app');

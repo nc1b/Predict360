@@ -1,16 +1,15 @@
 import * as React from 'react';
 import { UserButton } from '@clerk/react';
-import { Keyboard, Lock } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Keyboard, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { Logo } from '@/components/logo';
 import { ResultCard, StatusBadge } from '@/components/result-card';
-import { Button, buttonClass } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/blocks/theme-toggle';
 import { NotificationStack, useNotices } from '@/components/ui/notifications';
-import { analyze, ApiError } from '@/lib/api';
+import { analyze, ApiError, AiUnconfiguredError, explain } from '@/lib/api';
 import { KeystrokeRecorder } from '@/lib/capture';
 import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
 import {
@@ -38,8 +37,7 @@ interface Shown {
 }
 
 export default function CheckIn() {
-  const { user, exitGuest } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const userId = user!.id;
 
   const recorder = React.useRef(new KeystrokeRecorder());
@@ -50,6 +48,8 @@ export default function CheckIn() {
   const [shown, setShown] = React.useState<Shown | null>(null);
   const [history, setHistory] = React.useState<HistoryEntry[]>(() => loadHistory(localStorage, userId));
   const { notices, push, dismiss } = useNotices();
+  const [aiText, setAiText] = React.useState<string | null>(null);
+  const [aiBusy, setAiBusy] = React.useState(false);
 
   const usableCount = history.filter((h) => isUsable(h.features)).length;
   const baselineReady = usableCount >= MIN_BASELINE_SESSIONS;
@@ -79,6 +79,7 @@ export default function CheckIn() {
       });
       return;
     }
+    setAiText(null);
     setBusy(true);
     try {
       const result = await analyze({ keystrokes, baseline: baselineFrom(history) });
@@ -116,6 +117,7 @@ export default function CheckIn() {
   }
 
   async function runDemo(name: DemoName, label: string) {
+    setAiText(null);
     setBusy(true);
     try {
       const result = await analyze(await loadDemoRequest(name));
@@ -131,6 +133,31 @@ export default function CheckIn() {
       fail(err);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function explainResult() {
+    if (!shown) return;
+    setAiBusy(true);
+    try {
+      const text = await explain(shown.result);
+      setAiText(text);
+      dismiss('error');
+    } catch (err) {
+      setAiText(null);
+      push({
+        id: 'error',
+        kind: err instanceof AiUnconfiguredError ? 'info' : 'error',
+        title: err instanceof AiUnconfiguredError ? 'AI explanations are off' : "Couldn't explain that",
+        description:
+          err instanceof AiUnconfiguredError
+            ? 'This server has no AI key set, so the plain-words summary is unavailable.'
+            : err instanceof ApiError
+              ? err.message
+              : 'Something went wrong. Try again.',
+      });
+    } finally {
+      setAiBusy(false);
     }
   }
 
@@ -150,25 +177,7 @@ export default function CheckIn() {
           <Logo />
           <div className="flex items-center gap-1.5 pr-1">
             <ThemeToggle />
-            {user!.guest ? (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    exitGuest();
-                    navigate('/');
-                  }}
-                >
-                  Exit guest mode
-                </Button>
-                <Link to="/login" className={buttonClass({ size: 'sm' })}>
-                  Sign in
-                </Link>
-              </>
-            ) : (
-              <UserButton />
-            )}
+            <UserButton />
           </div>
         </div>
         </div>
@@ -177,7 +186,7 @@ export default function CheckIn() {
       <main className="mx-auto max-w-6xl px-6 py-10">
         <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Morning check-in</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-5xl">
-          {user!.guest ? greeting() : `${greeting()}, ${user!.name}`}
+          {greeting()}, {user!.name}
         </h1>
         <p className="mt-4 text-muted-foreground">
           {baselineReady
@@ -260,7 +269,28 @@ export default function CheckIn() {
 
           <div className="space-y-6">
             {shown ? (
-              <ResultCard result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
+              <>
+                <ResultCard result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
+                <Card className="p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold">Explain this in plain words</h2>
+                    <Button variant="outline" size="sm" className="rounded-full" onClick={explainResult} disabled={aiBusy}>
+                      <Sparkles className="size-4" aria-hidden="true" />
+                      {aiBusy ? 'Thinking…' : aiText ? 'Again' : 'Explain'}
+                    </Button>
+                  </div>
+                  {aiText ? (
+                    <p className="mt-3 text-sm leading-relaxed">{aiText}</p>
+                  ) : (
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      A short, plain summary of your numbers. The AI sees only the timing figures above, never your words.
+                    </p>
+                  )}
+                  <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
+                    AI-generated from your numbers. Not medical advice.
+                  </p>
+                </Card>
+              </>
             ) : (
               <Card className="p-6">
                 <p className="text-sm text-muted-foreground">Compared with your usual typing</p>

@@ -67,7 +67,7 @@ export function SiteNav() {
     return () => document.removeEventListener('keydown', onKey);
   }, [menuOpen]);
 
-  const signedIn = user && !user.guest;
+  const signedIn = !!user;
 
   return (
     <>

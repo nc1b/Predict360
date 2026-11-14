@@ -5,6 +5,7 @@ const express = require('express');
 const { LIMITS } = require('./config');
 const { validateAnalyzeRequest } = require('./validate');
 const { analyze } = require('./scoring');
+const ai = require('./ai');
 
 function errorBody(code, message, details) {
   const error = { code, message };
@@ -65,6 +66,45 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
     }
   );
 
+  // Optional: a plain-language explanation of a result, via the Hack Club AI proxy.
+  // Only numbers are forwarded to the model (see ai.js); never text or keystrokes.
+  app.post(
+    '/api/explain',
+    (req, res, next) => {
+      if (!req.is('application/json')) {
+        return res
+          .status(415)
+          .json(errorBody('unsupported_media_type', 'Send the body as JSON with Content-Type: application/json.'));
+      }
+      next();
+    },
+    express.json({ limit: 32 * 1024 }),
+    async (req, res) => {
+      if (!ai.isConfigured()) {
+        return res
+          .status(503)
+          .json(errorBody('ai_unconfigured', 'AI explanations are not configured on this server.'));
+      }
+      const summaryText = ai.buildSummaryText(req.body && req.body.summary);
+      if (!summaryText) {
+        return res
+          .status(400)
+          .json(errorBody('invalid_request', 'Send { "summary": ... } from an /api/analyze response.'));
+      }
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+      try {
+        const text = await ai.callAi(summaryText, { signal: controller.signal });
+        res.json({ text });
+      } catch (err) {
+        log(`error ai ${(err && err.name) || 'unknown'}`);
+        res.status(502).json(errorBody('ai_error', "Couldn't get an explanation right now. Please try again."));
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+  );
+
   // Optional: serve the built frontend (web/dist) so one process runs the whole demo.
   if (staticDir) {
     app.use(express.static(staticDir));
@@ -78,7 +118,7 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
   app.use((req, res) => {
     res
       .status(404)
-      .json(errorBody('not_found', 'Unknown route. Available: GET /health, POST /api/analyze.'));
+      .json(errorBody('not_found', 'Unknown route. Available: GET /health, POST /api/analyze, POST /api/explain.'));
   });
 
   // eslint-disable-next-line no-unused-vars

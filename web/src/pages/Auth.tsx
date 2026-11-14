@@ -2,8 +2,7 @@
 // form on the left, greyscale photo with a caption on the right.
 
 import { SignIn, SignUp } from '@clerk/react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 import { CLERK_KEY, useAuth } from '@/auth-context';
 import { ThemeToggle } from '@/components/blocks/theme-toggle';
 import { Logo } from '@/components/logo';
@@ -11,9 +10,8 @@ import { Card } from '@/components/ui/card';
 import { HERO_IMAGES } from '@/lib/site';
 
 function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
-  const { user, loaded, enterGuest } = useAuth();
-  const navigate = useNavigate();
-  if (loaded && user && !user.guest) return <Navigate to="/app" replace />;
+  const { user, loaded } = useAuth();
+  if (loaded && user) return <Navigate to="/app" replace />;
 
   return (
     <div className="grid min-h-screen bg-background text-foreground lg:grid-cols-2">
@@ -41,22 +39,6 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
             )}
           </div>
 
-          <div className="animate-element animate-delay-300 mt-6 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            or
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              enterGuest();
-              navigate('/app');
-            }}
-            className="animate-element animate-delay-300 mt-6 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Continue as a guest <ArrowRight className="size-4" aria-hidden="true" />
-          </button>
-
           <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
             Accounts are handled by Clerk. Your check-in history stays in this browser. This project is a prototype and is not
             medical advice.
@@ -80,19 +62,21 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
   );
 }
 
-// Clerk renders its own card and heading; flatten the card so it sits in our layout.
+// Clerk renders its own card and heading; flatten it into our layout and hide
+// the branding footer (which carries the development-instance badge).
 const flat = {
   elements: {
     rootBox: { width: '100%' },
     cardBox: { width: '100%', maxWidth: '100%', boxShadow: 'none', border: '1px solid var(--border)', borderRadius: '1rem' },
     card: { boxShadow: 'none', background: 'var(--card)' },
     header: { display: 'none' },
-    footer: { background: 'var(--card)' },
+    footer: { display: 'none' },
     socialButtonsBlockButton: { border: '1px solid var(--input)', color: 'var(--foreground)', boxShadow: 'none', height: '2.75rem' },
     socialButtonsBlockButtonText: { color: 'var(--foreground)' },
     formFieldInput: { border: '1px solid var(--input)', boxShadow: 'none', height: '2.75rem' },
     formButtonPrimary: { height: '2.75rem', boxShadow: 'none' },
     dividerLine: { background: 'var(--border)' },
+    footerAction: { display: 'flex' },
   },
 } as const;
 

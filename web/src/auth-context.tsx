@@ -12,46 +12,14 @@ export const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | 
 export interface AppUser {
   id: string;
   name: string;
-  /** Guest mode: no account, history kept in this browser under a shared "guest" key. */
-  guest: boolean;
 }
 
 interface AuthState {
   user: AppUser | null;
   loaded: boolean;
-  enterGuest: () => void;
-  exitGuest: () => void;
 }
 
-const GUEST_KEY = 'p360.guest';
-const GUEST_USER: AppUser = { id: 'guest', name: 'there', guest: true };
-
-const AuthContext = React.createContext<AuthState>({
-  user: null,
-  loaded: true,
-  enterGuest: () => {},
-  exitGuest: () => {},
-});
-
-function useGuest() {
-  const [guest, setGuest] = React.useState(() => {
-    try {
-      return localStorage.getItem(GUEST_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const set = React.useCallback((on: boolean) => {
-    try {
-      if (on) localStorage.setItem(GUEST_KEY, '1');
-      else localStorage.removeItem(GUEST_KEY);
-    } catch {
-      // Guest mode then lasts for this page view only.
-    }
-    setGuest(on);
-  }, []);
-  return { guest, enterGuest: () => set(true), exitGuest: () => set(false) };
-}
+const AuthContext = React.createContext<AuthState>({ user: null, loaded: true });
 
 export function useAuth(): AuthState {
   return React.useContext(AuthContext);
@@ -59,25 +27,15 @@ export function useAuth(): AuthState {
 
 function ClerkBridge({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, user } = useUser();
-  const { guest, enterGuest, exitGuest } = useGuest();
   const value = React.useMemo<AuthState>(
     () => ({
       loaded: isLoaded,
       user:
         isLoaded && isSignedIn && user
-          ? {
-              id: user.id,
-              name: user.firstName || user.username || user.primaryEmailAddress?.emailAddress || 'there',
-              guest: false,
-            }
-          : guest
-            ? GUEST_USER
-            : null,
-      enterGuest,
-      exitGuest,
+          ? { id: user.id, name: user.firstName || user.username || user.primaryEmailAddress?.emailAddress || 'there' }
+          : null,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLoaded, isSignedIn, user, guest]
+    [isLoaded, isSignedIn, user]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -101,20 +59,11 @@ export const clerkAppearance = {
   },
 } as const;
 
-function GuestOnlyProvider({ children }: { children: React.ReactNode }) {
-  const { guest, enterGuest, exitGuest } = useGuest();
-  return (
-    <AuthContext.Provider value={{ user: guest ? GUEST_USER : null, loaded: true, enterGuest, exitGuest }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   if (!CLERK_KEY) {
-    // No key configured: the site still works in guest mode.
-    return <GuestOnlyProvider>{children}</GuestOnlyProvider>;
+    // No key configured: the site still renders, signed out.
+    return <AuthContext.Provider value={{ user: null, loaded: true }}>{children}</AuthContext.Provider>;
   }
   return (
     <ClerkProvider
