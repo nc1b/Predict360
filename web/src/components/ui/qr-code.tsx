@@ -37,7 +37,7 @@ export function QRCode({
   variant = 'dots',
   errorCorrection = 'M',
   margin = 2,
-  color = '#2b2b2b',
+  color = '#000000',
   background = '#ffffff',
   className,
   'aria-label': label,

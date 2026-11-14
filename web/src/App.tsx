@@ -7,8 +7,8 @@ import NotFound from './pages/NotFound';
 
 function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground" role="status">
-      Loading…
+    <div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Loading">
+      <span className="size-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
     </div>
   );
 }

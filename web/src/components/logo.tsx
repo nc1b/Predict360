@@ -1,25 +1,43 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-/** A sun rising over a horizon: the one place besides the score that uses amber. */
+/**
+ * The Predict 360 mark: an almost-closed ring (the "360") around three bars of
+ * uneven height (typing rhythm). Line art with a transparent background; it
+ * takes the text colour, so it works on black and on white.
+ */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={cn('size-7', className)} aria-hidden="true">
-      <rect width="32" height="32" rx="8" className="fill-primary" />
-      <path d="M9 19a7 7 0 0 1 14 0Z" className="fill-accent" />
-      <rect x="6" y="20.5" width="20" height="2" rx="1" className="fill-primary-foreground" />
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      className={cn('size-9', className)}
+      aria-hidden="true"
+    >
+      <path d="M38.6 13.8A18 18 0 1 0 42 24" />
+      <path d="M17 20v8M24 15v18M31 21v6" />
     </svg>
   );
 }
 
-export function Logo({ to = '/' }: { to?: string }) {
+export function Logo({ to = '/', tagline = 'Morning check-in', className }: { to?: string; tagline?: string; className?: string }) {
   return (
     <Link
       to={to}
-      className="inline-flex items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label="Predict 360 home"
+      className={cn(
+        'flex shrink-0 items-center gap-2.5 rounded-xl py-1 pl-1 pr-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        className
+      )}
     >
       <LogoMark />
-      Predict 360
+      <span className="leading-tight">
+        <span className="block text-[15px] font-semibold tracking-tight">Predict 360</span>
+        <span className="block text-[11px] text-muted-foreground">{tagline}</span>
+      </span>
     </Link>
   );
 }

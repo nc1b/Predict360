@@ -36,7 +36,7 @@ const FEATURES: FeatureName[] = ['dwellMs', 'sentencePauseMs', 'flightVolatility
 
 export function StatusBadge({ status, className }: { status: Status; className?: string }) {
   return (
-    <span className={cn('inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium', STATUS_CLASS[status], className)}>
+    <span className={cn('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium', STATUS_CLASS[status], className)}>
       {STATUS_LABEL[status]}
     </span>
   );
@@ -71,7 +71,7 @@ function Explanation({ result, baselineCount }: { result: AnalyzeResponse; basel
     <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
       {result.drivers.map((d) => (
         <li key={d.flag} className="flex gap-2">
-          <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+          <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground" />
           <span>
             {FLAG_TEXT[d.flag]} <span className="text-muted-foreground">({d.ratio.toFixed(1)}x, -{Math.round(d.pointsDeducted)} points)</span>
           </span>
@@ -98,7 +98,7 @@ export function ResultCard({
     <Card className={cn('p-6', className)} aria-live="polite">
       <p className="text-sm text-muted-foreground">{caption}</p>
       <div className="mt-1 flex flex-wrap items-baseline gap-3">
-        <span className="text-6xl font-medium leading-none tracking-tight tabular-nums text-foreground">
+        <span className="text-7xl font-bold leading-none tracking-tight tabular-nums text-foreground">
           {score === null ? '–' : score}
         </span>
         <StatusBadge status={result.status} />
@@ -112,7 +112,7 @@ export function ResultCard({
         aria-valuemax={100}
         aria-valuenow={score ?? undefined}
       >
-        <div className="h-2 rounded-full bg-accent transition-[width] duration-700 ease-out" style={{ width: `${score ?? 0}%` }} />
+        <div className="h-2 rounded-full bg-foreground transition-[width] duration-700 ease-out" style={{ width: `${score ?? 0}%` }} />
       </div>
 
       <div className="mt-5">

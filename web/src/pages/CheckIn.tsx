@@ -8,7 +8,7 @@ import { ResultCard, StatusBadge } from '@/components/result-card';
 import { Button, buttonClass } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/ui/footer-section';
+import { ThemeToggle } from '@/components/blocks/theme-toggle';
 import { NotificationStack, useNotices } from '@/components/ui/notifications';
 import { analyze, ApiError } from '@/lib/api';
 import { KeystrokeRecorder } from '@/lib/capture';
@@ -144,10 +144,11 @@ export default function CheckIn() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border/70 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
+      <header className="sticky top-0 z-40">
+        <div className="mx-auto max-w-6xl px-3 pt-4 sm:px-6">
+        <div className="flex h-14 items-center justify-between rounded-2xl border bg-background/80 px-2 shadow-sm backdrop-blur-xl">
           <Logo />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 pr-1">
             <ThemeToggle />
             {user!.guest ? (
               <>
@@ -170,13 +171,15 @@ export default function CheckIn() {
             )}
           </div>
         </div>
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <h1 className="text-3xl font-medium tracking-tight">
+        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Morning check-in</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-5xl">
           {user!.guest ? greeting() : `${greeting()}, ${user!.name}`}
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-4 text-muted-foreground">
           {baselineReady
             ? 'Write two sentences to see how today compares with your usual.'
             : `Building your baseline: ${usableCount} of ${MIN_BASELINE_SESSIONS} check-ins done.`}
@@ -187,8 +190,8 @@ export default function CheckIn() {
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
           <div className="space-y-6">
             <Card className="p-6">
-              <label htmlFor="journal" className="text-lg font-medium">
-                Morning check-in
+              <label htmlFor="journal" className="text-xl font-bold">
+                Today&apos;s two sentences
               </label>
               <p id="journal-help" className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 Write two sentences about how your morning is going. End the first with a period, then keep typing.
@@ -211,7 +214,7 @@ export default function CheckIn() {
                 }}
                 onKeyUp={(e) => recorder.current.keyUp(e.nativeEvent)}
                 onBlur={() => recorder.current.releaseAll()}
-                className="mt-4 w-full resize-none rounded-md border border-input bg-card px-3 py-2.5 text-base leading-relaxed placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                className="mt-4 w-full resize-none rounded-xl border border-input bg-background px-3 py-2.5 text-base leading-relaxed placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
               />
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-2">
@@ -241,13 +244,13 @@ export default function CheckIn() {
             </Card>
 
             <Card className="p-6">
-              <h2 className="text-base font-medium">Try a simulated session</h2>
+              <h2 className="text-lg font-semibold">Try a simulated session</h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 Generated typing against a generated baseline, to show how each change moves the score.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {DEMO_SESSIONS.map((d) => (
-                  <Button key={d.name} variant="outline" size="sm" disabled={busy} title={d.note} onClick={() => runDemo(d.name, d.label)}>
+                  <Button key={d.name} variant="outline" size="sm" className="rounded-full" disabled={busy} title={d.note} onClick={() => runDemo(d.name, d.label)}>
                     {d.label}
                   </Button>
                 ))}
@@ -261,7 +264,7 @@ export default function CheckIn() {
             ) : (
               <Card className="p-6">
                 <p className="text-sm text-muted-foreground">Compared with your usual typing</p>
-                <p className="mt-3 text-lg font-medium">Your result appears here</p>
+                <p className="mt-3 text-xl font-bold">Your result appears here</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   {baselineReady
                     ? 'Finish a check-in to get a score from 0 to 100.'
@@ -269,7 +272,7 @@ export default function CheckIn() {
                 </p>
                 <div className="mt-5 h-2 rounded-full bg-track" aria-hidden="true">
                   <div
-                    className="h-2 rounded-full bg-accent transition-[width] duration-500"
+                    className="h-2 rounded-full bg-foreground transition-[width] duration-500"
                     style={{ width: `${(Math.min(usableCount, MIN_BASELINE_SESSIONS) / MIN_BASELINE_SESSIONS) * 100}%` }}
                   />
                 </div>
@@ -281,7 +284,7 @@ export default function CheckIn() {
 
             <Card className="p-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-medium">Recent check-ins</h2>
+                <h2 className="text-lg font-semibold">Recent check-ins</h2>
                 {history.length > 0 && (
                   <Button variant="destructive" size="sm" onClick={deleteData}>
                     Delete history

@@ -50,7 +50,7 @@ export function NotificationStack({
           <div
             key={n.id}
             role={n.kind === 'error' ? 'alert' : undefined}
-            className="flex animate-slide-down items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-[0_1px_2px_rgba(43,43,43,0.04)]"
+            className="animate-element flex items-start [animation-duration:300ms] gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm"
           >
             <Icon className={cn('mt-0.5 size-[18px] shrink-0', iconClass)} aria-hidden="true" />
             <div className="min-w-0 flex-1">
@@ -61,7 +61,7 @@ export function NotificationStack({
               type="button"
               onClick={() => onDismiss(n.id)}
               aria-label={`Dismiss: ${n.title}`}
-              className="-mr-1 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="-mr-1 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <X className="size-4" aria-hidden="true" />
             </button>

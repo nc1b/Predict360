@@ -13,7 +13,7 @@ export interface CalendarEvent {
 
 const DOT: Record<Status, string> = {
   near_baseline: 'bg-near-foreground',
-  some_deviation: 'bg-accent',
+  some_deviation: 'bg-some-foreground',
   large_deviation: 'bg-large-foreground',
   insufficient_samples: 'bg-muted-foreground/50',
   baseline_missing: 'bg-muted-foreground/50',
@@ -45,7 +45,7 @@ export function Calendar({ events, className }: { events: CalendarEvent[]; class
   const atCurrentMonth = month.getFullYear() === today.getFullYear() && month.getMonth() === today.getMonth();
 
   const navButton =
-    'flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40';
+    'flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40';
 
   return (
     <div className={cn('w-full', className)}>
@@ -98,7 +98,7 @@ export function Calendar({ events, className }: { events: CalendarEvent[]; class
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-near-foreground" />Close to usual</span>
-        <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-accent" />Some difference</span>
+        <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-some-foreground" />Some difference</span>
         <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-large-foreground" />Large difference</span>
         <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-muted-foreground/50" />Baseline</span>
       </div>

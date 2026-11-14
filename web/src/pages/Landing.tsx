@@ -1,20 +1,27 @@
-import { Navigation, Hero } from '@/components/ui/saa-s-template';
-import { HowItWorks } from '@/components/ui/how-it-works';
-import { Evidence } from '@/components/ui/evidence';
-import { Faqs } from '@/components/ui/faqs';
-import { FooterSection } from '@/components/ui/footer-section';
+import { HeroSection } from '@/components/blocks/hero-section';
+import {
+  AboutSection,
+  EvidenceSection,
+  FaqSection,
+  HowItWorksSection,
+  SignalsSection,
+} from '@/components/blocks/landing-sections';
+import { SiteFooter } from '@/components/blocks/site-footer';
+import { SiteNav } from '@/components/blocks/site-nav';
 
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navigation />
+      <SiteNav />
       <main>
-        <Hero />
-        <HowItWorks />
-        <Evidence />
-        <Faqs />
+        <HeroSection />
+        <SignalsSection />
+        <HowItWorksSection />
+        <EvidenceSection />
+        <FaqSection />
+        <AboutSection />
       </main>
-      <FooterSection />
+      <SiteFooter />
     </div>
   );
 }

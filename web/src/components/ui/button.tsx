@@ -7,21 +7,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const base =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-all cursor-pointer ' +
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors cursor-pointer ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ' +
-  'focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
+  'focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50';
 
 const variants = {
-  default: 'bg-primary text-primary-foreground hover:opacity-90',
-  outline: 'border border-border bg-card text-foreground hover:bg-muted',
-  ghost: 'text-foreground hover:bg-muted',
-  destructive: 'border border-border bg-card text-destructive hover:bg-muted',
+  default: 'bg-primary text-primary-foreground hover:bg-primary/85',
+  outline: 'border border-input bg-background text-foreground hover:bg-accent',
+  ghost: 'text-foreground hover:bg-accent',
+  destructive: 'border border-input bg-background text-destructive hover:bg-accent',
 };
 
 const sizes = {
-  default: 'h-10 px-4 text-sm',
-  sm: 'h-9 px-3.5 text-sm',
-  lg: 'h-12 px-7 text-base',
+  default: 'h-10 px-4',
+  sm: 'h-9 px-3',
+  lg: 'h-11 px-6 text-base',
 };
 
 export function buttonClass({

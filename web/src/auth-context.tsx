@@ -97,7 +97,7 @@ export const clerkAppearance = {
     colorRing: 'var(--ring)',
     colorDanger: '#b3261e',
     fontFamily: 'var(--font-sans)',
-    borderRadius: '0.5rem',
+    borderRadius: '0.75rem',
   },
 } as const;
 

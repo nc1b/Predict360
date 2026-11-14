@@ -58,6 +58,9 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
 
 ## Frontend
 
+- **Design**: black-and-white theme with light and dark modes, modeled on the team's Iris Checks
+  site. The logo is an original SVG (`web/public/logo.svg`, transparent background). Hero photos
+  are free-to-use Unsplash images loaded from Unsplash.
 - **Pages**: landing (`/`), sign in (`/login`), sign up (`/signup`), check-in (`/app`), and a 404.
 - **Sign-in**: [Clerk](https://clerk.com). Set `VITE_CLERK_PUBLISHABLE_KEY` in `web/.env.local`
   for local development (see `web/.env.example`). There is also a guest mode that needs no account.
@@ -367,6 +370,7 @@ test/               node:test suites
 api/index.js        Vercel serverless entry for the Express app
 web/                React frontend (Vite, Tailwind, Clerk)
 web/src/lib/        capture, history, API client (with tests)
-web/src/components/ui/   landing sections, calendar, alerts, QR code
+web/src/components/blocks/   navbar, hero, landing sections, footer
+web/src/components/ui/   buttons, cards, calendar, alerts, QR code
 web/src/pages/      landing, auth, check-in, 404
 ```

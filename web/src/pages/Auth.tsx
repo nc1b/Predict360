@@ -1,61 +1,113 @@
+// Sign-in and sign-up, in the split layout of the Iris Checks auth pages:
+// form on the left, greyscale photo with a caption on the right.
+
 import { SignIn, SignUp } from '@clerk/react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { CLERK_KEY, useAuth } from '@/auth-context';
+import { ThemeToggle } from '@/components/blocks/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Card } from '@/components/ui/card';
-import { CLERK_KEY, useAuth } from '@/auth-context';
+import { HERO_IMAGES } from '@/lib/site';
 
-function AuthShell({ children }: { children: React.ReactNode }) {
+function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   const { user, loaded, enterGuest } = useAuth();
   const navigate = useNavigate();
   if (loaded && user && !user.guest) return <Navigate to="/app" replace />;
+
   return (
-    <div className="flex min-h-screen flex-col items-center bg-background px-6 py-10">
-      <Logo />
-      <main className="flex w-full flex-1 flex-col items-center justify-center py-10">
-        <div className="flex justify-center">
-          {CLERK_KEY ? (
-            children
-          ) : (
-            <Card className="max-w-sm p-6 text-sm leading-relaxed">
-              <p className="font-medium">Sign-in isn't configured</p>
-              <p className="mt-2 text-muted-foreground">
-                Add <code className="rounded bg-muted px-1 py-0.5">VITE_CLERK_PUBLISHABLE_KEY</code> to{' '}
-                <code className="rounded bg-muted px-1 py-0.5">web/.env.local</code> and restart the dev server.
-              </p>
-            </Card>
-          )}
+    <div className="grid min-h-screen bg-background text-foreground lg:grid-cols-2">
+      <div className="flex flex-col px-6 py-6 sm:px-10">
+        <div className="flex items-center justify-between">
+          <Logo tagline="Research prototype" />
+          <ThemeToggle />
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            enterGuest();
-            navigate('/app');
-          }}
-          className="mt-6 cursor-pointer rounded-md text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Continue as a guest
-        </button>
-      </main>
-      <p className="max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
-        Your account is handled by Clerk. Your check-in history stays in this browser. This project is a prototype and is
-        not medical advice.
-      </p>
+
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
+          <h1 className="animate-element text-4xl font-bold tracking-tight">{title}</h1>
+          <p className="animate-element animate-delay-100 mt-3 text-muted-foreground">{subtitle}</p>
+
+          <div className="animate-element animate-delay-200 mt-8">
+            {CLERK_KEY ? (
+              children
+            ) : (
+              <Card className="p-6 text-sm leading-relaxed">
+                <p className="font-semibold">Sign-in isn&apos;t configured</p>
+                <p className="mt-2 text-muted-foreground">
+                  Add <code className="rounded bg-muted px-1 py-0.5">VITE_CLERK_PUBLISHABLE_KEY</code> to{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">web/.env.local</code> and restart the dev server.
+                </p>
+              </Card>
+            )}
+          </div>
+
+          <div className="animate-element animate-delay-300 mt-6 flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              enterGuest();
+              navigate('/app');
+            }}
+            className="animate-element animate-delay-300 mt-6 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Continue as a guest <ArrowRight className="size-4" aria-hidden="true" />
+          </button>
+
+          <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
+            Accounts are handled by Clerk. Your check-in history stays in this browser. This project is a prototype and is not
+            medical advice.
+          </p>
+        </main>
+      </div>
+
+      <div className="relative hidden p-4 lg:block">
+        <div className="relative h-full overflow-hidden rounded-3xl border bg-muted">
+          <img src={HERO_IMAGES.dark.src} alt={HERO_IMAGES.dark.alt} className="absolute inset-0 h-full w-full object-cover grayscale" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <figure className="absolute inset-x-6 bottom-6 rounded-2xl border border-white/15 bg-black/50 p-5 text-white backdrop-blur-md">
+            <blockquote className="text-lg font-semibold leading-snug">
+              Two sentences each morning. Compared with your own usual, never with anyone else.
+            </blockquote>
+            <figcaption className="mt-2 text-sm text-white/70">Only key timing is measured. Your words stay on your device.</figcaption>
+          </figure>
+        </div>
+      </div>
     </div>
   );
 }
 
+// Clerk renders its own card and heading; flatten the card so it sits in our layout.
+const flat = {
+  elements: {
+    rootBox: { width: '100%' },
+    cardBox: { width: '100%', maxWidth: '100%', boxShadow: 'none', border: '1px solid var(--border)', borderRadius: '1rem' },
+    card: { boxShadow: 'none', background: 'var(--card)' },
+    header: { display: 'none' },
+    footer: { background: 'var(--card)' },
+    socialButtonsBlockButton: { border: '1px solid var(--input)', color: 'var(--foreground)', boxShadow: 'none', height: '2.75rem' },
+    socialButtonsBlockButtonText: { color: 'var(--foreground)' },
+    formFieldInput: { border: '1px solid var(--input)', boxShadow: 'none', height: '2.75rem' },
+    formButtonPrimary: { height: '2.75rem', boxShadow: 'none' },
+    dividerLine: { background: 'var(--border)' },
+  },
+} as const;
+
 export function Login() {
   return (
-    <AuthShell>
-      <SignIn routing="path" path="/login" signUpUrl="/signup" fallbackRedirectUrl="/app" />
+    <AuthShell title="Welcome back" subtitle="Sign in to continue your morning check-ins.">
+      <SignIn routing="path" path="/login" signUpUrl="/signup" fallbackRedirectUrl="/app" appearance={flat} />
     </AuthShell>
   );
 }
 
 export function Signup() {
   return (
-    <AuthShell>
-      <SignUp routing="path" path="/signup" signInUrl="/login" fallbackRedirectUrl="/app" />
+    <AuthShell title="Create your account" subtitle="Three check-ins teach it your usual typing.">
+      <SignUp routing="path" path="/signup" signInUrl="/login" fallbackRedirectUrl="/app" appearance={flat} />
     </AuthShell>
   );
 }
