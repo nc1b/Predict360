@@ -1,9 +1,10 @@
-# Predict 360 backend
+# Predict 360
 
-Backend for Predict 360, a hackathon prototype for a two-sentence morning check-in. It takes
-keystroke **timing** from one check-in, computes three typing features, and compares them with
-the same person's earlier check-ins. It is for anyone who wants a quick way to reflect on how
-their morning is going.
+Predict 360 is a hackathon prototype for a two-sentence morning check-in. It takes keystroke
+**timing** from one check-in, computes three typing features, and compares them with the same
+person's earlier check-ins. It is for anyone who wants a quick way to reflect on how their
+morning is going. This repo holds the backend (Node.js, Express) and the frontend (React,
+Tailwind, shadcn-style components) in `web/`.
 
 This project is a prototype and is not medical advice.
 
@@ -15,33 +16,67 @@ accuracy, or whether someone is ready to work.
 
 Requires Node.js 20 or newer (built and tested on Node 24.19).
 
+Install both parts:
+
 ```bash
 npm install
+```
+
+```bash
+npm install --prefix web
+```
+
+Build the frontend, then start everything on one port:
+
+```bash
+npm run build
 ```
 
 ```bash
 npm start
 ```
 
-```bash
-npm test
-```
-
-The server listens on `http://localhost:3000` (override with `PORT`). Other commands:
+Open `http://localhost:3000` (override the port with `PORT`). Without a build, `npm start`
+serves the API only.
 
 | Command | What it does |
 |---|---|
+| `npm test` | Backend tests (`node:test`) |
+| `npm run test:web` | Frontend unit tests (Vitest) |
+| `npm run dev:web` | Frontend dev server on port 5173, proxying `/api` to port 3000 |
 | `npm run evaluate` | Runs the labeled fixtures through the algorithm and the naive comparator |
 | `npm run robustness` | Stress test across simulated typist profiles plus a sensitivity sweep |
 | `npm run fixtures` | Regenerates `fixtures/json/*.json` (deterministic) |
 
-Try it against a running server:
+Try the API directly:
 
 ```bash
 curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/json" --data @fixtures/json/four_second_pause.request.json
 ```
 
 (In PowerShell use `curl.exe` instead of `curl`.)
+
+## Frontend
+
+- **Pages**: landing (`/`), sign in (`/login`), sign up (`/signup`), check-in (`/app`), and a 404.
+- **Sign-in**: [Clerk](https://clerk.com). Set `VITE_CLERK_PUBLISHABLE_KEY` in `web/.env.local`
+  for local development (see `web/.env.example`). There is also a guest mode that needs no account.
+- **Capture**: `web/src/lib/capture.ts` pairs keydown and keyup, drops modifier keys, shortcuts
+  and auto-repeat, and keeps only `kind`, `downMs` and `upMs`. The typed text is never stored
+  or sent, and the box is cleared when a check-in finishes.
+- **History**: each check-in's three feature values are kept in the browser's localStorage under
+  the signed-in user's id, and sent back as the `baseline` for the next check-in. Clerk user ids
+  are never sent to the backend.
+- **Simulated sessions**: buttons on the check-in page replay the synthetic fixtures so the
+  scoring can be shown without typing.
+- **Phones**: on-screen keyboards usually do not report per-key timing, so a physical keyboard
+  is needed.
+
+### Deploying to Vercel
+
+`vercel.json` builds `web/` as a static site and runs the Express app as one serverless
+function (`api/index.js`) behind `/api/*` and `/health`. The Clerk publishable key for deployed
+builds is in `web/.env.production`.
 
 ## Privacy
 
@@ -293,11 +328,17 @@ Changes near a threshold are detected inconsistently (for example, 77 of 300 at 
 
 ### Automated tests
 
-`npm test` runs 38 tests with `node:test`; all 38 pass. They cover the feature maths
+`npm test` runs 39 backend tests with `node:test` and `npm run test:web` runs 15 frontend tests
+with Vitest; all pass. The backend tests cover the feature maths
 (including a hand-computed example), each fixture moving only its expected feature, final
 punctuation, overlapping holds, edits, short sessions, missing and insufficient baselines,
 score clamping, request validation and error responses, log contents, the comparator
-evaluation, and the multi-profile stress test.
+evaluation, and the multi-profile stress test. The frontend tests cover keystroke capture
+(pairing, overlapping holds, auto-repeat, modifiers, lost keyups) and history storage.
+
+The full flow was also exercised in a browser against the running backend: three typed
+check-ins built a baseline, a fourth scored 100, and a fifth with a four-second pause between
+sentences scored 65 with `long_sentence_pause`. Those keystrokes were scripted, not a person.
 
 ## Known limits
 
@@ -323,4 +364,9 @@ fixtures/synthetic.js   seeded fixture generator
 fixtures/json/          the same fixtures as ready-to-send request bodies
 scripts/            evaluate, robustness, write-fixtures
 test/               node:test suites
+api/index.js        Vercel serverless entry for the Express app
+web/                React frontend (Vite, Tailwind, Clerk)
+web/src/lib/        capture, history, API client (with tests)
+web/src/components/ui/   landing sections, calendar, alerts, QR code
+web/src/pages/      landing, auth, check-in, 404
 ```

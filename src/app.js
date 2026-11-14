@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('node:path');
 const express = require('express');
 const { LIMITS } = require('./config');
 const { validateAnalyzeRequest } = require('./validate');
@@ -16,7 +17,7 @@ function errorBody(code, message, details) {
  * and discarded. The access log records method, path, status and duration only,
  * never request bodies.
  */
-function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*' } = {}) {
+function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*', staticDir = null } = {}) {
   const app = express();
   app.disable('x-powered-by');
 
@@ -63,6 +64,16 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
       res.json(analyze(req.body));
     }
   );
+
+  // Optional: serve the built frontend (web/dist) so one process runs the whole demo.
+  if (staticDir) {
+    app.use(express.static(staticDir));
+    app.use((req, res, next) => {
+      const wantsPage = req.method === 'GET' && !req.path.startsWith('/api') && req.accepts('html');
+      if (!wantsPage) return next();
+      res.sendFile(path.join(staticDir, 'index.html'));
+    });
+  }
 
   app.use((req, res) => {
     res

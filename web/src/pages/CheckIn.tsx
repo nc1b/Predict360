@@ -1,0 +1,317 @@
+import * as React from 'react';
+import { UserButton } from '@clerk/react';
+import { Keyboard, Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/auth-context';
+import { Logo } from '@/components/logo';
+import { ResultCard, StatusBadge } from '@/components/result-card';
+import { Button, buttonClass } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/footer-section';
+import { NotificationStack, useNotices } from '@/components/ui/notifications';
+import { analyze, ApiError } from '@/lib/api';
+import { KeystrokeRecorder } from '@/lib/capture';
+import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
+import {
+  addEntry,
+  baselineFrom,
+  clearHistory,
+  isUsable,
+  loadHistory,
+  MIN_BASELINE_SESSIONS,
+  type HistoryEntry,
+} from '@/lib/history';
+import type { AnalyzeResponse } from '@/lib/types';
+
+function greeting(now = new Date()) {
+  const h = now.getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+const dateFormat = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+interface Shown {
+  result: AnalyzeResponse;
+  baselineCount: number;
+  caption: string;
+}
+
+export default function CheckIn() {
+  const { user, exitGuest } = useAuth();
+  const navigate = useNavigate();
+  const userId = user!.id;
+
+  const recorder = React.useRef(new KeystrokeRecorder());
+  const textRef = React.useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = React.useState(''); // lives only in this component; never stored or sent
+  const [count, setCount] = React.useState(0);
+  const [busy, setBusy] = React.useState(false);
+  const [shown, setShown] = React.useState<Shown | null>(null);
+  const [history, setHistory] = React.useState<HistoryEntry[]>(() => loadHistory(localStorage, userId));
+  const { notices, push, dismiss } = useNotices();
+
+  const usableCount = history.filter((h) => isUsable(h.features)).length;
+  const baselineReady = usableCount >= MIN_BASELINE_SESSIONS;
+
+  const resetField = () => {
+    recorder.current.reset();
+    setText('');
+    setCount(0);
+  };
+
+  const fail = (err: unknown) =>
+    push({
+      id: 'error',
+      kind: 'error',
+      title: "Couldn't analyze that",
+      description: err instanceof ApiError ? err.message : 'Something went wrong. Try again.',
+    });
+
+  async function finish() {
+    const keystrokes = recorder.current.finish();
+    if (keystrokes.length === 0) {
+      push({
+        id: 'empty',
+        kind: 'warning',
+        title: 'No typing was timed',
+        description: 'Type your two sentences on a physical keyboard. Pasted or dictated text has no key timing.',
+      });
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await analyze({ keystrokes, baseline: baselineFrom(history) });
+      dismiss('error');
+      dismiss('empty');
+      if (result.status === 'insufficient_samples') {
+        // Not saved: a too-short session would weaken the baseline.
+        setShown({ result, baselineCount: usableCount, caption: 'This check-in' });
+        push({ id: 'saved', kind: 'warning', title: 'Check-in not saved', description: 'It was too short to measure. Try again with two full sentences.' });
+      } else {
+        const next = addEntry(localStorage, userId, result);
+        const nextUsable = next.filter((h) => isUsable(h.features)).length;
+        setHistory(next);
+        setShown({ result, baselineCount: nextUsable, caption: 'Compared with your usual typing' });
+        push(
+          result.readinessScore === null
+            ? {
+                id: 'saved',
+                kind: 'info',
+                title: `Check-in saved (${Math.min(nextUsable, MIN_BASELINE_SESSIONS)} of ${MIN_BASELINE_SESSIONS})`,
+                description:
+                  nextUsable >= MIN_BASELINE_SESSIONS
+                    ? 'Your baseline is ready. Your next check-in gets a score.'
+                    : 'Scores start once your baseline has 3 check-ins.',
+              }
+            : { id: 'saved', kind: 'success', title: 'Check-in saved', description: 'Only three timing numbers were stored, on this device.' }
+        );
+      }
+      resetField();
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runDemo(name: DemoName, label: string) {
+    setBusy(true);
+    try {
+      const result = await analyze(await loadDemoRequest(name));
+      dismiss('error');
+      setShown({ result, baselineCount: 5, caption: `Simulated session: ${label}` });
+      push({
+        id: 'saved',
+        kind: 'info',
+        title: 'Showing a simulated session',
+        description: 'Generated typing scored against a generated baseline. It is not you and was not saved.',
+      });
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function deleteData() {
+    if (!window.confirm('Delete your check-in history from this browser? This cannot be undone.')) return;
+    clearHistory(localStorage, userId);
+    setHistory([]);
+    setShown(null);
+    push({ id: 'saved', kind: 'success', title: 'History deleted', description: 'Your baseline starts again from zero.' });
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border/70 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
+          <Logo />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            {user!.guest ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    exitGuest();
+                    navigate('/');
+                  }}
+                >
+                  Exit guest mode
+                </Button>
+                <Link to="/login" className={buttonClass({ size: 'sm' })}>
+                  Sign in
+                </Link>
+              </>
+            ) : (
+              <UserButton />
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <h1 className="text-3xl font-medium tracking-tight">
+          {user!.guest ? greeting() : `${greeting()}, ${user!.name}`}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {baselineReady
+            ? 'Write two sentences to see how today compares with your usual.'
+            : `Building your baseline: ${usableCount} of ${MIN_BASELINE_SESSIONS} check-ins done.`}
+        </p>
+
+        <NotificationStack notices={notices} onDismiss={dismiss} className="mt-6 max-w-xl" />
+
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
+            <Card className="p-6">
+              <label htmlFor="journal" className="text-lg font-medium">
+                Morning check-in
+              </label>
+              <p id="journal-help" className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Write two sentences about how your morning is going. End the first with a period, then keep typing.
+              </p>
+              <textarea
+                id="journal"
+                ref={textRef}
+                value={text}
+                rows={5}
+                aria-describedby="journal-help journal-privacy"
+                placeholder="Slept okay, a bit slow to get going. Coffee is helping and I have a plan for the day."
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={busy}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  recorder.current.keyDown(e.nativeEvent);
+                  setCount(recorder.current.count);
+                }}
+                onKeyUp={(e) => recorder.current.keyUp(e.nativeEvent)}
+                onBlur={() => recorder.current.releaseAll()}
+                className="mt-4 w-full resize-none rounded-md border border-input bg-card px-3 py-2.5 text-base leading-relaxed placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+              />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex gap-2">
+                  <Button onClick={finish} disabled={busy || count === 0}>
+                    {busy ? 'Analyzing…' : 'Finish check-in'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy || (count === 0 && text === '')}
+                    onClick={() => {
+                      resetField();
+                      textRef.current?.focus();
+                    }}
+                  >
+                    Start over
+                  </Button>
+                </div>
+                <span className="inline-flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+                  <Keyboard className="size-3.5" aria-hidden="true" />
+                  {count} {count === 1 ? 'keystroke' : 'keystrokes'} timed
+                </span>
+              </div>
+              <p id="journal-privacy" className="mt-4 flex items-start gap-2 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
+                <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                Your words never leave this box. Only key timing is sent, and the text is cleared when you finish.
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-base font-medium">Try a simulated session</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                Generated typing against a generated baseline, to show how each change moves the score.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {DEMO_SESSIONS.map((d) => (
+                  <Button key={d.name} variant="outline" size="sm" disabled={busy} title={d.note} onClick={() => runDemo(d.name, d.label)}>
+                    {d.label}
+                  </Button>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            {shown ? (
+              <ResultCard result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
+            ) : (
+              <Card className="p-6">
+                <p className="text-sm text-muted-foreground">Compared with your usual typing</p>
+                <p className="mt-3 text-lg font-medium">Your result appears here</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {baselineReady
+                    ? 'Finish a check-in to get a score from 0 to 100.'
+                    : 'Scores start after 3 check-ins. Until then each one adds to your baseline.'}
+                </p>
+                <div className="mt-5 h-2 rounded-full bg-track" aria-hidden="true">
+                  <div
+                    className="h-2 rounded-full bg-accent transition-[width] duration-500"
+                    style={{ width: `${(Math.min(usableCount, MIN_BASELINE_SESSIONS) / MIN_BASELINE_SESSIONS) * 100}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Baseline: {Math.min(usableCount, MIN_BASELINE_SESSIONS)} of {MIN_BASELINE_SESSIONS}
+                </p>
+              </Card>
+            )}
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-base font-medium">Recent check-ins</h2>
+                {history.length > 0 && (
+                  <Button variant="destructive" size="sm" onClick={deleteData}>
+                    Delete history
+                  </Button>
+                )}
+              </div>
+              {history.length === 0 ? (
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  Your first check-in starts your baseline. History is kept in this browser only.
+                </p>
+              ) : (
+                <>
+                <Calendar className="mt-4" events={history.map((h) => ({ at: h.at, status: h.status }))} />
+                <ul className="mt-4 divide-y divide-border border-t border-border">
+                  {[...history].reverse().slice(0, 4).map((h) => (
+                    <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
+                      <span className="text-sm text-muted-foreground">{dateFormat.format(new Date(h.at))}</span>
+                      <span className="flex items-center gap-3">
+                        <StatusBadge status={h.status} />
+                        <span className="w-8 text-right text-sm font-medium tabular-nums">{h.readinessScore ?? '–'}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                </>
+              )}
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -160,3 +160,29 @@ test('logs never contain request bodies', async () => {
     assert.match(line, /^(GET|POST|OPTIONS) \/[a-z/]* \d{3} \d+ms$/);
   }
 });
+
+test('optional static serving: pages fall back to index.html, API routes still 404 as JSON', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p360-'));
+  fs.writeFileSync(path.join(dir, 'index.html'), '<!doctype html><title>spa</title>');
+  const app = createApp({ staticDir: dir });
+  const s = await new Promise((resolve) => {
+    const srv = app.listen(0, '127.0.0.1', () => resolve(srv));
+  });
+  const origin = `http://127.0.0.1:${s.address().port}`;
+  try {
+    const page = await fetch(`${origin}/app`, { headers: { Accept: 'text/html' } });
+    assert.equal(page.status, 200);
+    assert.match(await page.text(), /spa/);
+    const health = await fetch(`${origin}/health`);
+    assert.equal((await health.json()).status, 'ok');
+    const missingApi = await fetch(`${origin}/api/nope`, { headers: { Accept: 'text/html' } });
+    assert.equal(missingApi.status, 404);
+    assert.equal((await missingApi.json()).error.code, 'not_found');
+  } finally {
+    await new Promise((resolve) => s.close(resolve));
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
