@@ -1,14 +1,14 @@
 {
-  "method": "Logistic regression trained on generated timing sessions",
+  "method": "Simulated check: the live model (trained on real typing, research/live-typing-model.json) scored on generated sessions",
   "trainingProfiles": 12,
   "testProfiles": 6,
   "trainingSessions": 720,
   "testSessions": 360,
   "weights": [
-    -2.18840285,
-    7.62038916,
-    6.63902206,
-    6.61257756
+    -1.589531,
+    11.810764,
+    3.923487,
+    2.395959
   ],
   "inputs": "Increase over the personal baseline, max(0, log(1 + current) - log(1 + baseline)), for key hold, sentence pause and rhythm",
   "caveat": "Simulated typists only. The scripted changes (1.15x to 2x) come from the same simulator that generated the baselines, so this is a sanity test, not evidence on real people.",
@@ -25,6 +25,12 @@
     "truePositives": 143
   },
   "model": {
+    "trueNegatives": 162,
+    "falsePositives": 18,
+    "falseNegatives": 47,
+    "truePositives": 133
+  },
+  "simulationTrainedModel": {
     "trueNegatives": 171,
     "falsePositives": 9,
     "falseNegatives": 36,
@@ -33,45 +39,45 @@
   "byProfile": [
     {
       "profile": 1,
-      "trueNegatives": 21,
-      "falsePositives": 9,
-      "falseNegatives": 1,
-      "truePositives": 29
+      "trueNegatives": 20,
+      "falsePositives": 10,
+      "falseNegatives": 2,
+      "truePositives": 28
     },
     {
       "profile": 2,
-      "trueNegatives": 30,
-      "falsePositives": 0,
-      "falseNegatives": 5,
-      "truePositives": 25
+      "trueNegatives": 25,
+      "falsePositives": 5,
+      "falseNegatives": 4,
+      "truePositives": 26
     },
     {
       "profile": 3,
-      "trueNegatives": 30,
-      "falsePositives": 0,
-      "falseNegatives": 7,
-      "truePositives": 23
+      "trueNegatives": 29,
+      "falsePositives": 1,
+      "falseNegatives": 11,
+      "truePositives": 19
     },
     {
       "profile": 4,
       "trueNegatives": 30,
       "falsePositives": 0,
-      "falseNegatives": 7,
-      "truePositives": 23
+      "falseNegatives": 11,
+      "truePositives": 19
     },
     {
       "profile": 5,
-      "trueNegatives": 30,
-      "falsePositives": 0,
-      "falseNegatives": 5,
-      "truePositives": 25
+      "trueNegatives": 28,
+      "falsePositives": 2,
+      "falseNegatives": 6,
+      "truePositives": 24
     },
     {
       "profile": 6,
       "trueNegatives": 30,
       "falsePositives": 0,
-      "falseNegatives": 11,
-      "truePositives": 19
+      "falseNegatives": 13,
+      "truePositives": 17
     }
   ]
 }

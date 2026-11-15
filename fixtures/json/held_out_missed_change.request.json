@@ -3,327 +3,327 @@
     {
       "kind": "character",
       "downMs": 0,
-      "upMs": 106
+      "upMs": 63
     },
     {
       "kind": "character",
-      "downMs": 121,
-      "upMs": 209
+      "downMs": 174,
+      "upMs": 243
     },
     {
       "kind": "character",
-      "downMs": 244,
-      "upMs": 347
+      "downMs": 346,
+      "upMs": 406
     },
     {
       "kind": "character",
-      "downMs": 401,
-      "upMs": 487
+      "downMs": 552,
+      "upMs": 617
     },
     {
       "kind": "character",
-      "downMs": 542,
-      "upMs": 640
+      "downMs": 748,
+      "upMs": 808
     },
     {
       "kind": "space",
-      "downMs": 683,
-      "upMs": 781
+      "downMs": 922,
+      "upMs": 989
     },
     {
       "kind": "character",
-      "downMs": 803,
-      "upMs": 889
+      "downMs": 1110,
+      "upMs": 1173
     },
     {
       "kind": "character",
-      "downMs": 924,
-      "upMs": 1014
+      "downMs": 1319,
+      "upMs": 1379
     },
     {
       "kind": "space",
-      "downMs": 1081,
-      "upMs": 1184
+      "downMs": 1487,
+      "upMs": 1560
     },
     {
       "kind": "character",
-      "downMs": 1225,
-      "upMs": 1312
+      "downMs": 1673,
+      "upMs": 1736
     },
     {
       "kind": "character",
-      "downMs": 1354,
-      "upMs": 1469
+      "downMs": 1846,
+      "upMs": 1907
     },
     {
       "kind": "character",
-      "downMs": 1506,
-      "upMs": 1610
+      "downMs": 2057,
+      "upMs": 2117
     },
     {
       "kind": "character",
-      "downMs": 1626,
-      "upMs": 1716
+      "downMs": 2272,
+      "upMs": 2344
     },
     {
       "kind": "space",
-      "downMs": 1766,
-      "upMs": 1860
+      "downMs": 2465,
+      "upMs": 2538
     },
     {
       "kind": "character",
-      "downMs": 1906,
-      "upMs": 2014
+      "downMs": 2657,
+      "upMs": 2724
     },
     {
       "kind": "character",
-      "downMs": 2050,
-      "upMs": 2169
+      "downMs": 2875,
+      "upMs": 2947
     },
     {
       "kind": "character",
-      "downMs": 2206,
-      "upMs": 2316
+      "downMs": 3045,
+      "upMs": 3107
     },
     {
       "kind": "space",
-      "downMs": 2367,
-      "upMs": 2452
+      "downMs": 3261,
+      "upMs": 3333
     },
     {
       "kind": "character",
-      "downMs": 2520,
-      "upMs": 2611
+      "downMs": 3435,
+      "upMs": 3495
     },
     {
       "kind": "character",
-      "downMs": 2653,
-      "upMs": 2740
+      "downMs": 3653,
+      "upMs": 3715
     },
     {
       "kind": "character",
-      "downMs": 2812,
-      "upMs": 2911
+      "downMs": 3880,
+      "upMs": 3952
     },
     {
       "kind": "character",
-      "downMs": 2955,
-      "upMs": 3074
+      "downMs": 4098,
+      "upMs": 4162
     },
     {
       "kind": "character",
-      "downMs": 3085,
-      "upMs": 3181
+      "downMs": 4296,
+      "upMs": 4368
     },
     {
       "kind": "character",
-      "downMs": 3243,
-      "upMs": 3353
+      "downMs": 4488,
+      "upMs": 4547
     },
     {
       "kind": "space",
-      "downMs": 3384,
-      "upMs": 3501
+      "downMs": 4672,
+      "upMs": 4740
     },
     {
       "kind": "character",
-      "downMs": 3523,
-      "upMs": 3635
+      "downMs": 4861,
+      "upMs": 4925
     },
     {
       "kind": "character",
-      "downMs": 3682,
-      "upMs": 3785
+      "downMs": 5062,
+      "upMs": 5121
     },
     {
       "kind": "character",
-      "downMs": 3801,
-      "upMs": 3905
+      "downMs": 5225,
+      "upMs": 5285
     },
     {
       "kind": "character",
-      "downMs": 3940,
-      "upMs": 4025
+      "downMs": 5412,
+      "upMs": 5485
     },
     {
       "kind": "sentence_end",
-      "downMs": 4069,
-      "upMs": 4159
+      "downMs": 5571,
+      "upMs": 5636
     },
     {
       "kind": "space",
-      "downMs": 4219,
-      "upMs": 4314
+      "downMs": 5738,
+      "upMs": 5801
     },
     {
       "kind": "character",
-      "downMs": 5549,
-      "upMs": 5644
+      "downMs": 6951,
+      "upMs": 7014
     },
     {
       "kind": "space",
-      "downMs": 5692,
-      "upMs": 5783
+      "downMs": 7121,
+      "upMs": 7181
     },
     {
       "kind": "character",
-      "downMs": 5840,
-      "upMs": 5954
+      "downMs": 7295,
+      "upMs": 7362
     },
     {
       "kind": "character",
-      "downMs": 5974,
-      "upMs": 6074
+      "downMs": 7514,
+      "upMs": 7575
     },
     {
       "kind": "character",
-      "downMs": 6098,
-      "upMs": 6198
+      "downMs": 7694,
+      "upMs": 7754
     },
     {
       "kind": "character",
-      "downMs": 6246,
-      "upMs": 6346
+      "downMs": 7895,
+      "upMs": 7964
     },
     {
       "kind": "space",
-      "downMs": 6397,
-      "upMs": 6481
+      "downMs": 8055,
+      "upMs": 8115
     },
     {
       "kind": "character",
-      "downMs": 6538,
-      "upMs": 6632
+      "downMs": 8230,
+      "upMs": 8288
     },
     {
       "kind": "character",
-      "downMs": 6673,
-      "upMs": 6789
+      "downMs": 8457,
+      "upMs": 8515
     },
     {
       "kind": "character",
-      "downMs": 6809,
-      "upMs": 6909
+      "downMs": 8659,
+      "upMs": 8724
     },
     {
       "kind": "character",
-      "downMs": 6973,
-      "upMs": 7076
+      "downMs": 8869,
+      "upMs": 8939
     },
     {
       "kind": "character",
-      "downMs": 7111,
-      "upMs": 7220
+      "downMs": 9089,
+      "upMs": 9157
     },
     {
       "kind": "space",
-      "downMs": 7267,
-      "upMs": 7358
+      "downMs": 9257,
+      "upMs": 9323
     },
     {
       "kind": "character",
-      "downMs": 7395,
-      "upMs": 7501
+      "downMs": 9424,
+      "upMs": 9484
     },
     {
       "kind": "character",
-      "downMs": 7530,
-      "upMs": 7638
+      "downMs": 9632,
+      "upMs": 9694
     },
     {
       "kind": "space",
-      "downMs": 7691,
-      "upMs": 7810
+      "downMs": 9839,
+      "upMs": 9910
     },
     {
       "kind": "character",
-      "downMs": 7842,
-      "upMs": 7930
+      "downMs": 10044,
+      "upMs": 10106
     },
     {
       "kind": "character",
-      "downMs": 7992,
-      "upMs": 8080
+      "downMs": 10231,
+      "upMs": 10293
     },
     {
       "kind": "character",
-      "downMs": 8132,
-      "upMs": 8240
+      "downMs": 10432,
+      "upMs": 10494
     },
     {
       "kind": "character",
-      "downMs": 8290,
-      "upMs": 8402
+      "downMs": 10658,
+      "upMs": 10724
     },
     {
       "kind": "character",
-      "downMs": 8428,
-      "upMs": 8541
+      "downMs": 10865,
+      "upMs": 10935
     },
     {
       "kind": "character",
-      "downMs": 8550,
-      "upMs": 8641
+      "downMs": 11083,
+      "upMs": 11152
     },
     {
       "kind": "character",
-      "downMs": 8697,
-      "upMs": 8815
+      "downMs": 11254,
+      "upMs": 11319
     },
     {
       "kind": "space",
-      "downMs": 8830,
-      "upMs": 8934
+      "downMs": 11463,
+      "upMs": 11523
     },
     {
       "kind": "character",
-      "downMs": 8981,
-      "upMs": 9090
+      "downMs": 11636,
+      "upMs": 11697
     },
     {
       "kind": "character",
-      "downMs": 9125,
-      "upMs": 9212
+      "downMs": 11802,
+      "upMs": 11866
     },
     {
       "kind": "character",
-      "downMs": 9253,
-      "upMs": 9355
+      "downMs": 12016,
+      "upMs": 12075
     },
     {
       "kind": "space",
-      "downMs": 9395,
-      "upMs": 9510
+      "downMs": 12213,
+      "upMs": 12275
     },
     {
       "kind": "character",
-      "downMs": 9533,
-      "upMs": 9618
+      "downMs": 12397,
+      "upMs": 12470
     },
     {
       "kind": "character",
-      "downMs": 9681,
-      "upMs": 9798
+      "downMs": 12556,
+      "upMs": 12622
     },
     {
       "kind": "character",
-      "downMs": 9844,
-      "upMs": 9961
+      "downMs": 12737,
+      "upMs": 12797
     },
     {
       "kind": "character",
-      "downMs": 9998,
-      "upMs": 10082
+      "downMs": 12945,
+      "upMs": 13005
     },
     {
       "kind": "character",
-      "downMs": 10124,
-      "upMs": 10212
+      "downMs": 13170,
+      "upMs": 13240
     },
     {
       "kind": "sentence_end",
-      "downMs": 10286,
-      "upMs": 10385
+      "downMs": 13395,
+      "upMs": 13459
     }
   ],
   "baseline": {
@@ -331,19 +331,19 @@
       {
         "features": {
           "dwellMs": {
-            "value": 77,
+            "value": 64,
             "samples": 65,
             "minSamples": 20,
             "sufficient": true
           },
           "sentencePauseMs": {
-            "value": 1199,
+            "value": 1442,
             "samples": 1,
             "minSamples": 1,
             "sufficient": true
           },
           "flightVolatilityMs": {
-            "value": 15.41,
+            "value": 12.8,
             "samples": 62,
             "minSamples": 20,
             "sufficient": true
@@ -353,19 +353,19 @@
       {
         "features": {
           "dwellMs": {
-            "value": 79,
+            "value": 65,
             "samples": 65,
             "minSamples": 20,
             "sufficient": true
           },
           "sentencePauseMs": {
-            "value": 1419,
+            "value": 1171,
             "samples": 1,
             "minSamples": 1,
             "sufficient": true
           },
           "flightVolatilityMs": {
-            "value": 14.48,
+            "value": 15.45,
             "samples": 62,
             "minSamples": 20,
             "sufficient": true
@@ -375,19 +375,19 @@
       {
         "features": {
           "dwellMs": {
-            "value": 83,
+            "value": 69,
             "samples": 65,
             "minSamples": 20,
             "sufficient": true
           },
           "sentencePauseMs": {
-            "value": 1317,
+            "value": 1231,
             "samples": 1,
             "minSamples": 1,
             "sufficient": true
           },
           "flightVolatilityMs": {
-            "value": 13.39,
+            "value": 13.11,
             "samples": 62,
             "minSamples": 20,
             "sufficient": true
@@ -397,19 +397,19 @@
       {
         "features": {
           "dwellMs": {
-            "value": 82,
+            "value": 66,
             "samples": 65,
             "minSamples": 20,
             "sufficient": true
           },
           "sentencePauseMs": {
-            "value": 1610,
+            "value": 1192,
             "samples": 1,
             "minSamples": 1,
             "sufficient": true
           },
           "flightVolatilityMs": {
-            "value": 15.85,
+            "value": 15.38,
             "samples": 62,
             "minSamples": 20,
             "sufficient": true
@@ -419,19 +419,19 @@
       {
         "features": {
           "dwellMs": {
-            "value": 77,
+            "value": 73,
             "samples": 65,
             "minSamples": 20,
             "sufficient": true
           },
           "sentencePauseMs": {
-            "value": 1525,
+            "value": 1427,
             "samples": 1,
             "minSamples": 1,
             "sufficient": true
           },
           "flightVolatilityMs": {
-            "value": 12.88,
+            "value": 12.56,
             "samples": 62,
             "minSamples": 20,
             "sufficient": true

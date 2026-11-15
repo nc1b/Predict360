@@ -1,0 +1,13 @@
+{
+  "method": "Logistic regression trained on real typing (CMU Keystroke Dynamics Benchmark, 51 typists)",
+  "inputs": "max(0, log(1 + current) - log(1 + usual)) for key hold, sentence pause and rhythm",
+  "weights": [
+    -1.589531,
+    11.810764,
+    3.923487,
+    2.395959
+  ],
+  "threshold": "moved so about 10% of unchanged real check-ins flag",
+  "sentence_pause": "not present in the training data; weight set so a pause 1.5x usual flags by itself",
+  "evaluation": "research/real-typing-eval.json (held-out typists)"
+}

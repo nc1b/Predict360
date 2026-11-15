@@ -22,7 +22,7 @@ export const SIGNALS: Signal[] = [
     icon: KeyHoldIcon,
     measures: 'How long each key stays pressed, taken as the middle value across your whole check-in.',
     why: 'It is the steadiest of the three: one slow key barely moves a median.',
-    evidence: 'Holds 1.3x longer were flagged in 300 of 300 simulated sessions; 1.05x in none.',
+    evidence: 'On real typing from 51 people this was the steadiest measure (about 4% wobble for the same person). Holds 20% longer were detected about 90% of the time; 10% longer, about half.',
     limits: 'A different keyboard changes it. Compare check-ins from the same device only.',
     flag: 'Keys held longer than your usual',
     research: {
@@ -40,7 +40,7 @@ export const SIGNALS: Signal[] = [
     icon: SentencePauseIcon,
     measures: 'The gap from the period, question mark or exclamation point to the first letter of your next sentence.',
     why: 'It captures the moment of deciding what to say next, separately from how you type.',
-    evidence: 'A pause 1.6x your usual was flagged every time; a four-second pause cost 35 points.',
+    evidence: 'Simulated only: the public typing data has no sentences, so this measure has not been tested on real people.',
     limits: 'Two sentences give exactly one pause, so one doorbell decides the result.',
     flag: 'A longer pause between sentences',
     research: {
@@ -58,7 +58,7 @@ export const SIGNALS: Signal[] = [
     icon: RhythmIcon,
     measures: 'How uneven the gaps between key presses are inside a sentence. The pause between sentences is left out.',
     why: 'Even typing and stop-start typing can have the same speed. This tells them apart.',
-    evidence: 'Reliable from about 1.4x more variation (295 of 300); only 83 of 300 at 1.2x.',
+    evidence: 'On real typing this wobbled about 26% for the same person even when nothing changed, so the model gives it little weight and misses most rhythm changes.',
     limits: 'The least sensitive signal. Small changes are often missed.',
     flag: 'A less even typing rhythm',
     research: {

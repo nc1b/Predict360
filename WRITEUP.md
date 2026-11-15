@@ -5,7 +5,7 @@
 
 This project is a prototype and is not medical advice. It is not affiliated with 360factors' Predict360 software.
 
-**Try it in under a minute.** Open the [interactive evaluation](https://predict360.vercel.app/evaluation) and choose **Distracted typist** and **Missed timing change**. The examples use the same analysis as the live app and include five prior check-ins, so you can see a result without creating an account. The model flags the distracted typist's longer pause but misses the other typist's longer key holds.
+**Try it in under a minute.** Open the [interactive evaluation](https://predict360.vercel.app/evaluation) and choose **Longer key holds**, then **Missed timing change**. The examples run through the live model and include five prior check-ins, so you can see a result without an account. The model flags the longer key holds and misses a 55% change in rhythm.
 
 ## The problem
 
@@ -13,29 +13,45 @@ Imagine you're near the end of a 12-hour nursing shift. You still have notes to 
 
 ## What we built
 
-Type two sentences on a physical keyboard. After three usable prior check-ins, Predict360 compares how long you hold keys, how long you pause between sentences, and how steady your rhythm is with your personal baseline. The model labels the pattern **usual** or **different**. A separate 0–100 score uses fixed rules to show which timing measures changed. The words stay in the browser and are cleared after the check-in. The optional desktop app shows trends in keyboard and mouse activity counts across the day.
+Type two sentences on a physical keyboard. After three usable prior check-ins, Predict360 compares how long you hold keys, how long you pause between sentences, and how steady your rhythm is with your personal baseline. A logistic regression model labels the pattern **usual** or **different**. A separate 0–100 score uses fixed rules to show which measures changed. The words stay in the browser and are cleared after the check-in. The optional desktop app shows trends in keyboard and mouse activity counts.
 
 ## What we added
 
-**Our own idea.** Two people can type at very different speeds on an ordinary day. We compare each person with their own earlier check-ins on the same device and use a short typing task that fits into a shift break without retaining what they write.
+**Our own idea, and our own question.** Two people type very differently on an ordinary day, so we compare each person only with their own earlier check-ins. Our question was: *over a real person's normal variation, how big does a change in typing have to be before a personal baseline can see it, and how often does it cry wolf?*
 
 ## How it works
 
-We trained the live logistic regression model on 720 generated sessions from 12 simulated typist profiles. Each profile had its own baseline, and we held out six other profiles for testing. The model's inputs are how far each of the three timing measures rose above the person's usual. No real people were tested and the same simulator made both the baselines and the changes, so this is a sanity test of the pipeline. Logistic regression gives a readable weight for each change and runs without an external AI key. In a separate offline experiment, we used 2,686 complete one-minute records from 25 participants in the public SWELL-KW dataset. We classified neutral office tasks versus tasks with interruptions or time pressure, holding out entire participants in each of five folds.
+- **Data.** The public [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/): 51 people, 8 sittings each. We grouped it into 80 real check-ins per person and compared each with that person's previous five.
+- **Labels.** "Unchanged" check-ins are untouched real typing. For "changed" ones we stretched key holds or made rhythm more uneven by 10–60% in a copy of each real check-in. The change is injected because we could not obtain public typing data with fatigue labels; the variation it must be detected over is real.
+- **Model.** Logistic regression on how far key hold and rhythm rose above the person's usual. It has four readable weights and runs in the app with no external AI service. Sentence pause is not in this dataset, so its weight is set to flag at 1.5× usual, like the rule.
+- **Testing.** Five folds split by person, so every result is from typists the model never saw.
 
 ## Results
 
-- **Live check-in, simulated data.** On 360 test sessions the model reached **87.5% accuracy vs. 50.0%** for the always-usual baseline. It flagged **9 of 180 unchanged sessions (5.0% false positives)** and missed **36 of 180 scripted changes (20.0% false negatives)**. A stronger baseline, our own fixed-threshold rule, scored **87.8%** (7 false positives, 37 misses), so the trained model only ties a simple rule. Our first model also counted drops below the baseline and did worse than the rule (82.2%, 19 false positives, 45 misses). All 9 false positives came from one of the six simulated typists.
-- **Offline SWELL-KW experiment, public data.** Logistic regression scored **56.0% accuracy and 0.59 ROC-AUC**. The always-interrupted-or-time-pressured baseline scored **61.8% accuracy and 0.50 ROC-AUC**. Logistic regression flagged **431 of 1,027 neutral minutes (42.0%)** and missed **752 of 1,659 interrupted or time-pressured minutes (45.3%)**. This experiment measures office-task conditions.
-- **Public typing audit.** Across 51 CMU typists repeating the same password, the median key hold rose more than 15% above their first-session baseline in **6.7%** of remaining blocks that session and **23.3%** of blocks in later sessions. In 73 public Inputlog copy tasks, inter-key timing spread rose more than 25% from the first three word blocks in **82.2%** of fourth word blocks and **21.9%** of sentence blocks. These checks isolate timing measures and show how session and prompt differences can affect them. [Method and counts](SOURCES.md#5-public-typing-audit)
-- **Where it fails.** In the held-out *Missed timing change* example, key holds were about 27% longer than usual and the model still returned **usual** (the fixed rule flagged it). A brief distraction can also produce the same pause flag as a deliberate pause. The check-in has yet to be validated for fatigue or clinical use. [Try the examples](https://predict360.vercel.app/evaluation)
+On 3,060 real check-ins from held-out typists, with every method set to about 10% false alarms:
+
+| Method | False alarms | Changes detected | Missed | ROC-AUC |
+|---|---|---|---|---|
+| Always "usual" (baseline) | 0% | 0% | 100% | 0.50 |
+| Hand-set rule (baseline) | 10% | 37% | 63% | 0.79 |
+| Our first model, trained on simulated typists | 10% | 37% | 63% | 0.79 |
+| **Live model, trained on real typing** | 10% | **59%** (95% interval 57–61%) | 41% | **0.83** |
+
+- **What we learned.** Our first model was trained on typists we simulated, and it looked good there (88% accuracy). On real people it was no better than the rule. The rule itself, at its original thresholds, flagged **25%** of untouched real check-ins, where the simulation had suggested 4%.
+- **Which measures can be trusted.** Median key hold wobbles about 4% for the same person; our rhythm measure wobbles about 26%. So the model weights key hold about five times more than rhythm. A 2015 MIT study found key hold time changed in 14 people typing just after being woken at night, which is why we kept it.
+- **How big a change.** Key holds 20% longer are detected about 90% of the time; 10% longer, about half the time. A gradient-boosted model with more inputs gained almost nothing (AUC 0.84), so we kept the simple one.
+- **Where it fails.** The model misses 41% of injected changes, including most rhythm changes: in *Missed timing change*, rhythm is 55% more uneven and it still says **usual**. The first check-in after a break between sittings is flagged more often. A distraction flags the same way as a real change. Nothing here shows a flagged change means fatigue.
+- **Separate experiment.** On the public SWELL-KW office dataset (25 people, held out by person), one minute of keyboard and mouse counts barely separated calm from pressured work: ROC-AUC 0.59, with 42% of calm minutes flagged. We report it as a weak result and show users no label from it.
+
+Graphs, intervals, per-typist results and the week-one curve are on the [evaluation page](https://predict360.vercel.app/evaluation). Reproduce with `python scripts/real-typing-eval.py`.
 
 ## What we'd do next
 
-We'd test whether using the same short prompt and refreshing a personal baseline cuts down on changes driven by text and session drift. We'd also evaluate the check-in with consenting nurses on day and night shifts.
+Collect check-ins from consenting nurses before and after day and night shifts, with their own tiredness ratings, so the change we detect is a real one and not injected. We'd also replace the rhythm measure with a steadier one.
 
 ## Sources
 
-- **Data.** [Synthetic session generator](fixtures/synthetic.js) for live model training and testing, [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) for the offline experiment, [CMU Keystroke Dynamics](https://www.cs.cmu.edu/~keystroke/) and [Tappy](https://physionet.org/content/tappy/1.0.0/) for reference ranges. We used [CMU](https://www.cs.cmu.edu/~keystroke/) and the [Inputlog Copy Task Corpus](https://doi.org/10.5281/zenodo.5803401) for the separate timing audit. [Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) provided optional weather context.
-- **Tools.** [scikit-learn](https://scikit-learn.org/) for the offline experiment, [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) via [Hack Club AI](https://ai.hackclub.com/) for optional explanations, and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) for development.
+- **Data.** [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/) (live model and evaluation), [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) (office experiment), [Inputlog Copy Task Corpus](https://doi.org/10.5281/zenodo.5803401) (timing audit), [Tappy](https://physionet.org/content/tappy/1.0.0/) (reference ranges), [Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) (optional weather context), and our own [synthetic session generator](fixtures/synthetic.js) (demo examples).
+- **Research.** Giancardo et al., [Psychomotor impairment detection via finger interactions with a computer keyboard during natural typing](https://doi.org/10.1038/srep09678), *Scientific Reports* 2015. Killourhy and Maxion, [Comparing anomaly-detection algorithms for keystroke dynamics](https://www.cs.cmu.edu/~keystroke/), DSN 2009.
+- **Tools.** [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/) and [Matplotlib](https://matplotlib.org/) for training and graphs, [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) via [Hack Club AI](https://ai.hackclub.com/) for optional explanations, and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) as coding assistants.
 - [Sources and licenses](SOURCES.md) · [Full project credits](README.md#credits) · [Live app](https://predict360.vercel.app)

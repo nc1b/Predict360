@@ -101,7 +101,7 @@ export function ResultCard({
           <p className="text-lg font-semibold">
             {result.typingPattern === 'different' ? 'Typing pattern changed' : 'Typing pattern close to usual'}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">Timing model trained on simulated check-ins. The score and flags below use fixed thresholds, so the two can disagree on small changes.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Timing model trained on real typing from 51 people. The score and flags below use fixed thresholds, so the two can disagree on small changes.</p>
         </div>
       )}
       {score !== null && <p className="text-xs text-muted-foreground">Similarity to your usual timing (100 = same as usual)</p>}

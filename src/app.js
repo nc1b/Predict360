@@ -11,7 +11,7 @@ const { benchmarks, weatherContextText } = require('./research');
 const { validateWeather, getWeatherContext } = require('./weather');
 const { verifyAiRequest } = require('./auth');
 const { timingInputs, predictTiming } = require('./typing-model');
-const { weights: typingWeights } = require('../research/typing-model.json');
+const { weights: typingWeights } = require('../research/live-typing-model.json');
 
 function errorBody(code, message, details) {
   const error = { code, message };

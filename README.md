@@ -45,23 +45,28 @@ Results are labelled by mode, and a **"Gathering data"** state is shown until th
 
 ## The AI
 
-The live check-in uses **logistic regression** to classify timing as close to usual or different. Its inputs are how much each of three measures rose above the person's own baseline: key-hold duration, sentence pause and typing rhythm. The model was trained on simulated sessions and runs without an AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
+The live check-in uses **logistic regression trained on real typing** from the public [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/) (51 people). Its inputs are how far key-hold time, sentence pause and typing rhythm rose above the person's own baseline. It has four readable weights and runs in the app without any AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
 
 An optional assistant explains the numbers using [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) through the [Hack Club AI proxy](https://ai.hackclub.com/). The assistant receives numeric results and messages entered in its chat box. The sentences typed during check-ins stay in the browser.
 
 ## Measured results
 
-**Live check-in model: a sanity test on simulated typists.** No real people were tested. We generated typists, scripted timing changes into some of their sessions, and checked whether the model finds them. Because the same simulator makes both the baselines and the changes, this shows the pipeline works as designed, not that it works on people. Held-out set: 360 sessions from six simulated typists the model never trained on.
+**Live check-in model, tested on real people's typing.** We grouped the CMU benchmark into 80 real check-ins per person and compared each with that person's previous five, as the app does. Unchanged examples are untouched real typing. Changed examples are copies with key holds stretched or rhythm made more uneven by 10–60%; the change is injected because we could not obtain public typing data with fatigue labels. All numbers are from typists the model never trained on (5 folds split by person, 3,060 real check-ins), with every method set to about 10% false alarms.
 
-| Method | Accuracy | Changes caught (of 180) | False alarms (of 180 unchanged) |
-|---|---|---|---|
-| Always "usual" | 50.0% | 0 (0%) | 0 (0%) |
-| Hand-set rule (thresholds below) | 87.8% | 143 (79%) | 7 (3.9%) |
-| Logistic regression (live) | 87.5% | 144 (80%) | 9 (5.0%) |
+| Method | False alarms | Changes detected | Missed | ROC-AUC |
+|---|---|---|---|---|
+| Always "usual" | 0% | 0% | 100% | 0.50 |
+| Hand-set rule (thresholds below) | 10% | 37% | 63% | 0.79 |
+| Earlier model, trained on simulated typists | 10% | 37% | 63% | 0.79 |
+| **Live model, trained on real typing** | 10% | **59%** (95% interval 57–61%) | 41% | **0.83** |
+| Gradient boosting, more inputs (not deployed) | 10% | 58% | 42% | 0.84 |
 
-The trained model only ties the simple rule; it does not beat it. An earlier version, which also counted *decreases* from the baseline, did worse than the rule (135 caught, 19 false alarms), so we changed it to look only at increases. All 9 false alarms came from one of the six simulated typists, whose baseline happened to be unusually steady. With only six typists, these percentages are rough (95% interval for false alarms: about 3–9%).
+- **Simulation misled us.** Our first model was trained on typists we simulated and scored 88% there. On real people it was no better than the rule, and the rule at its original thresholds flagged 25% of untouched real check-ins (38% of the first check-ins after a break between sittings), where simulation had suggested 4%.
+- **Which measures can be trusted.** For the same person, median key hold wobbles about 4% between check-ins, typing speed about 7%, and our rhythm measure about 26%. The model learned to weight key hold about five times more than rhythm. Key hold is also the measure a [2015 MIT study](https://doi.org/10.1038/srep09678) found changed when 14 people typed just after being woken at night.
+- **How big a change.** Key holds 20% longer are detected about 90% of the time, and 10% longer about half the time. Results change little between one and twenty earlier check-ins.
+- **Where it fails.** It misses 41% of injected changes, including most rhythm changes. A distraction flags the same way as a deliberate pause. A flagged change has not been shown to mean fatigue.
 
-**Where it fails.** A held-out typist held keys 27% longer than usual and the model still said "usual" (the rule did flag it). A distraction raises the same flag as a deliberate pause: the tool sees a change from your usual, never its cause.
+Reproduce with `python scripts/real-typing-eval.py`; full output is in [research/real-typing-eval.json](research/real-typing-eval.json). The simulated demo sessions are scored in [research/typing-model.json](research/typing-model.json); there the rule does better (143 of 180 caught, 7 false alarms) than the live model (133 caught, 18 false alarms), because the simulator assumed steadier rhythm than real people have.
 
 **All-day tracking research.** We separately tested offline classifiers for neutral versus interrupted or time-pressured work minutes in the public SWELL-KW dataset. The numbers below are from held-out participants (five grouped folds). The desktop app shows descriptive trends in activity counts.
 
@@ -96,11 +101,11 @@ The check-in compares three timing features with your baseline (the median of at
 | Dataset | Collection | Used for | Licence |
 |---|---|---|---|
 | [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) | 25 office workers, per-minute keyboard/mouse activity under neutral, interrupted and time-pressure conditions | Offline work-context research | CC BY-NC-SA 4.0 |
-| [CMU Keystroke Dynamics](https://www.cs.cmu.edu/~keystroke/) | 51 people typing a fixed password | Key-hold reference ranges (context only) | Public research dataset |
+| [CMU Keystroke Dynamics](https://www.cs.cmu.edu/~keystroke/) | 51 people typing a fixed password, 8 sittings each | Training and testing the live check-in model; reference ranges | Public research dataset |
 | [Tappy](https://physionet.org/content/tappy/1.0.0/) | 192 people, free typing over time | Key-hold reference ranges (context only) | ODC-By 1.0 |
 | [Open-Meteo](https://open-meteo.com) | Modelled barometric pressure | Optional weather context | CC BY 4.0 |
 
-No single dataset validates both modes. The check-in pipeline is tested on clearly labelled **synthetic** typing sessions.
+No single dataset validates both modes. The check-in model is trained and tested on real typing with injected changes; the demo examples are clearly labelled **synthetic** sessions.
 
 ## Architecture
 
@@ -131,7 +136,8 @@ Then open http://localhost:3000.
 |---|---|
 | `npm test` | Backend tests |
 | `npm run test:web` | Frontend tests |
-| `node scripts/train-typing-model.js` | Reproduce the check-in model and held-out synthetic results |
+| `python scripts/real-typing-eval.py` | Train the live check-in model on real typing and reproduce its held-out results and graphs |
+| `node scripts/train-typing-model.js` | Score the live model on the simulated demo sessions |
 | `python scripts/swell-strain-model.py` | Train and evaluate the strain model (downloads SWELL-KW and verifies its checksum) |
 | `npm start --prefix desktop` | Run the desktop app |
 | `npm run dist --prefix desktop` / `dist:mac` | Build the Windows / macOS app |

@@ -1,0 +1,364 @@
+{
+  "source": "https://www.cs.cmu.edu/~keystroke/DSL-StrongPasswordData.csv",
+  "what_is_real": "Every check-in is real typing by one of 51 people. Unchanged examples are untouched.",
+  "what_is_injected": "Changed examples are the same real check-ins with key holds stretched or rhythm made more uneven by 1.1x to 1.6x. No fatigue-labelled public typing data could be obtained.",
+  "typists": 51,
+  "check_ins_per_typist": 80,
+  "repetitions_per_check_in": 5,
+  "scored_check_ins": 3060,
+  "examples": 6120,
+  "baseline": "median of the previous 5 check-ins",
+  "validation": "5 folds split by typist; every number is from typists the model never trained on",
+  "measures": "median key hold and key-to-key rhythm (the fixed password has no sentence pause)",
+  "results_at_default_thresholds": {
+    "always_usual": {
+      "true_positives": 0,
+      "false_negatives": 3060,
+      "false_positives": 0,
+      "true_negatives": 3060,
+      "accuracy": 0.5,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 1.0,
+      "false_positive_rate_95ci": [
+        0.0,
+        0.0
+      ],
+      "false_negative_rate_95ci": [
+        1.0,
+        1.0
+      ]
+    },
+    "hand_set_rule": {
+      "true_positives": 2294,
+      "false_negatives": 766,
+      "false_positives": 760,
+      "true_negatives": 2300,
+      "accuracy": 0.7507,
+      "false_positive_rate": 0.2484,
+      "false_negative_rate": 0.2503,
+      "false_positive_rate_95ci": [
+        0.2294,
+        0.2683
+      ],
+      "false_negative_rate_95ci": [
+        0.2369,
+        0.2634
+      ],
+      "roc_auc": 0.7883
+    },
+    "live_model_trained_on_simulation": {
+      "true_positives": 1797,
+      "false_negatives": 1263,
+      "false_positives": 540,
+      "true_negatives": 2520,
+      "accuracy": 0.7054,
+      "false_positive_rate": 0.1765,
+      "false_negative_rate": 0.4127,
+      "false_positive_rate_95ci": [
+        0.1582,
+        0.1938
+      ],
+      "false_negative_rate_95ci": [
+        0.3971,
+        0.4294
+      ],
+      "roc_auc": 0.7903
+    },
+    "ratio_model": {
+      "true_positives": 1984,
+      "false_negatives": 1076,
+      "false_positives": 464,
+      "true_negatives": 2596,
+      "accuracy": 0.7484,
+      "false_positive_rate": 0.1516,
+      "false_negative_rate": 0.3516,
+      "false_positive_rate_95ci": [
+        0.131,
+        0.1709
+      ],
+      "false_negative_rate_95ci": [
+        0.3363,
+        0.3699
+      ],
+      "roc_auc": 0.8256
+    },
+    "personal_spread_model": {
+      "true_positives": 1930,
+      "false_negatives": 1130,
+      "false_positives": 471,
+      "true_negatives": 2589,
+      "accuracy": 0.7384,
+      "false_positive_rate": 0.1539,
+      "false_negative_rate": 0.3693,
+      "false_positive_rate_95ci": [
+        0.1435,
+        0.1654
+      ],
+      "false_negative_rate_95ci": [
+        0.3555,
+        0.385
+      ],
+      "roc_auc": 0.8007
+    },
+    "gradient_boosting_all_inputs": {
+      "true_positives": 2135,
+      "false_negatives": 925,
+      "false_positives": 546,
+      "true_negatives": 2514,
+      "accuracy": 0.7596,
+      "false_positive_rate": 0.1784,
+      "false_negative_rate": 0.3023,
+      "false_positive_rate_95ci": [
+        0.164,
+        0.1915
+      ],
+      "false_negative_rate_95ci": [
+        0.2853,
+        0.3186
+      ],
+      "roc_auc": 0.8408
+    }
+  },
+  "false_alarm_budget": 0.1,
+  "results_at_10pct_false_alarm_budget": {
+    "hand_set_rule": {
+      "true_positives": 1132,
+      "false_negatives": 1928,
+      "false_positives": 309,
+      "true_negatives": 2751,
+      "accuracy": 0.6345,
+      "false_positive_rate": 0.101,
+      "false_negative_rate": 0.6301,
+      "detection_rate": 0.3699,
+      "detection_rate_95ci": [
+        0.3526,
+        0.3882
+      ]
+    },
+    "live_model_trained_on_simulation": {
+      "true_positives": 1123,
+      "false_negatives": 1937,
+      "false_positives": 304,
+      "true_negatives": 2756,
+      "accuracy": 0.6338,
+      "false_positive_rate": 0.0993,
+      "false_negative_rate": 0.633,
+      "detection_rate": 0.367,
+      "detection_rate_95ci": [
+        0.349,
+        0.384
+      ]
+    },
+    "ratio_model": {
+      "true_positives": 1807,
+      "false_negatives": 1253,
+      "false_positives": 307,
+      "true_negatives": 2753,
+      "accuracy": 0.7451,
+      "false_positive_rate": 0.1003,
+      "false_negative_rate": 0.4095,
+      "detection_rate": 0.5905,
+      "detection_rate_95ci": [
+        0.5748,
+        0.6062
+      ]
+    },
+    "personal_spread_model": {
+      "true_positives": 1719,
+      "false_negatives": 1341,
+      "false_positives": 306,
+      "true_negatives": 2754,
+      "accuracy": 0.7309,
+      "false_positive_rate": 0.1,
+      "false_negative_rate": 0.4382,
+      "detection_rate": 0.5618,
+      "detection_rate_95ci": [
+        0.5448,
+        0.5791
+      ]
+    },
+    "gradient_boosting_all_inputs": {
+      "true_positives": 1783,
+      "false_negatives": 1277,
+      "false_positives": 310,
+      "true_negatives": 2750,
+      "accuracy": 0.7407,
+      "false_positive_rate": 0.1013,
+      "false_negative_rate": 0.4173,
+      "detection_rate": 0.5827,
+      "detection_rate_95ci": [
+        0.5644,
+        0.6007
+      ]
+    }
+  },
+  "measure_reliability": {
+    "median key hold": {
+      "wobble_within_a_sitting_pct": 4.4,
+      "wobble_across_sittings_pct": 6.8,
+      "untouched_check_ins_more_than_15pct_above_usual": 0.0245
+    },
+    "spread of key holds (IQR)": {
+      "wobble_within_a_sitting_pct": 14.7,
+      "wobble_across_sittings_pct": 18.6,
+      "untouched_check_ins_more_than_15pct_above_usual": 0.2363
+    },
+    "median key-to-key time (speed)": {
+      "wobble_within_a_sitting_pct": 7.4,
+      "wobble_across_sittings_pct": 10.5,
+      "untouched_check_ins_more_than_15pct_above_usual": 0.0843
+    },
+    "rhythm: SD of key-to-key times (the app's measure)": {
+      "wobble_within_a_sitting_pct": 26.0,
+      "wobble_across_sittings_pct": 31.5,
+      "untouched_check_ins_more_than_15pct_above_usual": 0.3013
+    },
+    "rhythm: robust spread of key-to-key times (IQR)": {
+      "wobble_within_a_sitting_pct": 17.2,
+      "wobble_across_sittings_pct": 22.6,
+      "untouched_check_ins_more_than_15pct_above_usual": 0.2124
+    }
+  },
+  "false_alarm_sources": {
+    "hand_set_rule": {
+      "first_check_in_of_a_new_session": 0.3758,
+      "later_check_ins_same_session": 0.2342,
+      "per_typist_false_alarm_rate": {
+        "lowest": 0.1,
+        "median": 0.25,
+        "highest": 0.4333,
+        "typists_above_20_percent": 34
+      }
+    },
+    "personal_spread_model": {
+      "first_check_in_of_a_new_session": 0.232,
+      "later_check_ins_same_session": 0.1452,
+      "per_typist_false_alarm_rate": {
+        "lowest": 0.0667,
+        "median": 0.15,
+        "highest": 0.25,
+        "typists_above_20_percent": 6
+      }
+    }
+  },
+  "sensitivity": {
+    "sizes": [
+      1.05,
+      1.1,
+      1.15,
+      1.2,
+      1.3,
+      1.5
+    ],
+    "hold": {
+      "hand_set_rule": [
+        0.2876,
+        0.4209,
+        0.6284,
+        0.8324,
+        0.9621,
+        0.9971
+      ],
+      "ratio_model": [
+        0.3085,
+        0.5395,
+        0.7771,
+        0.8977,
+        0.9752,
+        0.9993
+      ],
+      "personal_spread_model": [
+        0.3699,
+        0.6056,
+        0.7693,
+        0.8696,
+        0.9507,
+        0.9915
+      ]
+    },
+    "rhythm": {
+      "hand_set_rule": [
+        0.2859,
+        0.3284,
+        0.381,
+        0.4281,
+        0.5422,
+        0.7464
+      ],
+      "ratio_model": [
+        0.1748,
+        0.1961,
+        0.2239,
+        0.2542,
+        0.317,
+        0.4533
+      ],
+      "personal_spread_model": [
+        0.1797,
+        0.2036,
+        0.2265,
+        0.251,
+        0.3023,
+        0.4114
+      ]
+    }
+  },
+  "cold_start": {
+    "baseline_check_ins": [
+      1,
+      2,
+      3,
+      5,
+      10,
+      20
+    ],
+    "false_positive_rate": {
+      "hand_set_rule": [
+        0.2595,
+        0.2141,
+        0.2467,
+        0.2484,
+        0.2284,
+        0.216
+      ],
+      "personal_spread_model": [
+        0.1611,
+        0.1556,
+        0.1523,
+        0.1549,
+        0.1732,
+        0.1882
+      ]
+    },
+    "detection_rate": {
+      "hand_set_rule": [
+        0.7392,
+        0.7265,
+        0.749,
+        0.7507,
+        0.7382,
+        0.7193
+      ],
+      "personal_spread_model": [
+        0.6448,
+        0.5889,
+        0.6052,
+        0.6297,
+        0.6611,
+        0.6673
+      ]
+    }
+  },
+  "deployable_weights": {
+    "ratio_model": {
+      "intercept": -1.317736,
+      "hold_up": 11.810764,
+      "rhythm_up": 2.395959
+    },
+    "personal_spread_model": {
+      "intercept": -0.760833,
+      "hold_z": 0.329798,
+      "rhythm_z": 0.203384
+    }
+  }
+}

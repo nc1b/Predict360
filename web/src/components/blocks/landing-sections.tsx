@@ -174,7 +174,7 @@ export function SignalsSection() {
                 <div>
                   <dt className="flex items-center gap-2 font-medium">
                     Evidence
-                    <span className="rounded-full border px-2 py-0.5 text-[11px] font-normal text-muted-foreground">Simulated data only</span>
+                    <span className="rounded-full border px-2 py-0.5 text-[11px] font-normal text-muted-foreground">Public data, injected changes</span>
                   </dt>
                   <dd className="mt-0.5 text-muted-foreground">{s.evidence}</dd>
                 </div>
@@ -257,9 +257,9 @@ export function HowItWorksSection() {
 }
 
 const METRICS = [
-  { value: '5 of 5', label: 'scripted typing changes flagged correctly. A comparator that always answers 100 caught none.' },
-  { value: '0 of 900', label: 'ordinary simulated sessions flagged by mistake, across fast, average and slow typists.' },
-  { value: '3,600', label: 'seeded simulated sessions in the stress test. No real people have been tested yet.' },
+  { value: '59% vs 37%', label: 'of injected typing changes detected by the model trained on real typing versus a hand-set rule, both held to 10% false alarms.' },
+  { value: '51 people', label: 'whose real typing was used. Every result is from typists the model never trained on. The changes were injected, since no fatigue-labelled typing data was available.' },
+  { value: '41% missed', label: 'of injected changes still go undetected, including most changes in rhythm. Small changes hide inside normal variation.' },
 ];
 
 export function EvidenceSection() {
@@ -355,7 +355,7 @@ const FAQS: FaqItem[] = [
   {
     question: 'Has it been tested on people?',
     answer:
-      'Not yet. Every published result comes from seeded, simulated typing. Real typing is noisier, so expect it to do worse on people.',
+      'Partly. The model is trained and tested on real typing from 51 people in a public dataset, but the changes it detects there were injected by us. It has not been tested on nurses, and nothing shows that a flagged change means tiredness.',
   },
 ];
 

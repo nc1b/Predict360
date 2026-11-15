@@ -6,6 +6,7 @@ const { generateSession } = require('../fixtures/synthetic');
 const { extractFeatures } = require('../src/features');
 const { buildBaseline, analyze } = require('../src/scoring');
 const { timingInputs, predictTiming } = require('../src/typing-model');
+const { weights: liveWeights } = require('../research/live-typing-model.json');
 
 function random(seed) {
   let value = seed;
@@ -91,9 +92,10 @@ const trainingProfiles = 12;
 const testProfiles = 6;
 const train = examples(0, trainingProfiles);
 const test = examples(trainingProfiles, testProfiles);
-const weights = fit(train);
+const simulationWeights = fit(train);
+const weights = liveWeights;
 const report = {
-  method: 'Logistic regression trained on generated timing sessions',
+  method: 'Simulated check: the live model (trained on real typing, research/live-typing-model.json) scored on generated sessions',
   trainingProfiles,
   testProfiles,
   trainingSessions: train.length,
@@ -104,6 +106,7 @@ const report = {
   baseline: measure(test, () => 'usual'),
   ruleBaseline: measure(test, (_, row) => (row.ruleFlags ? 'different' : 'usual')),
   model: measure(test, (features) => predictTiming(features, weights)),
+  simulationTrainedModel: measure(test, (features) => predictTiming(features, simulationWeights)),
   byProfile: Array.from({ length: testProfiles }, (_, i) => ({
     profile: i + 1,
     ...measure(test.filter((row) => row.profile === trainingProfiles + i), (features) => predictTiming(features, weights)),
@@ -111,7 +114,7 @@ const report = {
 };
 
 writeFileSync(join(__dirname, '../research/typing-model.json'), JSON.stringify(report, null, 2) + '\n');
-const missed = test.find(({ shift, features }) => shift === 0 && predictTiming(features, weights) === 'usual')
+const missed = test.find(({ shift, features }) => shift === 2 && predictTiming(features, weights) === 'usual')
   || test.find(({ change, features }) => change && predictTiming(features, weights) === 'usual');
 if (!missed) throw new Error('The held-out example must show a missed change.');
 console.error(`Missed example: shift ${missed.shift}`);

@@ -52,8 +52,8 @@ test('public demo reproduces a held-out false negative', async () => {
   const request = require('../fixtures/json/held_out_missed_change.request.json');
   const { status, json } = await post(request);
   assert.equal(status, 200);
-  assert.equal(json.features.dwellMs.value, 100);
-  assert.equal(json.baseline.features.dwellMs.value, 79);
+  assert.equal(json.features.flightVolatilityMs.value, 20.29);
+  assert.equal(json.baseline.features.flightVolatilityMs.value, 13.11);
   assert.equal(json.typingPattern, 'usual');
 });
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/logo';
+import { RealTyping } from '@/components/real-typing';
 import { ResultCard } from '@/components/result-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -50,14 +51,15 @@ function TypingModelDemo() {
       {error && <p role="alert" className="text-sm">{error}</p>}
       {result && <ResultCard result={result.analysis} baselineCount={5} caption={result.label} />}
       <p className="text-sm leading-relaxed text-muted-foreground">
-        <strong className="text-foreground">A sanity test on simulated typists, not real people.</strong> The same
-        simulator made the baselines and the scripted changes. Across {typingModel.testSessions} sessions from{' '}
-        {typingModel.testProfiles} unseen simulated typists, the model caught {truePositives} of{' '}
-        {falseNegatives + truePositives} changes and flagged {falsePositives} of {falsePositives + trueNegatives} unchanged
-        sessions. The hand-set rule did about as well ({rule.truePositives} caught, {rule.falsePositives} false alarms), so
-        the model only ties a simple rule. Always guessing “usual” caught nothing. Try{' '}
-        <strong>Missed timing change</strong> for a held-out example with 27% longer key holds that the model called usual
-        (the rule flagged it). <strong>Distracted typist</strong> shows how an interruption can also flag a change.
+        These examples are simulated sessions run through the live model, which was trained on real people’s typing
+        (results below). On {typingModel.testSessions} simulated sessions from {typingModel.testProfiles} simulated
+        typists it caught {truePositives} of {falseNegatives + truePositives} scripted changes, with {falsePositives}{' '}
+        false alarms in {falsePositives + trueNegatives} unchanged sessions. The hand-set rule did better there (
+        {rule.truePositives} caught, {rule.falsePositives} false alarms), because our simulator assumed typing rhythm is
+        steadier than it is in real people. Try <strong>Missed timing change</strong>: rhythm became 55% more uneven and
+        the model still says usual. Real typists’ rhythm wobbles by about a quarter between check-ins, so the model
+        gives rhythm little weight. <strong>Distracted typist</strong> shows that an interruption flags a change just
+        like a deliberate pause.
       </p>
     </section>
   );
@@ -91,6 +93,7 @@ export default function Evaluation() {
       <p className="mt-8 text-sm font-medium uppercase tracking-widest text-muted-foreground">Evaluation</p>
       <h1 className="mt-3 text-4xl font-bold tracking-tight">How Predict 360 was tested</h1>
       <TypingModelDemo />
+      <RealTyping />
       <h2 className="mt-10 text-2xl font-semibold">All-day tracking research</h2>
       <p className="mt-4 max-w-3xl text-muted-foreground">
         We tested an offline classifier for a <strong className="text-foreground">strained</strong> work minute (interrupted or

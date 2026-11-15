@@ -9,7 +9,7 @@ export const DEMO_SESSIONS = [
   { name: 'four_second_pause', label: 'Four-second pause', note: 'A deliberate 4 s pause between sentences.' },
   { name: 'uneven_typing', label: 'Uneven rhythm', note: 'Irregular gaps between keys.' },
   { name: 'distracted_pause', label: 'Distracted typist', note: 'A 6.5 s distraction between sentences.' },
-  { name: 'held_out_missed_change', label: 'Missed timing change', note: 'The simulated key holds got longer, but the model missed the change.' },
+  { name: 'held_out_missed_change', label: 'Missed timing change', note: 'Rhythm became 55% more uneven, but the model called it usual.' },
 ] as const;
 
 export type DemoName = (typeof DEMO_SESSIONS)[number]['name'];
