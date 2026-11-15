@@ -1,38 +1,38 @@
 # Predict 360
 
-**Track** — Health  
+**Track** — AI + Health  
 **Team** — Divij Velagapudi and Sahaj Kalia
 
 This project is a prototype and is not medical advice.
 
 ## The problem
 
-Imagine you're near the end of a 12-hour nursing shift and still have medication records to enter. By then, it can be hard to tell how much your pace has changed since the start of the day. We wanted to give nurses and other hospital staff a quick, private way to check in with themselves. The same idea can help anyone who spends a lot of time at a keyboard.
+Imagine you're near the end of a 12-hour nursing shift. You still have notes to chart, and it's hard to notice when your typing feels different from usual. We wanted to give nurses a 30-second way to check in privately during a break.
 
 ## What we built
 
-Predict 360 gives you two ways to check in. In the browser, you type two sentences on a physical keyboard. It takes about 30 seconds. We measure how long you hold each key, how long you pause between sentences, and how steady your typing rhythm is. The words stay in the browser and are cleared after the check-in. The optional Windows and macOS app counts key presses, clicks, scrolls, and active and idle time to show patterns across the day. It starts paused, and you can pause it again anytime.
+Type two sentences on a physical keyboard. After three usable prior check-ins, Predict360 compares how long you hold keys, how long you pause between sentences, and how steady your rhythm is with your personal baseline. The model labels the pattern **usual** or **different**. A separate 0–100 score uses fixed rules to show which timing measures changed. The words stay in the browser and are cleared after the check-in. The optional desktop app shows trends in keyboard and mouse activity counts across the day.
 
 ## What we added
 
-The idea is to compare your typing today with how you usually type. After at least three check-ins, Predict 360 uses your earlier sessions to build a personal baseline. It gives you a 0–100 score and shows what changed, such as a longer pause between sentences. A separate model classifies your timing as close to usual or different.
+**Our own idea.** We compare each person with their own earlier check-ins. The interactive evaluation lets a judge run the same check-in model on examples, including one it gets wrong.
 
 ## How it works
 
-We trained the check-in model with logistic regression on 720 simulated typing sessions from 12 typist profiles. We tested it on 360 sessions from six other simulated profiles. We also ran a separate experiment on 2,686 one-minute keyboard and mouse activity records from 25 people in the public SWELL-KW dataset. We used five test splits, each holding out entire participants, to see how well the model could tell ordinary work minutes from minutes with interruptions or time pressure.
+We trained the live logistic regression model on 720 generated sessions from 12 simulated typist profiles. Each profile had its own baseline, and we held out six other profiles for testing. The model uses changes in the three timing measures because each can be compared with a person's usual range. In a separate offline experiment, we used 2,686 complete one-minute records from 25 participants in the public SWELL-KW dataset. We classified neutral office tasks versus tasks with interruptions or time pressure, holding out entire participants in each of five folds.
 
 ## Results
 
-- **Two-sentence check-in.** The model caught 135 of 180 scripted timing changes (75%) and flagged 19 of 180 unchanged sessions (10.6%). The simple baseline that always guessed “usual” had zero false alarms and missed all 180 changes.
-- **SWELL-KW experiment.** Always guessing “strained” was 61.8% accurate and flagged every calm minute. Our logistic regression model reached a ROC-AUC of 0.59, flagged 42.0% of calm minutes, and missed 45.3% of minutes labeled as strained.
-- **Where it fails.** In the **Missed timing change** example, the simulated typist held keys about 27% longer than usual, and the model still called it “usual.” In **Distracted typist**, a brief interruption triggered the same flag as a deliberate pause. A flag tells you what changed in your typing. Its cause could be something as ordinary as a phone call. [Interactive evaluation](https://predict360.vercel.app/evaluation)
+- **Live check-in, simulated data.** The model reached **82.2% accuracy vs. 50.0%** for the always-usual baseline on 360 test sessions. It flagged **19 of 180 unchanged sessions (10.6% false positives)** and missed **45 of 180 scripted changes (25.0% false negatives)**. The baseline flagged no unchanged sessions and missed all 180 changes.
+- **Offline SWELL-KW experiment, public data.** Logistic regression scored **56.0% accuracy and 0.59 ROC-AUC**. The always-interrupted-or-time-pressured baseline scored **61.8% accuracy and 0.50 ROC-AUC**. Logistic regression flagged **431 of 1,027 neutral minutes (42.0%)** and missed **752 of 1,659 interrupted or time-pressured minutes (45.3%)**. This experiment measures office-task conditions.
+- **Where it fails.** In the held-out *Missed timing change* example, key holds were about 27% longer than usual and the model still returned **usual**. A brief distraction can also produce the same pause flag as a deliberate pause. The check-in has yet to be validated for fatigue or clinical use. [Try the examples](https://predict360.vercel.app/evaluation)
 
 ## What we'd do next
 
-We'd ask hospital staff who volunteer to try the check-in on day and night shifts. We'd also see whether averaging several check-ins cuts down on false alarms from one-off interruptions.
+We'd test whether averaging several check-ins cuts down on flags from one-off interruptions. We'd also evaluate the check-in with consenting nurses on day and night shifts.
 
 ## Sources
 
-- **Research data.** We used [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) for the offline experiment. The [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/) and [Tappy](https://physionet.org/content/tappy/1.0.0/) provided reference ranges for key-hold times. [Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) provided optional weather context.
-- **Tools.** We used scikit-learn for the SWELL-KW experiment, GPT-4o mini through Hack Club AI for optional summaries of the results, and Claude and ChatGPT for development help.
-- **Project links.** [GitHub](https://github.com/nc1b/Predict360) · [Live app](https://predict360.vercel.app) · [Sources and licenses](https://github.com/nc1b/Predict360/blob/main/SOURCES.md)
+- **Data.** [Synthetic session generator](fixtures/synthetic.js) for live model training and testing, [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) for the offline experiment, [CMU Keystroke Dynamics](https://www.cs.cmu.edu/~keystroke/) and [Tappy](https://physionet.org/content/tappy/1.0.0/) for reference ranges, and [Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) for optional weather context.
+- **Tools.** [scikit-learn](https://scikit-learn.org/) for the offline experiment, [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) via [Hack Club AI](https://ai.hackclub.com/) for optional explanations, and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) for development.
+- [Sources and licenses](SOURCES.md) · [Full project credits](README.md#credits) · [Live app](https://predict360.vercel.app)
