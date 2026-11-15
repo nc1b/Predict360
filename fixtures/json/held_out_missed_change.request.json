@@ -1,0 +1,443 @@
+{
+  "keystrokes": [
+    {
+      "kind": "character",
+      "downMs": 0,
+      "upMs": 106
+    },
+    {
+      "kind": "character",
+      "downMs": 121,
+      "upMs": 209
+    },
+    {
+      "kind": "character",
+      "downMs": 244,
+      "upMs": 347
+    },
+    {
+      "kind": "character",
+      "downMs": 401,
+      "upMs": 487
+    },
+    {
+      "kind": "character",
+      "downMs": 542,
+      "upMs": 640
+    },
+    {
+      "kind": "space",
+      "downMs": 683,
+      "upMs": 781
+    },
+    {
+      "kind": "character",
+      "downMs": 803,
+      "upMs": 889
+    },
+    {
+      "kind": "character",
+      "downMs": 924,
+      "upMs": 1014
+    },
+    {
+      "kind": "space",
+      "downMs": 1081,
+      "upMs": 1184
+    },
+    {
+      "kind": "character",
+      "downMs": 1225,
+      "upMs": 1312
+    },
+    {
+      "kind": "character",
+      "downMs": 1354,
+      "upMs": 1469
+    },
+    {
+      "kind": "character",
+      "downMs": 1506,
+      "upMs": 1610
+    },
+    {
+      "kind": "character",
+      "downMs": 1626,
+      "upMs": 1716
+    },
+    {
+      "kind": "space",
+      "downMs": 1766,
+      "upMs": 1860
+    },
+    {
+      "kind": "character",
+      "downMs": 1906,
+      "upMs": 2014
+    },
+    {
+      "kind": "character",
+      "downMs": 2050,
+      "upMs": 2169
+    },
+    {
+      "kind": "character",
+      "downMs": 2206,
+      "upMs": 2316
+    },
+    {
+      "kind": "space",
+      "downMs": 2367,
+      "upMs": 2452
+    },
+    {
+      "kind": "character",
+      "downMs": 2520,
+      "upMs": 2611
+    },
+    {
+      "kind": "character",
+      "downMs": 2653,
+      "upMs": 2740
+    },
+    {
+      "kind": "character",
+      "downMs": 2812,
+      "upMs": 2911
+    },
+    {
+      "kind": "character",
+      "downMs": 2955,
+      "upMs": 3074
+    },
+    {
+      "kind": "character",
+      "downMs": 3085,
+      "upMs": 3181
+    },
+    {
+      "kind": "character",
+      "downMs": 3243,
+      "upMs": 3353
+    },
+    {
+      "kind": "space",
+      "downMs": 3384,
+      "upMs": 3501
+    },
+    {
+      "kind": "character",
+      "downMs": 3523,
+      "upMs": 3635
+    },
+    {
+      "kind": "character",
+      "downMs": 3682,
+      "upMs": 3785
+    },
+    {
+      "kind": "character",
+      "downMs": 3801,
+      "upMs": 3905
+    },
+    {
+      "kind": "character",
+      "downMs": 3940,
+      "upMs": 4025
+    },
+    {
+      "kind": "sentence_end",
+      "downMs": 4069,
+      "upMs": 4159
+    },
+    {
+      "kind": "space",
+      "downMs": 4219,
+      "upMs": 4314
+    },
+    {
+      "kind": "character",
+      "downMs": 5549,
+      "upMs": 5644
+    },
+    {
+      "kind": "space",
+      "downMs": 5692,
+      "upMs": 5783
+    },
+    {
+      "kind": "character",
+      "downMs": 5840,
+      "upMs": 5954
+    },
+    {
+      "kind": "character",
+      "downMs": 5974,
+      "upMs": 6074
+    },
+    {
+      "kind": "character",
+      "downMs": 6098,
+      "upMs": 6198
+    },
+    {
+      "kind": "character",
+      "downMs": 6246,
+      "upMs": 6346
+    },
+    {
+      "kind": "space",
+      "downMs": 6397,
+      "upMs": 6481
+    },
+    {
+      "kind": "character",
+      "downMs": 6538,
+      "upMs": 6632
+    },
+    {
+      "kind": "character",
+      "downMs": 6673,
+      "upMs": 6789
+    },
+    {
+      "kind": "character",
+      "downMs": 6809,
+      "upMs": 6909
+    },
+    {
+      "kind": "character",
+      "downMs": 6973,
+      "upMs": 7076
+    },
+    {
+      "kind": "character",
+      "downMs": 7111,
+      "upMs": 7220
+    },
+    {
+      "kind": "space",
+      "downMs": 7267,
+      "upMs": 7358
+    },
+    {
+      "kind": "character",
+      "downMs": 7395,
+      "upMs": 7501
+    },
+    {
+      "kind": "character",
+      "downMs": 7530,
+      "upMs": 7638
+    },
+    {
+      "kind": "space",
+      "downMs": 7691,
+      "upMs": 7810
+    },
+    {
+      "kind": "character",
+      "downMs": 7842,
+      "upMs": 7930
+    },
+    {
+      "kind": "character",
+      "downMs": 7992,
+      "upMs": 8080
+    },
+    {
+      "kind": "character",
+      "downMs": 8132,
+      "upMs": 8240
+    },
+    {
+      "kind": "character",
+      "downMs": 8290,
+      "upMs": 8402
+    },
+    {
+      "kind": "character",
+      "downMs": 8428,
+      "upMs": 8541
+    },
+    {
+      "kind": "character",
+      "downMs": 8550,
+      "upMs": 8641
+    },
+    {
+      "kind": "character",
+      "downMs": 8697,
+      "upMs": 8815
+    },
+    {
+      "kind": "space",
+      "downMs": 8830,
+      "upMs": 8934
+    },
+    {
+      "kind": "character",
+      "downMs": 8981,
+      "upMs": 9090
+    },
+    {
+      "kind": "character",
+      "downMs": 9125,
+      "upMs": 9212
+    },
+    {
+      "kind": "character",
+      "downMs": 9253,
+      "upMs": 9355
+    },
+    {
+      "kind": "space",
+      "downMs": 9395,
+      "upMs": 9510
+    },
+    {
+      "kind": "character",
+      "downMs": 9533,
+      "upMs": 9618
+    },
+    {
+      "kind": "character",
+      "downMs": 9681,
+      "upMs": 9798
+    },
+    {
+      "kind": "character",
+      "downMs": 9844,
+      "upMs": 9961
+    },
+    {
+      "kind": "character",
+      "downMs": 9998,
+      "upMs": 10082
+    },
+    {
+      "kind": "character",
+      "downMs": 10124,
+      "upMs": 10212
+    },
+    {
+      "kind": "sentence_end",
+      "downMs": 10286,
+      "upMs": 10385
+    }
+  ],
+  "baseline": {
+    "sessions": [
+      {
+        "features": {
+          "dwellMs": {
+            "value": 77,
+            "samples": 65,
+            "minSamples": 20,
+            "sufficient": true
+          },
+          "sentencePauseMs": {
+            "value": 1199,
+            "samples": 1,
+            "minSamples": 1,
+            "sufficient": true
+          },
+          "flightVolatilityMs": {
+            "value": 15.41,
+            "samples": 62,
+            "minSamples": 20,
+            "sufficient": true
+          }
+        }
+      },
+      {
+        "features": {
+          "dwellMs": {
+            "value": 79,
+            "samples": 65,
+            "minSamples": 20,
+            "sufficient": true
+          },
+          "sentencePauseMs": {
+            "value": 1419,
+            "samples": 1,
+            "minSamples": 1,
+            "sufficient": true
+          },
+          "flightVolatilityMs": {
+            "value": 14.48,
+            "samples": 62,
+            "minSamples": 20,
+            "sufficient": true
+          }
+        }
+      },
+      {
+        "features": {
+          "dwellMs": {
+            "value": 83,
+            "samples": 65,
+            "minSamples": 20,
+            "sufficient": true
+          },
+          "sentencePauseMs": {
+            "value": 1317,
+            "samples": 1,
+            "minSamples": 1,
+            "sufficient": true
+          },
+          "flightVolatilityMs": {
+            "value": 13.39,
+            "samples": 62,
+            "minSamples": 20,
+            "sufficient": true
+          }
+        }
+      },
+      {
+        "features": {
+          "dwellMs": {
+            "value": 82,
+            "samples": 65,
+            "minSamples": 20,
+            "sufficient": true
+          },
+          "sentencePauseMs": {
+            "value": 1610,
+            "samples": 1,
+            "minSamples": 1,
+            "sufficient": true
+          },
+          "flightVolatilityMs": {
+            "value": 15.85,
+            "samples": 62,
+            "minSamples": 20,
+            "sufficient": true
+          }
+        }
+      },
+      {
+        "features": {
+          "dwellMs": {
+            "value": 77,
+            "samples": 65,
+            "minSamples": 20,
+            "sufficient": true
+          },
+          "sentencePauseMs": {
+            "value": 1525,
+            "samples": 1,
+            "minSamples": 1,
+            "sufficient": true
+          },
+          "flightVolatilityMs": {
+            "value": 12.88,
+            "samples": 62,
+            "minSamples": 20,
+            "sufficient": true
+          }
+        }
+      }
+    ]
+  }
+}

@@ -52,7 +52,8 @@ function TypingModelDemo() {
         Across {typingModel.testSessions} sessions from {typingModel.testProfiles} unseen simulated typists, the model
         flagged {falsePositives} of {falsePositives + trueNegatives} unchanged sessions and missed {falseNegatives} of{' '}
         {falseNegatives + truePositives} scripted changes. An always-usual baseline produced zero false alarms and missed
-        every change. Try the distracted typist to see how an interruption alone can trigger a timing flag.
+        every change. Try <strong>Missed timing change</strong> for a held-out example with longer key holds that the
+        model classified as close to usual. <strong>Distracted typist</strong> shows how an interruption can also flag a change.
       </p>
     </section>
   );

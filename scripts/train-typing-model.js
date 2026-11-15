@@ -38,13 +38,16 @@ function examples(profileStart, profileCount) {
       if (shift === 0) options.dwellScale *= factor;
       if (shift === 1) options.pauseMs = Math.round(options.pauseMs * factor);
       if (shift === 2) options.flightJitter *= factor;
-      return extractFeatures(generateSession(options));
+      return generateSession(options);
     }
-    const baseline = buildBaseline(Array.from({ length: 5 }, (_, i) => session(i, null)));
+    const sessions = Array.from({ length: 5 }, (_, i) => ({ features: extractFeatures(session(i, null)) }));
+    const baseline = buildBaseline(sessions.map(({ features }) => features));
     for (let i = 0; i < 60; i++) {
       const change = i % 2 === 1;
-      const features = session(i + 5, change ? Math.floor(i / 2) % 3 : null);
-      rows.push({ features: timingInputs(features, baseline), change });
+      const shift = change ? Math.floor(i / 2) % 3 : null;
+      const keystrokes = session(i + 5, shift);
+      const features = extractFeatures(keystrokes);
+      rows.push({ features: timingInputs(features, baseline), change, shift, keystrokes, sessions });
     }
   }
   return rows;
@@ -100,5 +103,9 @@ const report = {
 };
 
 writeFileSync(join(__dirname, '../research/typing-model.json'), JSON.stringify(report, null, 2) + '\n');
+const missed = test.find(({ shift, features }) => shift === 0 && predictTiming(features, weights) === 'usual');
+if (!missed) throw new Error('The held-out example must show a missed change in key holds.');
+const example = { keystrokes: missed.keystrokes, baseline: { sessions: missed.sessions } };
+writeFileSync(join(__dirname, '../fixtures/json/held_out_missed_change.request.json'), JSON.stringify(example, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));
 

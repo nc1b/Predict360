@@ -48,6 +48,15 @@ test('POST /api/analyze scores a fixture', async () => {
   assert.equal(json.comparisons.sentencePauseMs.baselineMs, 700);
 });
 
+test('public demo reproduces a held-out false negative', async () => {
+  const request = require('../fixtures/json/held_out_missed_change.request.json');
+  const { status, json } = await post(request);
+  assert.equal(status, 200);
+  assert.equal(json.features.dwellMs.value, 100);
+  assert.equal(json.baseline.features.dwellMs.value, 79);
+  assert.equal(json.typingPattern, 'usual');
+});
+
 test('works without a baseline: 200 with null score', async () => {
   const { status, json } = await post({ keystrokes: fixture('ordinary').keystrokes });
   assert.equal(status, 200);
