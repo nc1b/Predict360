@@ -8,7 +8,7 @@ import {
   SignalsSection,
 } from '@/components/blocks/landing-sections';
 import { ProjectVideo } from '@/components/blocks/project-video';
-import { ModesSection } from '@/components/blocks/landing-sections';
+import { ModesSection, ResearchMapSection } from '@/components/blocks/landing-sections';
 import { SiteFooter } from '@/components/blocks/site-footer';
 import { SiteNav } from '@/components/blocks/site-nav';
 
@@ -67,6 +67,7 @@ export default function Landing() {
       <main>
         <HeroSection />
         <ModesSection />
+        <ResearchMapSection />
         <ProjectVideo />
         <SignalsSection />
         <HowItWorksSection />

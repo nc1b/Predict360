@@ -1,10 +1,11 @@
-import { AudioLines, Hourglass, Keyboard, type LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
+import { KeyHoldIcon, RhythmIcon, SentencePauseIcon } from '@/components/signal-icons';
 
 export interface Signal {
   id: string;
   name: string;
   signal: string;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   measures: string;
   why: string;
   evidence: string;
@@ -19,7 +20,7 @@ export const SIGNALS: Signal[] = [
     id: 'dwell',
     name: 'Key hold',
     signal: 'Dwell time',
-    icon: Keyboard,
+    icon: KeyHoldIcon,
     measures: 'How long each key stays pressed, taken as the middle value across your whole check-in.',
     why: 'It is the steadiest of the three: one slow key barely moves a median.',
     evidence: 'Holds 1.3x longer were flagged in 300 of 300 simulated sessions; 1.05x in none.',
@@ -37,7 +38,7 @@ export const SIGNALS: Signal[] = [
     id: 'pause',
     name: 'Sentence pause',
     signal: 'Inter-sentence pause',
-    icon: Hourglass,
+    icon: SentencePauseIcon,
     measures: 'The gap from the period, question mark or exclamation point to the first letter of your next sentence.',
     why: 'It captures the moment of deciding what to say next, separately from how you type.',
     evidence: 'A pause 1.6x your usual was flagged every time; a four-second pause cost 35 points.',
@@ -55,7 +56,7 @@ export const SIGNALS: Signal[] = [
     id: 'rhythm',
     name: 'Rhythm variation',
     signal: 'Flight-time volatility',
-    icon: AudioLines,
+    icon: RhythmIcon,
     measures: 'How uneven the gaps between key presses are inside a sentence. The pause between sentences is left out.',
     why: 'Even typing and stop-start typing can have the same speed. This tells them apart.',
     evidence: 'Reliable from about 1.4x more variation (295 of 300); only 83 of 300 at 1.2x.',

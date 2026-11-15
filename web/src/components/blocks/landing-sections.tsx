@@ -89,6 +89,60 @@ export function ModesSection() {
   );
 }
 
+export function ResearchMapSection() {
+  return (
+    <section id="research-map" className="scroll-mt-24 border-t">
+      <div className="mx-auto max-w-5xl px-6 py-24">
+        <Eyebrow>Typing and health research</Eyebrow>
+        <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">What your typing rhythm is linked to</h2>
+        <p className="mt-4 max-w-2xl text-muted-foreground">
+          Researchers have studied how typing timing changes with certain health conditions. Predict 360 tracks the same
+          three signals over time, compared with your own usual, so you can notice a change and talk to a professional.
+        </p>
+
+        <ol className="mt-12 space-y-3">
+          {SIGNALS.map((s) => (
+            <li
+              key={s.id}
+              className={cn('grid items-center gap-4 rounded-2xl border bg-card p-5 md:grid-cols-[1fr_auto_1fr]', cardHover)}
+            >
+              <div className="flex items-center gap-4">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background">
+                  <s.icon className="size-6" />
+                </span>
+                <div>
+                  <p className="font-semibold">{s.name}</p>
+                  <p className="text-sm text-muted-foreground">{s.flag}</p>
+                </div>
+              </div>
+              <ArrowRight className="hidden size-5 text-muted-foreground md:block" aria-hidden="true" />
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied in</p>
+                <p className="mt-0.5 font-semibold">{s.research.conditions}</p>
+                <a
+                  href={s.research.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                >
+                  {s.research.cite}
+                </a>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 max-w-2xl rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">Important:</span> these are correlations from published studies.
+          Predict 360 does not diagnose or detect any illness, and in the public data we tested, people with and without a
+          condition often type alike. A change in your rhythm is a reason to reflect or check in with a doctor, not a
+          result. This project is a prototype and is not medical advice.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export function SignalsSection() {
   return (
     <section id="signals" className="scroll-mt-24 border-t">
