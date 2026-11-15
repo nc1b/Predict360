@@ -72,6 +72,9 @@ header {
   width: 24px;
   height: 24px;
 }
+:root:not([data-theme='light']) .brand img {
+  filter: invert(1);
+}
 .brand strong {
   font-size: 15px;
   letter-spacing: -0.3px;
@@ -323,6 +326,19 @@ footer {
   color: var(--muted);
   margin: 18px 0 0;
   text-align: center;
+}
+
+/* macOS: hidden-inset title bar. Leave room for the window buttons, keep the
+   header the height of the button row, and make it the window's drag handle. */
+:root[data-platform='darwin'] header {
+  padding: 10px 14px 10px 86px;
+  min-height: 52px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+:root[data-platform='darwin'] header button,
+:root[data-platform='darwin'] header a {
+  -webkit-app-region: no-drag;
 }
 
 @keyframes appear {

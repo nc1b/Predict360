@@ -130,11 +130,11 @@ else {
     else app.setAsDefaultProtocolClient('predict360');
     Menu.setApplicationMenu(null);
     win = new BrowserWindow({ width: 500, height: 760, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
-      backgroundColor: '#0b0b0c', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+      backgroundColor: '#0b0b0c', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default', trafficLightPosition: { x: 18, y: 20 },
       webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('will-navigate', (event) => event.preventDefault());
-    win.loadFile(path.join(__dirname, 'index.html'));
+    win.loadFile(path.join(__dirname, 'index.html'), { query: { platform: process.platform } });
     win.on('close', (event) => { if (tracker.running && !quitting) { event.preventDefault(); win.hide(); } else if (!quitting) app.quit(); });
     tray = new Tray(path.join(assets, 'icon.png'));
     tray.on('double-click', () => win.show());
