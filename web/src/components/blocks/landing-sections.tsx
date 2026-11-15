@@ -3,13 +3,13 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, ChevronDown, Download, Keyboard, Laptop, PenLine, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, ChevronDown, Keyboard, Laptop, PenLine, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { buttonClass } from '@/components/ui/button';
 import { QRCode } from '@/components/ui/qr-code';
 import { SIGNALS } from '@/lib/signals';
-import { DOWNLOAD_URL, REPO_URL } from '@/lib/site';
-import { downloadLabel, useOS } from '@/lib/os';
+import { REPO_URL } from '@/lib/site';
+import { DownloadDesktop } from '@/components/download-desktop';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -29,7 +29,6 @@ function ModeFeature({ children }: { children: React.ReactNode }) {
 
 export function ModesSection() {
   const { user } = useAuth();
-  const os = useOS();
   return (
     <section id="modes" className="scroll-mt-24 border-t">
       <div className="mx-auto max-w-5xl px-6 py-24">
@@ -74,9 +73,9 @@ export function ModesSection() {
               <ModeFeature>Counts only: clicks, key presses, focus. Never words, key values, or screenshots.</ModeFeature>
               <ModeFeature>A daily trend appears once there&apos;s enough data.</ModeFeature>
             </ul>
-            <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer" className={buttonClass({ variant: 'outline', className: 'mt-6 w-fit' })}>
-              <Download className="size-4" aria-hidden="true" /> {downloadLabel(os)}
-            </a>
+            <div className="mt-6">
+              <DownloadDesktop />
+            </div>
           </article>
         </div>
 
