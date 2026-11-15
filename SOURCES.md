@@ -49,6 +49,22 @@ The [typing model script](scripts/train-typing-model.js) uses the [synthetic ses
 - The city is not saved in activity history or sent to the AI. Explanations may receive only the numeric mean, range, and pressure change.
 - Limit: weather is context, not a migraine dataset. Without prospectively collected symptom/aura outcomes, individual validation, and confounder controls, pressure changes cannot prove migraine prediction.
 
+## 5. Public typing audit
+
+We ran two descriptive checks on public timing measurements. Neither dataset entered the live model's training or supplied fatigue labels. Run `python scripts/audit-public-typing.py` to download the sources, verify publisher checksums, and regenerate the [aggregate results](research/public-typing-audit.json). The repository publishes only aggregate results.
+
+| Data and comparison | Above reference threshold |
+|---|---:|
+| CMU · remaining blocks in the first session | 24 / 357 (6.7%) |
+| CMU · blocks from the seven later sessions | 831 / 3,570 (23.3%) |
+| Inputlog · fourth word block vs. first three | 60 / 73 (82.2%) |
+| Inputlog · sentence block vs. first three word blocks | 16 / 73 (21.9%) |
+
+- **CMU Keystroke Dynamics Benchmark.** From 20,400 fixed-password repetitions across 51 typists, we took the median key-hold duration of each nonoverlapping block of five repetitions. For each typist, the baseline was the median of their first three blocks. The threshold was a hold more than 15% above baseline, the live scoring rule's dwell tolerance. Blocks are repeated observations from the same typists. This design measures drift across recording sessions and includes any normal change or other unmeasured condition.
+- **Inputlog Copy Task Corpus.** [Van Waes et al., Zenodo release](https://doi.org/10.5281/zenodo.5803401). We included 73 complete QWERTY desktop/laptop tasks from the 491-task English release, requiring a positive timing spread and at least 20 targeted inter-key intervals in each of five blocks. For each task, the baseline was the median standard deviation of the first three word blocks. The comparison uses the app's 25% rhythm tolerance as a reference. The corpus reports standard deviations for targeted intervals and does not provide the exact app feature set in this release. Task content and task order can both contribute to the differences.
+
+The audit compares individual timing measures. It cannot estimate classifier accuracy, clinical false alarms, or fatigue detection.
+
 ## Why unspecified Kaggle/Hugging Face datasets were not imported
 
 Kaggle and Hugging Face are hosting platforms. “Keystroke biometrics,” “fatigue,” or “cognitive fatigue” do not identify a specific licensed, compatible dataset. Research located generic processed typing data and fatigue reproduction results, but did not establish an additional source with verified keystroke event definitions, suitable clinical labels, and demonstrated external validity for this app. Original CMU, Tappy, and SWELL sources were preferred over unverified reuploads.

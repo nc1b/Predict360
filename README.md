@@ -65,6 +65,8 @@ Logistic regression ranked interrupted or time-pressured minutes above neutral m
 
 Graphs (confusion matrix, ROC, precision–recall, feature weights, flagged rate by condition) are on the [evaluation page](https://predict360.vercel.app/evaluation). Full fixture, confounder and sensitivity results are in the [technical reference](docs/TECHNICAL.md#measured-results).
 
+**Public typing audit.** We checked real recorded timing in two public datasets. On the CMU benchmark, key holds exceeded the 15% baseline tolerance in 6.7% of remaining first-session blocks and 23.3% of later-session blocks. On 73 Inputlog copy tasks, the share exceeding the 25% rhythm tolerance changed from 82.2% in the fourth word block to 21.9% in the sentence block, each compared with the first three word blocks. [Method, counts, and reproduction](SOURCES.md#5-public-typing-audit).
+
 ## Scoring rules
 
 The morning check-in compares three timing features with your baseline (the median of at least three earlier check-ins). Points are deducted only when a feature rises above your usual:

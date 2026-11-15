@@ -1,0 +1,40 @@
+{
+  "cmu": {
+    "source": "https://www.cs.cmu.edu/~keystroke/DSL-StrongPasswordData.csv",
+    "typists": 51,
+    "password_repetitions": 20400,
+    "repetitions_per_block": 5,
+    "baseline_blocks": 3,
+    "dwell_ratio_threshold": 1.15,
+    "same_session": {
+      "observations": 357,
+      "above_threshold": 24,
+      "above_threshold_rate": 0.0672,
+      "median_ratio": 1.0052
+    },
+    "later_sessions": {
+      "observations": 3570,
+      "above_threshold": 831,
+      "above_threshold_rate": 0.2328,
+      "median_ratio": 1.0537
+    }
+  },
+  "inputlog": {
+    "source": "https://doi.org/10.5281/zenodo.5803401",
+    "published_english_copy_tasks": 491,
+    "complete_qwerty_computer_copy_tasks": 73,
+    "interkey_spread_ratio_threshold": 1.25,
+    "fourth_word_block_vs_first_three": {
+      "observations": 73,
+      "above_threshold": 60,
+      "above_threshold_rate": 0.8219,
+      "median_ratio": 1.7167
+    },
+    "sentence_block_vs_first_three_word_blocks": {
+      "observations": 73,
+      "above_threshold": 16,
+      "above_threshold_rate": 0.2192,
+      "median_ratio": 0.7715
+    }
+  }
+}
