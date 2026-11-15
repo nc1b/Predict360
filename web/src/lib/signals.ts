@@ -26,11 +26,11 @@ export const SIGNALS: Signal[] = [
     limits: 'A different keyboard changes it. Compare check-ins from the same device only.',
     flag: 'Keys held longer than your usual',
     research: {
-      conditions: "Parkinson's disease (motor slowing)",
+      conditions: 'Grogginess just after waking (sleep inertia)',
       finding:
-        "Longer and more variable key-hold times were reported in early Parkinson's. In the public Tappy data we checked, people with and without Parkinson's overlap heavily, so it cannot tell them apart.",
-      cite: 'Giancardo et al., Scientific Reports 2016; Adams, PLoS ONE 2017 (Tappy)',
-      href: 'https://www.nature.com/articles/srep34468',
+        'Fourteen people typed while rested and again just after being woken at night. Key-hold times shifted enough for a classifier to tell the two states apart (AUC 0.91 to 0.93; 0.76 to 0.79 from median hold time alone).',
+      cite: 'Giancardo et al., Scientific Reports 2015',
+      href: 'https://doi.org/10.1038/srep09678',
     },
   },
   {
@@ -44,11 +44,11 @@ export const SIGNALS: Signal[] = [
     limits: 'Two sentences give exactly one pause, so one doorbell decides the result.',
     flag: 'A longer pause between sentences',
     research: {
-      conditions: 'Depression and mood changes (psychomotor slowing); mental workload',
+      conditions: 'Mental and physical stress',
       finding:
-        'Slower, more hesitant typing has been associated with mood symptoms in phone-keyboard studies, and pauses grow with harder thinking. A single pause is also explained by everyday distractions.',
-      cite: 'Zulueta et al., J Med Internet Res 2018 (BiAffect)',
-      href: 'https://www.jmir.org/2018/7/e241/',
+        'Pauses and other timing features changed after people did mentally or physically stressful tasks. A single pause is also explained by everyday distractions.',
+      cite: 'Vizer et al., Int J Human-Computer Studies 2009',
+      href: 'https://doi.org/10.1016/j.ijhcs.2009.07.005',
     },
   },
   {
@@ -62,11 +62,11 @@ export const SIGNALS: Signal[] = [
     limits: 'The least sensitive signal. Small changes are often missed.',
     flag: 'A less even typing rhythm',
     research: {
-      conditions: 'Stress, time pressure and fatigue',
+      conditions: 'Stress while multitasking',
       finding:
-        'Keystroke timing changes under stress and time pressure. Our own model on SWELL-KW office-work data finds only a weak signal (ROC-AUC about 0.6).',
-      cite: 'Vizer et al., Int J Human-Computer Studies 2009; Koldijk et al. 2014 (SWELL-KW)',
-      href: 'https://doi.org/10.1016/j.ijhcs.2009.07.005',
+        'Stressed typing could be recognised for each individual, but no marker of stress held across everyone. That is the case for a personal baseline, and it matches how unsteady this measure was in our own test.',
+      cite: 'Wetherell, Lau and Maxion (typing rhythms under multitasking stress)',
+      href: 'https://researchportal.northumbria.ac.uk/en/publications/the-effect-of-socially-evaluated-multitasking-stress-on-typing-rh/',
     },
   },
 ];

@@ -90,11 +90,11 @@ export function ResearchMapSection() {
   return (
     <section id="research-map" className="scroll-mt-24 border-t">
       <div className="mx-auto max-w-5xl px-6 py-24">
-        <Eyebrow>Typing and health research</Eyebrow>
-        <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">What your typing rhythm is linked to</h2>
+        <Eyebrow>What research says</Eyebrow>
+        <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Typing timing changes when people are worn down</h2>
         <p className="mt-4 max-w-2xl text-muted-foreground">
-          Researchers have studied how typing timing changes with certain health conditions. Predict 360 tracks the same
-          three signals over time, compared with your own usual, so you can notice a change and talk to a professional.
+          Researchers have measured how typing timing shifts when people are groggy, stressed or overloaded. Predict 360
+          tracks the same three signals against your own usual, so a change is easier to notice at the end of a long shift.
         </p>
 
         <ol className="mt-12 space-y-3">
@@ -114,7 +114,7 @@ export function ResearchMapSection() {
               </div>
               <ArrowRight className="hidden size-5 text-muted-foreground md:block" aria-hidden="true" />
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied in</p>
+                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied under</p>
                 <p className="mt-0.5 font-semibold">{s.research.conditions}</p>
                 <a
                   href={s.research.href}
@@ -130,10 +130,10 @@ export function ResearchMapSection() {
         </ol>
 
         <p className="mt-6 max-w-2xl rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">Important:</span> these are correlations from published studies.
-          Predict 360 does not diagnose or detect any illness, and in the public data we tested, people with and without a
-          condition often type alike. A change in your rhythm is a reason to reflect or check in with a doctor, not a
-          result. This project is a prototype and is not medical advice.
+          <span className="font-semibold text-foreground">Important:</span> these studies were run on other people
+          under controlled conditions. Predict 360 has not been tested on nurses, and it cannot tell why your typing
+          changed. A change is a prompt to notice how you are doing, not a result. This project is a prototype and is not
+          medical advice.
         </p>
       </div>
     </section>
@@ -174,7 +174,7 @@ export function SignalsSection() {
                 <div>
                   <dt className="flex items-center gap-2 font-medium">
                     Evidence
-                    <span className="rounded-full border px-2 py-0.5 text-[11px] font-normal text-muted-foreground">Public data, injected changes</span>
+                    <span className="rounded-full border px-2 py-0.5 text-[11px] font-normal text-muted-foreground">What we measured</span>
                   </dt>
                   <dd className="mt-0.5 text-muted-foreground">{s.evidence}</dd>
                 </div>
@@ -185,7 +185,7 @@ export function SignalsSection() {
               </dl>
 
               <div className="mt-5 rounded-2xl border bg-muted/50 p-4 text-sm">
-                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied in research on</p>
+                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied under</p>
                 <p className="mt-1.5 font-semibold">{s.research.conditions}</p>
                 <p className="mt-1.5 text-muted-foreground">{s.research.finding}</p>
                 <a
@@ -224,7 +224,7 @@ export function SignalsSection() {
 }
 
 const STEPS = [
-  { icon: UserRoundCheck, title: 'Open the check-in', body: 'Sign in, or continue as a guest. It works in any desktop browser.' },
+  { icon: UserRoundCheck, title: 'Open the check-in', body: 'Sign in on a laptop or desktop. It works in any browser with a physical keyboard.' },
   { icon: PenLine, title: 'Write two sentences', body: 'Say how your shift is going. End the first sentence with a period.' },
   { icon: Timer, title: 'Timing is measured', body: 'Key holds, the pause between sentences, and rhythm. The words are discarded.' },
   { icon: Keyboard, title: 'Compare with your usual', body: 'After three check-ins you get a score from 0 to 100 against your own baseline.' },

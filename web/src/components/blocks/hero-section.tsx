@@ -45,12 +45,12 @@ export function HeroSection() {
             </a>
 
             <h1 className="animate-element animate-delay-100 mt-10 text-balance text-4xl font-bold tracking-tight md:text-6xl">
-              A daily view of your <span className="text-muted-foreground">typing rhythm.</span>
+              A 30-second typing check-in <span className="text-muted-foreground">for the end of a long shift.</span>
             </h1>
             <p className="animate-element animate-delay-200 mt-8 text-muted-foreground">
-              Write two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Either way, Predict 360
-              compares your typing rhythm with your own usual — counts and timing only, never your words. Switch whenever you
-              want. It&apos;s a hackathon prototype, not a medical device, and it can&apos;t diagnose anything.
+              Built for nurses on 12-hour shifts. Type two sentences during a break and Predict 360 uses a model
+              trained on real typing to tell you whether your timing differs from your own usual. Your words never leave
+              the browser. It&apos;s a hackathon prototype, not a medical device, and it can&apos;t diagnose anything.
             </p>
 
             <div className="animate-element animate-delay-300 mx-auto my-10 max-w-sm lg:my-12 lg:ml-0 lg:mr-auto">
