@@ -41,18 +41,18 @@ export function HeroSection() {
               className="animate-element group mx-auto flex w-fit items-center gap-2 rounded-lg border bg-background p-1 pr-3 transition-colors hover:bg-accent lg:ml-0"
             >
               <span className="rounded-[calc(var(--radius)-0.25rem)] bg-muted px-2 py-1 text-xs">Research prototype</span>
-              <span className="text-sm">Check-ins by keyboard</span>
+              <span className="text-sm">Morning check-in or all-day on Mac</span>
               <span className="block h-4 w-px bg-border" />
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </a>
 
             <h1 className="animate-element animate-delay-100 mt-10 text-balance text-4xl font-bold tracking-tight md:text-6xl">
-              Two sentences. <span className="text-muted-foreground">Your own baseline.</span>
+              A daily view of your <span className="text-muted-foreground">typing rhythm.</span>
             </h1>
             <p className="animate-element animate-delay-200 mt-8 text-muted-foreground">
-              Predict 360 is a one-minute morning check-in. You type two sentences, and it compares the rhythm of your typing
-              with your own usual, never the words. It&apos;s a hackathon prototype: you can try it now, but it isn&apos;t a
-              medical device and can&apos;t diagnose anything.
+              Write two sentences in the morning, or opt into all-day tracking on your Mac. Either way, Predict 360 compares
+              your typing rhythm with your own usual — counts and timing only, never your words. Switch whenever you want.
+              It&apos;s a hackathon prototype, not a medical device, and it can&apos;t diagnose anything.
             </p>
 
             <div className="animate-element animate-delay-300 mx-auto my-10 max-w-sm lg:my-12 lg:ml-0 lg:mr-auto">
