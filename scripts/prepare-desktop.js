@@ -12,7 +12,8 @@ async function main() {
   fs.writeFileSync(path.join(target, 'workday.cjs'), workday + '\nmodule.exports = { createWorkdayPlan };\n');
   const svg = fs.readFileSync(path.join(root, 'web/public/icon.svg'), 'utf8').replace(/<style>.*?<\/style>/s, '').replace('<g stroke-width', '<g stroke="#000" stroke-width');
   const png = path.join(target, 'icon.png');
-  await sharp(Buffer.from(svg)).resize(256, 256).flatten({ background: '#fff' }).png().toFile(png);
+  // Transparent background (no white fill), so the app icon has no backdrop.
+  await sharp(Buffer.from(svg)).resize(256, 256).png().toFile(png);
   const pngToIco = (await import('png-to-ico')).default;
   fs.writeFileSync(path.join(target, 'icon.ico'), await pngToIco(png));
 }

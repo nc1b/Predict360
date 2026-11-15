@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Keyboard, Pause, PenLine, Play, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, ChevronDown, Keyboard, PenLine, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { buttonClass } from '@/components/ui/button';
 import { QRCode } from '@/components/ui/qr-code';
@@ -178,104 +178,116 @@ interface FaqItem {
   answer: string;
 }
 
-const FAQ_ROWS: { items: FaqItem[]; duration: number; reverse?: boolean }[] = [
+const FAQS: FaqItem[] = [
   {
-    duration: 70,
-    items: [
-      {
-        question: 'Is this medical advice?',
-        answer: 'No. This project is a prototype and is not medical advice. It cannot detect or rule out any condition, and it cannot tell you whether you are ready to work.',
-      },
-      {
-        question: 'What exactly is measured?',
-        answer: 'How long each key is held, how long you pause between your two sentences, and how uneven the gaps between keys are inside a sentence.',
-      },
-      {
-        question: 'Do you read what I type?',
-        answer: 'No. Each key becomes one of four labels (character, space, sentence end, edit) plus two timestamps. Your words stay in the text box and are cleared when you finish.',
-      },
-      {
-        question: 'Where is my data stored?',
-        answer: 'Numeric summaries are cached on your device and synced to your account in Supabase. Typed words are never saved. You can delete your activity and check-in history from your dashboard.',
-      },
-    ],
+    question: 'Is this medical advice?',
+    answer:
+      'No. This project is a prototype and is not medical advice. It cannot detect or rule out any condition, and it cannot tell you whether you are ready to work.',
   },
   {
-    duration: 80,
-    reverse: true,
-    items: [
-      {
-        question: 'Why three check-ins before a score?',
-        answer: 'The score compares you with yourself, not with other people. Three earlier check-ins is the minimum for a usable picture of your usual typing.',
-      },
-      {
-        question: 'My score dropped. What does that mean?',
-        answer: 'Only that your typing timing differed from your usual. A doorbell, a new keyboard, or stopping to think looks the same as anything else.',
-      },
-      {
-        question: 'Does it work on a phone?',
-        answer: 'Not reliably. On-screen keyboards usually do not report when each key goes down and up, so there is nothing to time. Use a physical keyboard.',
-      },
-      {
-        question: 'Has it been tested on people?',
-        answer: 'Not yet. Every published result comes from seeded, simulated typing. Real typing is noisier, so expect it to do worse on people.',
-      },
-    ],
+    question: 'What exactly is measured?',
+    answer:
+      'How long each key is held, how long you pause between your two sentences, and how uneven the gaps between keys are inside a sentence.',
+  },
+  {
+    question: 'Do you read what I type?',
+    answer:
+      'No. Each key becomes one of four labels (character, space, sentence end, edit) plus two timestamps. Your words stay in the text box and are cleared when you finish.',
+  },
+  {
+    question: 'Where is my data stored?',
+    answer:
+      'Numeric summaries are cached on your device and synced to your account in Supabase. Typed words are never saved. You can delete your activity and check-in history from your dashboard.',
+  },
+  {
+    question: 'Why three check-ins before a score?',
+    answer:
+      'The score compares you with yourself, not with other people. Three earlier check-ins is the minimum for a usable picture of your usual typing.',
+  },
+  {
+    question: 'My score dropped. What does that mean?',
+    answer:
+      'Only that your typing timing differed from your usual. A doorbell, a new keyboard, or stopping to think looks the same as anything else.',
+  },
+  {
+    question: 'Does it work on a phone?',
+    answer:
+      'Not reliably. On-screen keyboards usually do not report when each key goes down and up, so there is nothing to time. Use a physical keyboard.',
+  },
+  {
+    question: 'Has it been tested on people?',
+    answer:
+      'Not yet. Every published result comes from seeded, simulated typing. Real typing is noisier, so expect it to do worse on people.',
   },
 ];
 
-function FaqCard({ item }: { item: FaqItem }) {
+function FaqRow({ item, open, onToggle }: { item: FaqItem; open: boolean; onToggle: () => void }) {
   return (
-    <article className="flex w-[19rem] shrink-0 flex-col gap-3 rounded-2xl border bg-card p-6 text-card-foreground shadow-sm transition-colors hover:border-foreground/30 sm:w-[23rem]">
-      <h3 className="text-base font-semibold leading-snug">{item.question}</h3>
-      <p className="text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
-    </article>
+    <div className="rounded-2xl border bg-card">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left text-base font-medium transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {item.question}
+        <ChevronDown
+          className={cn('size-5 shrink-0 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
+          aria-hidden="true"
+        />
+      </button>
+      <div className={cn('grid transition-all duration-200 ease-out', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+        <div className="overflow-hidden">
+          <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function FaqSection() {
-  const [paused, setPaused] = React.useState(false);
+  const [open, setOpen] = React.useState<number | null>(0);
   return (
-    <section id="faq" className="scroll-mt-24 overflow-hidden border-t">
-      <div className="mx-auto max-w-5xl px-6 pt-24">
-        <Eyebrow>FAQ</Eyebrow>
-        <h2 className="mt-3 max-w-xl text-balance text-3xl font-bold md:text-5xl">Questions, answered plainly</h2>
-      </div>
-      <div className="mt-12 flex flex-col gap-3 pb-24">
-        {FAQ_ROWS.map((row, i) => (
-          <div
-            key={i}
-            className="faq-row relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
-          >
-            <div
-              className="faq-track flex w-max items-stretch gap-4 py-2"
-              data-reverse={row.reverse ? 'true' : 'false'}
-              data-paused={paused ? 'true' : 'false'}
-              style={{ '--faq-duration': `${row.duration}s` } as React.CSSProperties}
-            >
-              <div className="flex items-stretch gap-4 pr-4">
-                {row.items.map((item) => (
-                  <FaqCard key={item.question} item={item} />
-                ))}
+    <section id="faq" className="scroll-mt-24 border-t bg-background">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+          <div className="flex flex-col gap-5 lg:sticky lg:top-24">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm shadow-black/5">
+              FAQs
+            </span>
+            <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">Your questions answered</h2>
+            <p className="text-sm text-muted-foreground">
+              What Predict 360 measures, what it can&apos;t tell you, and where your data lives.
+            </p>
+
+            <div className="mt-2 flex flex-col gap-3 rounded-2xl border bg-card p-4">
+              <div className="flex items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground text-background">
+                  <BookOpen className="size-4" aria-hidden="true" />
+                </span>
+                <div className="flex flex-col leading-tight">
+                  <p className="text-sm font-medium">Check the rules yourself</p>
+                  <p className="text-xs text-muted-foreground">Scoring, thresholds and results are public</p>
+                </div>
               </div>
-              {/* Second copy makes the loop seamless; hidden from assistive tech. */}
-              <div aria-hidden="true" inert className="flex items-stretch gap-4 pr-4">
-                {row.items.map((item) => (
-                  <FaqCard key={item.question} item={item} />
-                ))}
-              </div>
+              <a
+                href={`${REPO_URL}#scoring-rules`}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonClass({ size: 'sm', className: 'mt-1 w-full rounded-full' })}
+              >
+                Read the scoring rules
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </a>
             </div>
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => setPaused((p) => !p)}
-          aria-pressed={paused}
-          className="mx-auto mt-2 inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          {paused ? <Play className="size-3.5" aria-hidden="true" /> : <Pause className="size-3.5" aria-hidden="true" />}
-          {paused ? 'Play' : 'Pause'} questions
-        </button>
+
+          <div className="space-y-3">
+            {FAQS.map((item, i) => (
+              <FaqRow key={item.question} item={item} open={open === i} onToggle={() => setOpen(open === i ? null : i)} />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
