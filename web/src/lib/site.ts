@@ -1,5 +1,11 @@
 export const REPO_URL = 'https://github.com/nc1b/Predict360';
 
+/** Front-page product video (generated with Arcade). Empty src hides the section. */
+export const PROJECT_VIDEO = {
+  src: '',
+  poster: '',
+};
+
 // Free-to-use Unsplash photos, shown in greyscale like the Iris Checks hero.
 export const HERO_IMAGES = {
   dark: {

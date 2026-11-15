@@ -6,6 +6,7 @@ import {
   HowItWorksSection,
   SignalsSection,
 } from '@/components/blocks/landing-sections';
+import { ProjectVideo } from '@/components/blocks/project-video';
 import { SiteFooter } from '@/components/blocks/site-footer';
 import { SiteNav } from '@/components/blocks/site-nav';
 
@@ -15,6 +16,7 @@ export default function Landing() {
       <SiteNav />
       <main>
         <HeroSection />
+        <ProjectVideo />
         <SignalsSection />
         <HowItWorksSection />
         <EvidenceSection />
