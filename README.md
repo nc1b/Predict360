@@ -23,7 +23,13 @@ Write two sentences in the morning, or opt into all-day tracking on your compute
 
 Built for the **Veritas AI International High School Hackathon 2026 — AI + Health track**.
 
-Maya, a fictional 35-year-old remote worker who manages chronic migraine, uses a two-sentence check-in to notice when her typing rhythm changes. A change is a reminder to note how she feels in her usual symptom log. She can also opt into all-day activity tracking to see how her routine varies.
+**Predict 360** is a privacy-first cognitive rhythm check-in designed for high-fatigue shift environments and daily work:
+- **Primary User:** Hospital staff, nurses, and clinicians balancing demanding 12-hour shifts who need an objective check on cognitive-motor fatigue before entering high-stakes medication records and patient EHR charts.
+- **Everyday Professionals:** Desk workers, students, and remote employees who want a private morning check-in to track cognitive strain and routine stability.
+
+Neither mode ever logs what you type: typed words stay in your browser and are cleared immediately. Users can also opt into desktop activity tracking to see aggregate workload patterns across their shift or day.
+
+[One-page project write-up](WRITEUP.md)
 
 [One-page project write-up](WRITEUP.md)
 
