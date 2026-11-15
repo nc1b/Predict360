@@ -1,6 +1,8 @@
-// Front-page product video (generated with Arcade). Renders nothing until a
-// video URL is configured in site.ts, so the section never shows an empty frame.
+// Front-page product video (generated with Arcade). Uses the HLS-capable video
+// player so it works with a plain MP4 today and an .m3u8 stream later without a
+// code change. Renders nothing until a video URL is configured in site.ts.
 
+import { HLSVideoPlayer } from '@/components/ui/hls-video-player';
 import { PROJECT_VIDEO } from '@/lib/site';
 
 export function ProjectVideo() {
@@ -16,20 +18,16 @@ export function ProjectVideo() {
           What it measures, the score, the assistant, the desktop app and cloud sync — the whole project at a glance.
         </p>
         <div className="mt-10 overflow-hidden rounded-2xl border bg-card shadow-[0_24px_60px_-28px_rgba(0,0,0,0.35)]">
-          <video
-            className="aspect-video w-full"
+          <HLSVideoPlayer
             src={PROJECT_VIDEO.src}
             poster={PROJECT_VIDEO.poster || undefined}
+            width={1920}
+            height={1080}
             controls
             playsInline
             preload="metadata"
-          >
-            Your browser can&apos;t play this video.{' '}
-            <a href={PROJECT_VIDEO.src} className="underline">
-              Download it
-            </a>
-            .
-          </video>
+            className="block w-full"
+          />
         </div>
       </div>
     </section>
