@@ -4,8 +4,8 @@
 
 # Predict 360
 
-**A daily view of your typing rhythm.**
-Write two sentences in the morning, or opt into all-day tracking on your computer. Switch whenever you want.
+**A private, two-sentence typing check-in for nurses near the end of a long shift.**
+Compare your typing with your personal baseline without saving the words you type. Optional desktop tracking shows activity trends across the day.
 
 [Live site](https://predict360.vercel.app) · [Model evaluation](https://predict360.vercel.app/evaluation) · [Sources & limits](https://predict360.vercel.app/sources) · [Technical reference](docs/TECHNICAL.md)
 
@@ -23,13 +23,9 @@ Write two sentences in the morning, or opt into all-day tracking on your compute
 
 Built for the **Veritas AI International High School Hackathon 2026 — AI + Health track**.
 
-**Predict 360** is a privacy-first cognitive rhythm check-in designed for high-fatigue shift environments and daily work:
-- **Primary User:** Hospital staff, nurses, and clinicians balancing demanding 12-hour shifts who need an objective check on cognitive-motor fatigue before entering high-stakes medication records and patient EHR charts.
-- **Everyday Professionals:** Desk workers, students, and remote employees who want a private morning check-in to track cognitive strain and routine stability.
+**Predict 360** is designed for a nurse who wants to compare their typing rhythm with their usual pattern during a break near the end of a 12-hour shift. The check-in takes about 30 seconds and uses a personal baseline after at least three usable prior sessions.
 
 Neither mode ever logs what you type: typed words stay in your browser and are cleared immediately. Users can also opt into desktop activity tracking to see aggregate workload patterns across their shift or day.
-
-[One-page project write-up](WRITEUP.md)
 
 [One-page project write-up](WRITEUP.md)
 
@@ -53,7 +49,7 @@ An optional assistant explains the numbers using [GPT-4o mini](https://platform.
 
 ## Measured results
 
-**Live check-in model.** On 360 generated sessions from six unseen simulated profiles, the model flagged **19 of 180 unchanged sessions (10.6% false positives)** and missed **45 of 180 scripted changes (25.0% false negatives)**. An always-usual baseline had zero false positives and missed all 180 changes. A distraction can trigger the same flag as a deliberate pause. These results measure timing changes in simulated data.
+**Live check-in model.** On 360 generated sessions from six unseen simulated profiles, accuracy was **82.2% vs. 50.0%** for the always-usual baseline. The model flagged **19 of 180 unchanged sessions (10.6% false positives)** and missed **45 of 180 scripted changes (25.0% false negatives)**. An always-usual baseline had zero false positives and missed all 180 changes. A distraction can trigger the same flag as a deliberate pause. These results measure timing changes in simulated data.
 
 **All-day tracking research.** We separately tested offline classifiers for neutral versus interrupted or time-pressured work minutes in the public SWELL-KW dataset. The numbers below are from held-out participants (five grouped folds). The desktop app shows descriptive trends in activity counts.
 
@@ -63,7 +59,7 @@ An optional assistant explains the numbers using [GPT-4o mini](https://platform.
 | Logistic regression | 56% | 55% | 42% | 45% | **0.59** |
 | Random forest | 60% | 70% | 58% | 30% | 0.60 |
 
-**The honest read:** the signal is real but weak. The model beats the baseline at telling calm from strained minutes, but it is not reliable on its own. Accuracy is misleading here — the baseline looks more accurate only because most minutes are strained, while flagging every calm minute.
+Logistic regression ranked interrupted or time-pressured minutes above neutral minutes only slightly better than chance (0.59 ROC-AUC). At the tested threshold, it had lower accuracy than the majority baseline and flagged fewer neutral minutes. These results describe office-task conditions.
 
 **Where it fails:** 42% of genuinely calm minutes are still flagged. In the morning check-in, a distraction produces the same "longer pause" flag as a deliberate pause — the tool detects a change from your usual, never its cause.
 
@@ -141,7 +137,7 @@ Then open http://localhost:3000.
 
 ## Credits
 
-[Datasets and research limits](SOURCES.md), [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), [React](https://react.dev/), [Express](https://expressjs.com/), [Electron](https://www.electronjs.org/), [Clerk](https://clerk.com/), [Supabase](https://supabase.com/), [Arcade](https://www.arcade.software/) (demo), and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) (development assistance).
+[Datasets and research limits](SOURCES.md), [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), [React](https://react.dev/), [Express](https://expressjs.com/), [Electron](https://www.electronjs.org/), [Clerk](https://clerk.com/), [Supabase](https://supabase.com/), [Arcade](https://www.arcade.software/) (demo), [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) via [Hack Club AI](https://ai.hackclub.com/) (optional explanations), and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) (development assistance).
 
 <div align="center">
 <sub>Predict 360 · Veritas AI High School Hackathon 2026 · This project is a prototype and is not medical advice.</sub>
