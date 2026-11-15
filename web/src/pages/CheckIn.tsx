@@ -4,6 +4,7 @@ import { Keyboard, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { Logo } from '@/components/logo';
 import { Chat } from '@/components/chat';
+import { ReferenceContext } from '@/components/reference-context';
 import { ResultCard, StatusBadge } from '@/components/result-card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -329,6 +330,7 @@ export default function CheckIn() {
                   </p>
                   <WeatherContextPanel onChange={setWeather} />
                 </Card>
+                <ReferenceContext features={shown.result.features} />
               </>
             ) : (
               <Card className="p-6">
