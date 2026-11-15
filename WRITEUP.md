@@ -1,37 +1,38 @@
 # Predict 360
 
-**Track:** Health  
-**Team:** [Insert Your Teammate Names and High Schools]
+**Track** — Health  
+**Team** — [Add team member names and high schools]
 
 This project is a prototype and is not medical advice.
 
 ## The problem
-Inpatient hospital staff and nurses working 12-hour shifts endure acute cognitive fatigue and physical slowing, directly heightening the risk of burnout and electronic health record (EHR) medication charting errors. While everyday computer professionals also struggle with unmeasured mental fatigue, hospital personnel face immediate safety consequences if motor slowing goes unnoticed before clinical data entry. Both healthcare workers and everyday desk users lack a non-invasive, objective tool to check their own cognitive-motor rhythm without workplace surveillance or privacy invasion.
+
+Imagine you're near the end of a 12-hour nursing shift and still have medication records to enter. By then, it can be hard to tell how much your pace has changed since the start of the day. We wanted to give nurses and other hospital staff a quick, private way to check in with themselves. The same idea can help anyone who spends a lot of time at a keyboard.
 
 ## What we built
-Predict 360 is a zero-text-storage typing rhythm monitor. Before entering clinical logs or starting a shift, users complete a 30-second check-in by typing two sentences on a physical keyboard. The tool extracts three key timing dynamics—key-hold duration (`dwellMs`), pause length between sentences (`sentencePauseMs`), and keystroke rhythm volatility (`flightVolatilityMs`)—while discarding the words typed to protect clinical and personal confidentiality. After three initial sessions, it compares current timing against the individual's personal baseline and outputs an objective readiness score (0–100), deviation flags, and feature breakdowns. An optional desktop companion passively tracks aggregate daily activity (clicks, keystrokes, active/idle time) with a visible one-click pause switch.
+
+Predict 360 gives you two ways to check in. In the browser, you type two sentences on a physical keyboard. It takes about 30 seconds. We measure how long you hold each key, how long you pause between sentences, and how steady your typing rhythm is. The words stay in the browser and are cleared after the check-in. The optional Windows and macOS app counts key presses, clicks, scrolls, and active and idle time to show patterns across the day. It starts paused, and you can pause it again anytime.
 
 ## What we added
-Our own idea. Instead of building an intrusive surveillance tool or a fragile population-level disease classifier, we engineered an $n=1$ longitudinal self-baseline. This enables shift workers entering critical medication data—and everyday professionals monitoring cognitive strain—to compare their micro-timing against their own historical baseline rather than an arbitrary group average.
+
+The idea is to compare your typing today with how you usually type. After at least three check-ins, Predict 360 uses your earlier sessions to build a personal baseline. It gives you a 0–100 score and shows what changed, such as a longer pause between sentences. A separate model classifies your timing as close to usual or different.
 
 ## How it works
-The live check-in uses a logistic regression model trained on 720 simulated typing sessions across 12 typist profiles and evaluated on 360 held-out sessions from 6 unseen profiles. The model evaluates relative changes in key-hold duration, sentence pause, and inter-key rhythm. We separately tested an offline comparative classifier on the public SWELL-KW dataset (25 participants, 2,686 minute-level keyboard/mouse activity records under neutral and stress conditions) using 5-fold leave-participants-out cross-validation (`StratifiedGroupKFold`) so the model is strictly evaluated on unseen individuals.
+
+We trained the check-in model with logistic regression on 720 simulated typing sessions from 12 typist profiles. We tested it on 360 sessions from six other simulated profiles. We also ran a separate experiment on 2,686 one-minute keyboard and mouse activity records from 25 people in the public SWELL-KW dataset. We used five test splits, each holding out entire participants, to see how well the model could tell ordinary work minutes from minutes with interruptions or time pressure.
 
 ## Results
-On held-out check-in test data (360 sessions; 180 unchanged, 180 scripted changes):
-- **Naive baseline (always predict "usual"):** 0/180 false alarms (0.0%), but missed 180/180 timing changes (100.0% false negatives / 0% recall).
-- **Our Model:** 19/180 false alarms (10.6% false positive rate) and caught 135/180 changes (75.0% recall, 25.0% false negative rate).
 
-On SWELL-KW cross-person work strain:
-- **Majority-class baseline ("always strained"):** Scored 61.8% accuracy but had a 100% false-alarm rate (caught 0 calm minutes).
-- **Our logistic regression:** Achieved ROC-AUC 0.59, 42.0% false alarms, and 45.3% missed strain, honestly demonstrating that cross-person typing is a real but noisy signal.
-
-**Where it fails:** In our interactive demo (`/evaluation`), selecting **Missed timing change** shows a held-out failure where key holds were 27% longer (100 ms vs 79 ms baseline), but an unusually even rhythm dampened the penalty, causing the model to misclassify it as usual. Furthermore, **Distracted typist** shows that an ordinary distraction (answering a hospital phone call or talking to a coworker) triggers the same pause flag as motor slowing—the model detects deviation from routine, never the medical or situational cause.
+- **Two-sentence check-in.** The model caught 135 of 180 scripted timing changes (75%) and flagged 19 of 180 unchanged sessions (10.6%). The simple baseline that always guessed “usual” had zero false alarms and missed all 180 changes.
+- **SWELL-KW experiment.** Always guessing “strained” was 61.8% accurate and flagged every calm minute. Our logistic regression model reached a ROC-AUC of 0.59, flagged 42.0% of calm minutes, and missed 45.3% of minutes labeled as strained.
+- **Where it fails.** In the **Missed timing change** example, the simulated typist held keys about 27% longer than usual, and the model still called it “usual.” In **Distracted typist**, a brief interruption triggered the same flag as a deliberate pause. A flag tells you what changed in your typing. Its cause could be something as ordinary as a phone call. [Interactive evaluation](https://predict360.vercel.app/evaluation)
 
 ## What we'd do next
-Pilot test the check-in with consenting hospital personnel across day and night shift rotations, and investigate whether multi-check-in rolling averages reduce false alarms caused by temporary workplace interruptions.
+
+We'd ask hospital staff who volunteer to try the check-in on day and night shifts. We'd also see whether averaging several check-ins cuts down on false alarms from one-off interruptions.
 
 ## Sources
-- **Datasets:** SWELL-KW (CC BY-NC-SA 4.0, DANS), CMU Keystroke Dynamics Benchmark, Tappy Keystroke Data (PhysioNet, ODC-By 1.0), and Open-Meteo Historical Weather API.
-- **AI & Libraries:** scikit-learn (offline model & leave-participants-out evaluation), GPT-4o mini via Hack Club AI (optional text summaries of numeric outputs), and Claude & ChatGPT for development assistance.
-- **Code & Live Demo:** Public repository (https://github.com/nc1b/Predict360), Live App (https://predict360.vercel.app), and Interactive Model Evaluation (https://predict360.vercel.app/evaluation).
+
+- **Research data.** We used [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) for the offline experiment. The [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/) and [Tappy](https://physionet.org/content/tappy/1.0.0/) provided reference ranges for key-hold times. [Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) provided optional weather context.
+- **Tools.** We used scikit-learn for the SWELL-KW experiment, GPT-4o mini through Hack Club AI for optional summaries of the results, and Claude and ChatGPT for development help.
+- **Project links.** [GitHub](https://github.com/nc1b/Predict360) · [Live app](https://predict360.vercel.app) · [Sources and licenses](https://github.com/nc1b/Predict360/blob/main/SOURCES.md)
