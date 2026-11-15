@@ -37,7 +37,7 @@ test('points are linear between tolerance and fullAt', () => {
   assert.equal(pointsFor('sentencePauseMs', 2.75), 17.5);
   assert.equal(pointsFor('sentencePauseMs', 4), 35);
   assert.equal(pointsFor('sentencePauseMs', 40), 35);
-  assert.equal(pointsFor('dwellMs', 0.5), 0); // faster than usual is not penalised
+  assert.equal(pointsFor('dwellMs', 0.5), 0);
 });
 
 test('deductions use the original ratio, not the rounded display ratio', () => {

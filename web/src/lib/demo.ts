@@ -1,5 +1,3 @@
-// Simulated sessions for the demo: the same seeded synthetic fixtures the backend
-// tests use, already paired with their synthetic baseline. Loaded on demand.
 
 import type { AnalyzeRequest } from './types';
 

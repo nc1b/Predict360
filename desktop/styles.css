@@ -1,5 +1,3 @@
-/* Predict 360 desktop — compact, dark-first UI (Wispr Flow-style).
-   Dark is the default; [data-theme="light"] on <html> switches to light. */
 :root {
   --bg: #0b0b0c;
   --surface: #161618;
@@ -330,8 +328,6 @@ footer {
   text-align: center;
 }
 
-/* macOS: hidden-inset title bar. Leave room for the window buttons, keep the
-   header the height of the button row, and make it the window's drag handle. */
 :root[data-platform='darwin'] header {
   padding: 10px 14px 10px 86px;
   min-height: 52px;
@@ -383,7 +379,6 @@ footer {
   }
 }
 
-/* Softer, rounder surfaces */
 .control,
 .metrics section,
 .panel {

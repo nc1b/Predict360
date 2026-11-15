@@ -1,12 +1,9 @@
 'use strict';
 
-// Load a local .env (e.g. HACKCLUB_AI_KEY) when present. On Vercel the env vars
-// come from the project settings instead, so this is a no-op there.
 if (typeof process.loadEnvFile === 'function') {
   try {
     process.loadEnvFile();
   } catch (err) {
-    // Missing local configuration is fine; malformed/unreadable files are not.
     if (err.code !== 'ENOENT') throw err;
   }
 }
@@ -20,7 +17,6 @@ if (!Number.isInteger(port) || port < 0 || port > 65535 || process.env.PORT === 
   throw new Error('PORT must be an integer between 0 and 65535.');
 }
 
-// If the frontend has been built (npm run build), serve it from the same port.
 const dist = path.join(__dirname, '..', 'web', 'dist');
 const staticDir = fs.existsSync(path.join(dist, 'index.html')) ? dist : null;
 
@@ -38,7 +34,6 @@ server.on('error', (err) => {
   process.exitCode = 1;
 });
 
-// Stop accepting requests on deploy/restart, then let active requests finish.
 let stopping = false;
 function shutdown() {
   if (stopping) return;

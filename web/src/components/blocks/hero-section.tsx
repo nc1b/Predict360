@@ -1,5 +1,3 @@
-// Hero in the layout of the Iris Checks site: left-aligned copy over a greyscale
-// photo that fades into the page, with a gentle parallax on scroll.
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';

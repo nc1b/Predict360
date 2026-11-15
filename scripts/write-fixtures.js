@@ -1,7 +1,5 @@
 'use strict';
 
-// Writes the synthetic fixtures as JSON so they can be sent with curl or loaded
-// by the future frontend. Output is deterministic; rerunning produces identical files.
 
 const fs = require('node:fs');
 const path = require('node:path');

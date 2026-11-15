@@ -39,8 +39,6 @@ async function syncHistory(user: string, token: string): Promise<HistoryEntry[]>
     localStorage.setItem(pendingKey(user), JSON.stringify(pending(user).filter((item) => item !== id)));
   }
   const { entries } = await cloud<{ entries: HistoryEntry[] }>('checkins', token);
-  // New entries can be queued while the fetch is in flight. Preserve those
-  // locally until the next sync rather than replacing them with an older read.
   const unsent = new Set(pending(user));
   const fresh = loadHistory(localStorage, user).filter((entry) => unsent.has(entry.id));
   const merged = [...new Map([...entries, ...fresh].map((entry) => [entry.id, entry])).values()].sort((a, b) => a.at.localeCompare(b.at));

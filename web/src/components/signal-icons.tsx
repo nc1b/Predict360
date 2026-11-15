@@ -12,7 +12,6 @@ const base = {
   'aria-hidden': true,
 };
 
-/** A key pressed down, with a timer bar showing how long it's held. */
 export function KeyHoldIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -25,7 +24,6 @@ export function KeyHoldIcon(props: IconProps) {
   );
 }
 
-/** Two lines of text with a period and a gap before the next sentence. */
 export function SentencePauseIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -38,7 +36,6 @@ export function SentencePauseIcon(props: IconProps) {
   );
 }
 
-/** Uneven bars: keystroke intervals with irregular rhythm. */
 export function RhythmIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

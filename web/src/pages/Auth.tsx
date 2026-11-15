@@ -1,5 +1,3 @@
-// Sign-in and sign-up, in the split layout of the Iris Checks auth pages:
-// form on the left, greyscale photo with a caption on the right.
 
 import { SignIn, SignUp } from '@clerk/react';
 import { Navigate } from 'react-router-dom';
@@ -68,8 +66,6 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
   );
 }
 
-// Clerk renders its own card and heading; flatten it into our layout and hide
-// the branding footer (which carries the development-instance badge).
 const flat = {
   elements: {
     rootBox: { width: '100%' },

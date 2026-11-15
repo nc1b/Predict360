@@ -1,6 +1,3 @@
-// Front-page product video (generated with Arcade). Uses the HLS-capable video
-// player so it works with a plain MP4 today and an .m3u8 stream later without a
-// code change. Renders nothing until a video URL is configured in site.ts.
 
 import { HLSVideoPlayer } from '@/components/ui/hls-video-player';
 import { PROJECT_VIDEO } from '@/lib/site';

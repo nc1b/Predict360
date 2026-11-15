@@ -4,8 +4,6 @@ import { createCloudHandler, readLimited } from './cloud-core.mjs';
 import * as activity from './activity.mjs';
 import * as validation from './validate.mjs';
 
-// Public issuer for the existing website's Clerk instance. No Clerk secret key
-// is needed to verify its asymmetric session signatures.
 const issuer = 'https://destined-pika-103.clerk.accounts.dev';
 const origins = ['https://predict360.vercel.app', 'http://localhost:3000', 'http://localhost:5173'];
 const jwks = createRemoteJWKSet(new URL(`${issuer}/.well-known/jwks.json`));

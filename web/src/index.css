@@ -3,8 +3,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Monochrome theme matching the Iris Checks site: black, white and greys.
-   The only colour is in the three score-status tints. */
 :root {
   --radius: 0.625rem;
 
@@ -100,7 +98,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Entrance animations (same recipe as Iris Checks). */
 @keyframes fadeSlideIn {
   to {
     opacity: 1;
@@ -180,8 +177,6 @@
   }
 }
 
-/* Hide Clerk's branding and development-instance badge, but keep the
-   "Don't have an account? Sign up" link (its sibling in the footer). */
 .cl-footerItem {
   display: none !important;
 }

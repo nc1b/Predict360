@@ -7,13 +7,10 @@ function setRef<T>(ref: PossibleRef<T>, value: T) {
   else if (ref !== null && ref !== undefined) (ref as React.RefObject<T>).current = value;
 }
 
-/** Merge several refs into one callback ref. */
 export function composeRefs<T>(...refs: PossibleRef<T>[]) {
   return (node: T) => refs.forEach((ref) => setRef(ref, node));
 }
 
-/** Memoised version of composeRefs for use in render. */
 export function useComposedRefs<T>(...refs: PossibleRef<T>[]) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return React.useCallback(composeRefs(...refs), refs);
 }

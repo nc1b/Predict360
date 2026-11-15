@@ -1,7 +1,5 @@
 'use strict';
-// Platform class (macOS leaves room for the window buttons in the header).
 document.documentElement.dataset.platform = new URLSearchParams(location.search).get('platform') || '';
-// Theme (dark by default; persisted light/dark toggle in the header).
 (function () {
   try {
     const saved = localStorage.getItem('p360.desktop.theme');

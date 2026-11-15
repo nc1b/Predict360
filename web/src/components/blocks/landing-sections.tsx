@@ -1,5 +1,3 @@
-// Landing page sections, in the layout language of the Iris Checks site:
-// uppercase eyebrow, bold heading, bordered cards that lift on hover.
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';

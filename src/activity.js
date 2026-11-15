@@ -1,6 +1,5 @@
 'use strict';
 
-// Hourly counts only. This module also runs inside the desktop main process.
 const HOUR = 3600000;
 const COUNTS = ['clicks', 'keyPresses', 'scrollEvents'];
 const FIELDS = ['hour', ...COUNTS, 'trackedMs', 'activeMs'];
@@ -27,7 +26,7 @@ function validateDay(day, path = 'day') {
     if (!Number.isInteger(bucket.hour) || bucket.hour < 0 || bucket.hour > 23 || hours.has(bucket.hour)) add(`${p}.hour`, 'Use a unique hour between 0 and 23.');
     hours.add(bucket.hour);
     for (const field of [...COUNTS, 'trackedMs', 'activeMs']) {
-      const max = COUNTS.includes(field) ? 10000000 : 2 * HOUR; // repeated DST hour
+      const max = COUNTS.includes(field) ? 10000000 : 2 * HOUR;
       if (!Number.isInteger(bucket[field]) || bucket[field] < 0 || bucket[field] > max) add(`${p}.${field}`, `Use an integer between 0 and ${max}.`);
     }
     if (bucket.activeMs > bucket.trackedMs) add(`${p}.activeMs`, 'Active time cannot exceed tracked time.');

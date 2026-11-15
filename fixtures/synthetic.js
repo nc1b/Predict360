@@ -1,14 +1,6 @@
 'use strict';
 
-/**
- * Reproducible synthetic typing sessions for tests and the demo.
- *
- * Everything here is generated from a seeded PRNG. These sessions simulate
- * typing-timing changes only; they are not recordings of people and say nothing
- * about any health condition.
- */
 
-// Word lengths of a two-sentence check-in. No text exists anywhere, only shapes.
 const SENTENCES = [
   [5, 2, 4, 3, 6, 4],
   [1, 4, 5, 2, 7, 3, 5],
@@ -25,11 +17,6 @@ function mulberry32(seed) {
   };
 }
 
-/**
- * Generate one session. Each key consumes exactly two random draws (dwell, flight)
- * regardless of options, so two sessions with the same seed differ only in the
- * option that was changed.
- */
 function generateSession({
   seed,
   dwellMean = 95,
@@ -63,14 +50,13 @@ function generateSession({
     if (s < sentences.length - 1) {
       t = endDown + flightAfterEnd;
       press('space');
-      t = endDown + pauseMs; // first character of the next sentence
+      t = endDown + pauseMs;
     }
   });
 
   return keystrokes;
 }
 
-// Five ordinary prior check-ins that form the demo baseline.
 const BASELINE_SPECS = [
   { seed: 101, dwellMean: 93, pauseMs: 640 },
   { seed: 102, dwellMean: 95, pauseMs: 700 },
@@ -83,8 +69,6 @@ function baselineSessions() {
   return BASELINE_SPECS.map((spec) => ({ keystrokes: generateSession(spec) }));
 }
 
-// Labeled fixtures. `expectedFlags` is the scripted change each one simulates.
-// All but the confounder share seed 11, so each differs from `ordinary` in one option only.
 const FIXTURE_SPECS = [
   {
     name: 'ordinary',
@@ -135,7 +119,6 @@ function fixture(name) {
   return found;
 }
 
-/** A complete POST /api/analyze body for a named fixture, baseline included. */
 function requestFor(name) {
   return { keystrokes: fixture(name).keystrokes, baseline: { sessions: baselineSessions() } };
 }

@@ -21,7 +21,6 @@ grant execute on function public.save_activity_day(text, uuid, date, jsonb, bigi
 create function public.delete_activity_account(p_user_id text)
 returns void language plpgsql security invoker set search_path = '' as $$
 begin
-  -- Session locks serialize against in-flight writes before deleting summaries.
   delete from public.desktop_sessions where user_id = p_user_id;
   delete from public.activity_days where user_id = p_user_id;
   delete from public.desktop_codes where user_id = p_user_id;

@@ -38,8 +38,8 @@ test('buildHistoryText and prepareChat use numbers only', () => {
   assert.ok(Array.isArray(prepared.messages));
   assert.equal(prepared.messages[0].role, 'system');
   const wire = JSON.stringify(prepared.messages);
-  assert.match(wire, /4200ms/); // history numbers reach the model
-  assert.match(wire, /summarise/); // the user's question
+  assert.match(wire, /4200ms/);
+  assert.match(wire, /summarise/);
   assert.ok(!/keystrokes|downMs|upMs|journal/i.test(wire));
 });
 

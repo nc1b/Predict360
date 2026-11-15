@@ -50,7 +50,7 @@ export default function CheckIn() {
 
   const recorder = React.useRef(new KeystrokeRecorder());
   const textRef = React.useRef<HTMLTextAreaElement>(null);
-  const [text, setText] = React.useState(''); // lives only in this component; never stored or sent
+  const [text, setText] = React.useState('');
   const [count, setCount] = React.useState(0);
   const [busy, setBusy] = React.useState(false);
   const [shown, setShown] = React.useState<Shown | null>(null);
@@ -109,7 +109,6 @@ export default function CheckIn() {
       dismiss('error');
       dismiss('empty');
       if (result.status === 'insufficient_samples') {
-        // Not saved: a too-short session would weaken the baseline.
         setShown({ result, baselineCount: usableCount, caption: 'This check-in' });
         push({ id: 'saved', kind: 'warning', title: 'Check-in not saved', description: 'It was too short to measure. Try again with two full sentences.' });
       } else {

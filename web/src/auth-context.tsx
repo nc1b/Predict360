@@ -1,6 +1,3 @@
-// Thin wrapper around Clerk so pages depend on one small hook.
-// Clerk handles accounts and sessions. The sync service verifies session tokens
-// before accessing account-scoped summaries; the stateless analyzer gets timing only.
 
 import * as React from 'react';
 import { ClerkProvider, useUser, useSession } from '@clerk/react';
@@ -43,7 +40,6 @@ function ClerkBridge({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-/** Clerk's components, themed with the same CSS variables as the rest of the site. */
 export const clerkAppearance = {
   variables: {
     colorPrimary: 'var(--primary)',
@@ -65,7 +61,6 @@ export const clerkAppearance = {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   if (!CLERK_KEY) {
-    // No key configured: the site still renders, signed out.
     return <AuthContext.Provider value={signedOut}>{children}</AuthContext.Provider>;
   }
   return (

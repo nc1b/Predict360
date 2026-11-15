@@ -1,9 +1,62 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/logo';
+import { ResultCard } from '@/components/result-card';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { analyze } from '@/lib/api';
+import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
+import type { AnalyzeResponse } from '@/lib/types';
 import metrics from '../../../research/swell-strain-metrics.json';
+import typingModel from '../../../research/typing-model.json';
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
+
+function TypingModelDemo() {
+  const [result, setResult] = useState<{ label: string; analysis: AnalyzeResponse } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function run(name: DemoName, label: string) {
+    setBusy(true);
+    setError('');
+    try {
+      const analysis = await analyze(await loadDemoRequest(name));
+      setResult({ label, analysis });
+    } catch {
+      setError('Could not analyze the example. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const { falsePositives, falseNegatives, truePositives, trueNegatives } = typingModel.model;
+  return (
+    <section className="mt-8 space-y-4" aria-labelledby="typing-model-heading">
+      <h2 id="typing-model-heading" className="text-2xl font-semibold">Try the morning check-in model</h2>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        Choose a simulated typing session to run it through the same model used in the app. Each example includes five
+        earlier sessions to serve as its baseline. The demo requires no account and saves no entries.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {DEMO_SESSIONS.map(({ name, label }) => (
+          <Button key={name} type="button" variant="outline" size="sm" disabled={busy} onClick={() => void run(name, label)}>
+            {label}
+          </Button>
+        ))}
+      </div>
+      {busy && <p role="status" className="text-sm">Analyzing the example…</p>}
+      {error && <p role="alert" className="text-sm">{error}</p>}
+      {result && <ResultCard result={result.analysis} baselineCount={5} caption={result.label} />}
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        Across {typingModel.testSessions} sessions from {typingModel.testProfiles} unseen simulated typists, the model
+        flagged {falsePositives} of {falsePositives + trueNegatives} unchanged sessions and missed {falseNegatives} of{' '}
+        {falseNegatives + truePositives} scripted changes. An always-usual baseline produced zero false alarms and missed
+        every change. Try the distracted typist to see how an interruption alone can trigger a timing flag.
+      </p>
+    </section>
+  );
+}
 
 type Row = { tn: number; fp: number; fn: number; tp: number; accuracy: number; recall_strain: number; false_positive_rate: number; false_negative_rate: number; roc_auc?: number };
 
@@ -31,9 +84,11 @@ export default function Evaluation() {
       </Link>
 
       <p className="mt-8 text-sm font-medium uppercase tracking-widest text-muted-foreground">Evaluation</p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight">Does the model actually work?</h1>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight">How Predict 360 was tested</h1>
+      <TypingModelDemo />
+      <h2 className="mt-10 text-2xl font-semibold">All-day tracking research</h2>
       <p className="mt-4 max-w-3xl text-muted-foreground">
-        We trained a classifier to tell a <strong className="text-foreground">strained</strong> work minute (interrupted or
+        We tested an offline classifier for a <strong className="text-foreground">strained</strong> work minute (interrupted or
         under time pressure) from a <strong className="text-foreground">neutral</strong> one, using one minute of keyboard
         and mouse activity from the public{' '}
         <a href={metrics.source} target="_blank" rel="noreferrer" className="underline">

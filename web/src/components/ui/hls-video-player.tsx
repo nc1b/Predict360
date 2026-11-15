@@ -5,7 +5,6 @@ import type Hls from 'hls.js';
 import type { ErrorData, ManifestParsedData, LevelSwitchedData } from 'hls.js';
 import { useComposedRefs } from '@/components/ui/hls-video-player-utils/compose-refs';
 
-/* ------------------------------------------------------------------ Types */
 
 type HLSErrorType = 'network' | 'media' | 'fatal' | 'other';
 
@@ -19,11 +18,8 @@ export interface HLSVideoError {
 export interface HLSVideoPlayerProps
   extends Omit<React.VideoHTMLAttributes<HTMLVideoElement>, 'src' | 'width' | 'height' | 'onError'> {
   ref?: React.Ref<HTMLVideoElement>;
-  /** The HLS stream URL (.m3u8) or regular video source */
   src: string;
-  /** Video width (required for aspect ratio) */
   width: number;
-  /** Video height (required for aspect ratio) */
   height: number;
   debug?: boolean;
   onHlsError?: (error: HLSVideoError) => void;
@@ -35,7 +31,6 @@ export interface HLSVideoPlayerProps
   minResolution?: number;
 }
 
-/* ------------------------------------------------------------------ Utils */
 
 function supportsHlsNatively(): boolean {
   if (typeof window === 'undefined') return false;
@@ -51,7 +46,6 @@ function createHlsError(type: HLSErrorType, message: string, fatal: boolean, det
   return { type, message, fatal, details };
 }
 
-/* -------------------------------------------------------- HLSVideoPlayer */
 
 export function HLSVideoPlayer({
   ref,

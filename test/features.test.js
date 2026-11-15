@@ -61,10 +61,8 @@ test('hand-computed example: median dwell, pause, population std dev', () => {
   assert.deepEqual(s.flights, [100, 200, 100, 200, 100]);
   assert.deepEqual(s.pauses, [1000]);
   const f = extractFeatures(session);
-  // dwells: 80,100,120,90,100,50,100,90 -> median 95
   assert.equal(f.dwellMs.value, 95);
   assert.equal(f.sentencePauseMs.value, 1000);
-  // mean 140, variance (3*40^2 + 2*60^2)/5 = 2400 -> sd 48.99
   assert.equal(f.flightVolatilityMs.value, 48.99);
 });
 
@@ -74,7 +72,6 @@ test('final punctuation with no following sentence contributes no pause sample',
   assert.equal(one.sentencePauseMs.value, null);
   assert.equal(one.sentencePauseMs.sufficient, false);
 
-  // Trailing spaces and edits after the final mark still add nothing.
   const trailing = extractFeatures([
     k('character', 0, 90),
     k('sentence_end', 300, 390),
@@ -95,7 +92,7 @@ test('pause skips spaces and edits and ends at the first typed character', () =>
     k('character', 1000, 1090),
   ]);
   assert.deepEqual(s.pauses, [800]);
-  assert.deepEqual(s.flights, [100, 100]); // boundary gap never becomes a flight interval
+  assert.deepEqual(s.flights, [100, 100]);
 });
 
 test('multiple pauses use the median', () => {
@@ -113,7 +110,6 @@ test('multiple pauses use the median', () => {
 });
 
 test('overlapping key holds are measured normally', () => {
-  // Second key goes down 60 ms before the first is released.
   const f = extractFeatures([k('character', 0, 160), k('character', 100, 220), k('character', 200, 330)]);
   assert.equal(f.dwellMs.value, 130);
   assert.equal(f.dwellMs.samples, 3);

@@ -247,6 +247,8 @@ Minimum samples per session: dwell 20, sentence pause 1, flight intervals 20.
 
 ## Scoring rules
 
+`POST /api/analyze` also returns `typingPattern` (`usual`, `different`, or `null` when the baseline or samples are insufficient). The classifier uses `log(1 + current) - log(1 + baseline)` for each of the three timing measures. The weights and held-out synthetic results are in [the model report](../research/typing-model.json). Reproduce them with `node scripts/train-typing-model.js`.
+
 - **Baseline**: for each feature, the median across prior sessions that met that feature's
   minimum samples. At least 3 such sessions are required per feature.
 - **Ratio**: `session value / baseline value`, using the unrounded ratio for deductions. Display ratios are rounded to two decimals. If both values are zero, the ratio is 1; an increase from zero uses `ratio: null` and the maximum feature deduction. Zero-variation baselines remain usable.

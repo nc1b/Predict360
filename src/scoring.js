@@ -10,11 +10,6 @@ const {
 } = require('./config');
 const { extractFeatures, median, round2 } = require('./features');
 
-/**
- * Build a baseline from prior sessions' feature objects
- * ({ dwellMs: { value, samples }, ... }). For each feature, the baseline is the
- * median of the values from sessions that met that feature's minimum samples.
- */
 function buildBaseline(sessionFeatures) {
   const features = {};
   for (const name of FEATURES) {
@@ -42,11 +37,8 @@ function pointsFor(name, ratio) {
 
 function compare(name, current, base) {
   if (!base || !base.valid || current.value === null) return null;
-  // A perfectly even rhythm can have a zero baseline. An unchanged zero is
-  // equal to usual; an increase has no finite ratio. Never serialize Infinity.
   const rawRatio = base.value === 0 ? (current.value === 0 ? 1 : Infinity) : current.value / base.value;
   const ratio = Number.isFinite(rawRatio) ? round2(rawRatio) : null;
-  // Round for display only: rounding a ratio first shifts the scoring thresholds.
   const pointsDeducted = current.sufficient ? pointsFor(name, rawRatio) : 0;
   return {
     sessionMs: current.value,
@@ -58,10 +50,6 @@ function compare(name, current, base) {
   };
 }
 
-/**
- * Score one session's features against a baseline (or null).
- * Only increases are penalised: longer holds, longer sentence pause, more uneven rhythm.
- */
 function scoreSession(features, baseline) {
   const reasons = [];
 
@@ -131,7 +119,6 @@ function scoreSession(features, baseline) {
   };
 }
 
-/** Full pipeline for a validated request body. */
 function analyze(body) {
   const features = extractFeatures(body.keystrokes);
   let baseline = null;
@@ -144,7 +131,6 @@ function analyze(body) {
   return scoreSession(features, baseline);
 }
 
-/** Naive comparator used for the judging evidence: never detects anything. */
 function naiveAnalyze() {
   return { readinessScore: 100, status: 'near_baseline', flags: [] };
 }

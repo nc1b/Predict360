@@ -1,5 +1,3 @@
-// Per-account local cache of check-in summaries synced with the cloud service.
-// An entry holds three numbers and their sample counts. No text and no keystrokes.
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -19,7 +17,7 @@ export interface HistoryEntry {
   flags: Flag[];
 }
 
-export const MAX_HISTORY = 30; // the API accepts at most 30 baseline sessions
+export const MAX_HISTORY = 30;
 export const MIN_BASELINE_SESSIONS = 3;
 
 const FEATURES: FeatureName[] = ['dwellMs', 'sentencePauseMs', 'flightVolatilityMs'];
@@ -70,7 +68,6 @@ export function saveHistory(storage: StorageLike, userId: string, entries: unkno
   storage.setItem(key(userId), JSON.stringify(Array.isArray(entries) ? entries.filter(validEntry).slice(-MAX_HISTORY) : []));
 }
 
-/** A check-in is worth keeping only if every feature had enough samples. */
 export function isUsable(features: Features): boolean {
   return validFeatures(features) && FEATURES.every((name) => features[name].samples >= MIN_SAMPLES[name]);
 }
@@ -94,7 +91,6 @@ export function clearHistory(storage: StorageLike, userId: string): void {
   storage.removeItem(key(userId));
 }
 
-/** The `baseline` field for the next request, built from stored feature summaries. */
 export function baselineFrom(history: HistoryEntry[], deviceId?: string): AnalyzeRequest['baseline'] | undefined {
   const usable = history.filter((h) => h && (!deviceId || h.deviceId === deviceId) && isUsable(h.features)).slice(-MAX_HISTORY);
   if (usable.length === 0) return undefined;

@@ -1,4 +1,3 @@
-// Personal planning heuristics, not a health, productivity or employment score.
 export function createWorkdayPlan({ days = [], energy = null } = {}) {
   const summaries = days.filter((day) => day && typeof day.date === 'string' && Array.isArray(day.buckets))
     .map((day) => ({ date: day.date, active: day.buckets.reduce((sum, bucket) => sum + (Number.isFinite(bucket.activeMs) ? Math.max(0, bucket.activeMs) : 0), 0) / 60000,

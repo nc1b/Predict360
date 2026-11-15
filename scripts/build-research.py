@@ -50,7 +50,6 @@ def cmu():
         'https://www.cs.cmu.edu/~keystroke/DSL-StrongPasswordData.csv',
         'https://raw.githubusercontent.com/kevinmgamboa/keystroke_dynamics/master/DSL-StrongPasswordData.csv',
     ])
-    # Publisher's checksum verifies the fallback is the identical original file.
     if hashlib.md5(path.read_bytes()).hexdigest() != '470235f96568f28f9ea0da62234ec857':
         raise RuntimeError('CMU file does not match the original publisher checksum.')
     rows = list(csv.DictReader(path.open()))
@@ -98,8 +97,6 @@ def tappy():
                     holds[subject].append(hold)
                 except (ValueError, IndexError):
                     rejected += 1
-    # Require a stable number of valid events; weight subjects equally so prolific
-    # typists do not dominate. Labels remain in this offline audit only.
     medians = {subject: statistics.median(values) for subject, values in holds.items() if len(values) >= 100}
     groups = {label: distribution([value for subject, value in medians.items() if labels[subject] == label]) for label in ['True', 'False']}
     overlap = max(0, min(groups['True']['p90'], groups['False']['p90']) - max(groups['True']['p10'], groups['False']['p10']))

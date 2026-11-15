@@ -1,8 +1,3 @@
-// Shows the user's typing features against the best available reference:
-// - key-hold time: published public-dataset ranges (research/benchmarks.json)
-// - sentence pause and rhythm: the user's OWN baseline, because no public
-//   dataset measures a free two-sentence check-in's pause or rhythm.
-// Context only — never a diagnosis, and no invented population numbers.
 
 import benchmarks from '../../../research/benchmarks.json';
 import { Card } from '@/components/ui/card';

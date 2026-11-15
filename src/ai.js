@@ -1,11 +1,5 @@
 'use strict';
 
-// Optional AI explanation of a check-in result.
-//
-// The API key lives only on the server (process.env.HACKCLUB_AI_KEY) and is
-// never sent to the browser. Only NUMBERS reach the model: the score and the
-// three timing features versus the user's own usual. No typed text, no
-// keystrokes, no identifiers are ever included.
 
 const AI_ENDPOINT = 'https://ai.hackclub.com/proxy/v1/chat/completions';
 const AI_MODEL = 'openai/gpt-4o-mini';
@@ -44,11 +38,6 @@ function isConfigured() {
 
 const num = (v, max = LIMITS.maxTimestampMs) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= max ? v : null);
 
-/**
- * Build a plain-text description of a result from numbers only. Returns null if
- * the payload is not a usable summary object. This is the ONLY thing sent to the
- * model, so nothing but numbers can leak.
- */
 function buildSummaryText(summary) {
   if (summary === null || typeof summary !== 'object' || Array.isArray(summary)) return null;
   const lines = [];
@@ -78,7 +67,6 @@ function buildSummaryText(summary) {
   if (!hasFeature && score === null) return null;
 
   if (Array.isArray(summary.drivers) && summary.drivers.length > 0) {
-    // Iterate known keys: prototype names (constructor, toString) are never labels.
     const names = Object.keys(FEATURE_LABELS)
       .filter((key) => summary.drivers.some((d) => d && d.feature === key))
       .map((key) => FEATURE_LABELS[key]);
@@ -87,7 +75,6 @@ function buildSummaryText(summary) {
   return lines.join('\n') + '\nPublic research context (not diagnostic thresholds):\n' + typingResearchContext();
 }
 
-/** Call the Hack Club AI proxy. Throws on any failure. */
 function buildActivitySummaryText(result) {
   const totals = result.totals;
   return [
@@ -123,10 +110,6 @@ async function callAi(summaryText, { signal, mode = 'typing' } = {}) {
   return text.trim();
 }
 
-// --- Multi-turn assistant -------------------------------------------------
-// The user's chat messages are their own words, typed to the assistant on
-// purpose. The check-in HISTORY passed as context is numbers only (see
-// buildHistoryText); no journal text or keystrokes are ever included.
 
 const CHAT_SYSTEM_PROMPT = [
   'You are the assistant for Predict 360, an experimental morning typing check-in.',
@@ -147,7 +130,6 @@ const MAX_CHAT_MESSAGES = 20;
 const MAX_CHAT_CHARS = 2000;
 const MAX_HISTORY_ITEMS = 30;
 
-/** Numbers-only description of a list of past check-ins, for chat context. */
 function buildHistoryText(history) {
   if (!Array.isArray(history) || history.length === 0) return null;
   const rows = [];
@@ -167,7 +149,6 @@ function buildHistoryText(history) {
   return rows.length ? rows.join('\n') : null;
 }
 
-/** Validate a chat body and build the message list sent to the model. */
 function prepareChat(body) {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) return { error: 'Send { messages: [...] }.' };
   const raw = Array.isArray(body.messages) ? body.messages : null;

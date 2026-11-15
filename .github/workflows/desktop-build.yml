@@ -1,7 +1,5 @@
 name: Desktop app (Windows)
 
-# Build an installer with the website icon, then publish directly to Supabase.
-# OIDC authorizes publishing without a stored Supabase service key.
 
 on:
   workflow_dispatch:

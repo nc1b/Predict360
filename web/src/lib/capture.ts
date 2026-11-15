@@ -1,7 +1,3 @@
-// Keystroke timing capture for the journal field.
-//
-// Only a coarse `kind` and two relative timestamps are kept per key. The key's
-// value is read once to classify it and then discarded; it is never stored.
 
 export type Kind = 'character' | 'space' | 'sentence_end' | 'edit';
 
@@ -11,7 +7,6 @@ export interface Keystroke {
   upMs: number;
 }
 
-/** The parts of a KeyboardEvent the recorder needs. */
 export interface KeyLike {
   key: string;
   code?: string;
@@ -24,16 +19,13 @@ export interface KeyLike {
 
 export const MAX_EVENTS = 5000;
 
-/** Map a key to an event kind, or null for keys that are not recorded. */
 export function classifyKey(e: KeyLike): Kind | null {
   if (e.isComposing) return null;
-  // Shortcuts (Ctrl+C, Cmd+V). Ctrl+Alt together is AltGr, which types characters.
   if (e.metaKey || (e.ctrlKey && !e.altKey)) return null;
   const key = e.key;
   if (key === 'Backspace' || key === 'Delete') return 'edit';
   if (key === ' ' || key === 'Spacebar' || key === 'Enter') return 'space';
   if (key === '.' || key === '?' || key === '!') return 'sentence_end';
-  // Printable keys have a one-character value; Shift, arrows, Tab etc. do not.
   if (key.length === 1) return 'character';
   return null;
 }
@@ -55,8 +47,6 @@ export class KeystrokeRecorder {
   }
 
   private id(e: KeyLike): string {
-    // `code` identifies the physical key, so a hold still pairs up when Shift is
-    // released first and the keyup reports a different `key`.
     return e.code || e.key;
   }
 
@@ -67,7 +57,7 @@ export class KeystrokeRecorder {
     const t = this.elapsed();
     const id = this.id(e);
     const stale = this.open.get(id);
-    if (stale) stale.upMs = Math.max(stale.downMs, t); // its keyup was lost
+    if (stale) stale.upMs = Math.max(stale.downMs, t);
     const event: Keystroke = { kind, downMs: t, upMs: t };
     this.events.push(event);
     this.open.set(id, event);
@@ -81,7 +71,6 @@ export class KeystrokeRecorder {
     this.open.delete(id);
   }
 
-  /** Close any keys still held, e.g. when the field loses focus. */
   releaseAll(): void {
     if (this.open.size === 0) return;
     const t = this.elapsed();
@@ -93,7 +82,6 @@ export class KeystrokeRecorder {
     return this.events.length;
   }
 
-  /** The session so far, ready to send as `keystrokes`. */
   finish(): Keystroke[] {
     this.releaseAll();
     return this.events.map((e) => ({ ...e }));

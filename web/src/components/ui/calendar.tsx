@@ -1,5 +1,3 @@
-// Inline month calendar with event dots, in the style of the 21st.dev "Calendar"
-// component. Read-only: it shows which days have a check-in and how each compared.
 
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -7,7 +5,7 @@ import { cn } from '@/lib/utils';
 import type { Status } from '@/lib/types';
 
 export interface CalendarEvent {
-  at: string; // ISO timestamp
+  at: string;
   status: Status;
 }
 
@@ -29,7 +27,6 @@ export function Calendar({ events, className }: { events: CalendarEvent[]; class
 
   const byDay = React.useMemo(() => {
     const map = new Map<string, Status>();
-    // Later check-ins on the same day win.
     for (const e of events) map.set(dayKey(new Date(e.at)), e.status);
     return map;
   }, [events]);

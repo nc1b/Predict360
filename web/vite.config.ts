@@ -1,9 +1,8 @@
-/// <reference types="vitest/config" />
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -14,7 +13,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    // The synthetic demo fixtures live in the repo root.
     fs: { allow: [path.resolve(dir, '..')] },
     proxy: {
       '/api': 'http://localhost:3000',

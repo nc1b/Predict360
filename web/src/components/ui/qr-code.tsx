@@ -1,32 +1,23 @@
-// QR code drawn as one SVG from the `qrcode` encoder. Adapted from the supplied
-// component; the optional reveal animation is left out because its helper file
-// was not part of what was provided.
 
 import { create } from 'qrcode';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** The three 7x7 corner squares scanners lock on to. */
 function inFinder(row: number, column: number, size: number) {
   return (row < 7 && column < 7) || (row < 7 && column >= size - 7) || (row >= size - 7 && column < 7);
 }
 
-/** A rounded rectangle as path data, so a ring can be cut out with even-odd filling. */
 function roundedRect(x: number, y: number, size: number, radius: number) {
   const r = Math.min(radius, size / 2);
   return `M${x + r} ${y}h${size - 2 * r}a${r} ${r} 0 0 1 ${r} ${r}v${size - 2 * r}a${r} ${r} 0 0 1 -${r} ${r}h-${size - 2 * r}a${r} ${r} 0 0 1 -${r} -${r}v-${size - 2 * r}a${r} ${r} 0 0 1 ${r} -${r}z`;
 }
 
 export interface QRCodeProps extends Omit<ComponentProps<'svg'>, 'children'> {
-  /** The text or URL to encode. */
   value: string;
-  /** Width and height in px. */
   size?: number;
   variant?: 'dots' | 'rounded' | 'squares';
   errorCorrection?: 'L' | 'M' | 'Q' | 'H';
-  /** Quiet zone around the code, in modules. */
   margin?: number;
-  /** Module colour. Keep it dark on a light background so scanners can read it. */
   color?: string;
   background?: string;
 }
@@ -47,7 +38,7 @@ export function QRCode({
   try {
     modules = create(value, { errorCorrectionLevel: errorCorrection }).modules;
   } catch {
-    return null; // too much data for a QR code at this level
+    return null;
   }
 
   const count = modules.size;

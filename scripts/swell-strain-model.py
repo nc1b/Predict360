@@ -54,10 +54,10 @@ def rates(y_true, y_pred):
         "tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp),
         "accuracy": round((tp + tn) / len(y_true), 4),
         "precision": round(tp / (tp + fp), 4) if (tp + fp) else 0.0,
-        "recall_strain": round(tp / (tp + fn), 4) if (tp + fn) else 0.0,  # sensitivity / 1 - FNR
+        "recall_strain": round(tp / (tp + fn), 4) if (tp + fn) else 0.0,
         "specificity": round(tn / (tn + fp), 4) if (tn + fp) else 0.0,
-        "false_positive_rate": round(fp / (fp + tn), 4) if (fp + tn) else 0.0,  # neutral wrongly flagged
-        "false_negative_rate": round(fn / (fn + tp), 4) if (fn + tp) else 0.0,  # strain missed
+        "false_positive_rate": round(fp / (fp + tn), 4) if (fp + tn) else 0.0,
+        "false_negative_rate": round(fn / (fn + tp), 4) if (fn + tp) else 0.0,
     }
 
 
@@ -94,13 +94,13 @@ def main():
     ensure_data()
     df = pd.read_csv(CSV, encoding="utf-8-sig")
     df.columns = [c.strip() for c in df.columns]
-    df = df[df["Condition"].isin(["N", "I", "T"])].copy()  # drop R (relax), like the reference artifact
+    df = df[df["Condition"].isin(["N", "I", "T"])].copy()
     for col in FEATURES:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.dropna(subset=FEATURES)
 
     X = df[FEATURES].to_numpy(dtype=float)
-    y = (df["Condition"] != "N").astype(int).to_numpy()  # 1 = strained (I or T)
+    y = (df["Condition"] != "N").astype(int).to_numpy()
     groups = df["PP"].to_numpy()
 
     n_participants = len(np.unique(groups))
@@ -114,7 +114,6 @@ def main():
         "random_forest": RandomForestClassifier(n_estimators=300, class_weight="balanced", random_state=7),
     }
 
-    # Majority-class baseline: always predict the more common label (strained).
     majority = int(round(prevalence))
     baseline_pred = np.full_like(y, majority)
     report = {
@@ -153,7 +152,6 @@ def main():
         if name == "logistic_regression":
             best_proba, best_pred, best = proba, pred, m
 
-    # ROC + PR plots
     style(roc_ax, "ROC — strain vs neutral")
     roc_ax.set_xlabel("False positive rate")
     roc_ax.set_ylabel("True positive rate")
@@ -167,7 +165,6 @@ def main():
     pr_ax.legend(fontsize=8)
     save(pr_fig, "pr.png")
 
-    # Confusion matrix (logistic regression)
     cm = confusion_matrix(y, best_pred, labels=[0, 1])
     fig, ax = plt.subplots(figsize=(4.2, 4))
     ax.imshow(cm, cmap="Greys")
@@ -182,7 +179,6 @@ def main():
     style(ax, "Confusion matrix (logistic regression)")
     save(fig, "confusion-matrix.png")
 
-    # Feature importance (|standardised LR coefficient|)
     lr = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000, class_weight="balanced")).fit(X, y)
     coefs = lr.named_steps["logisticregression"].coef_[0]
     order = np.argsort(np.abs(coefs))[::-1][:10][::-1]
@@ -192,7 +188,6 @@ def main():
     style(ax, "Top features (standardised LR weight)")
     save(fig, "feature-importance.png")
 
-    # Where it fails: recall by original condition (N correctly 'not strained', I/T caught)
     df = df.assign(_pred=best_pred, _y=y)
     by_cond = {}
     for code, label in [("N", "neutral"), ("I", "interrupted"), ("T", "time_pressure")]:

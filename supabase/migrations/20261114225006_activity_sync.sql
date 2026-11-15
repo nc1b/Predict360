@@ -1,5 +1,3 @@
--- Only the verified Edge Function can access these tables. Never expose a
--- service-role key to the website or desktop. Clerk user ids are text, not UUIDs.
 create table public.activity_days (
   user_id text not null,
   device_id uuid not null,
@@ -53,8 +51,6 @@ $$;
 revoke all on function public.save_activity_day(text, uuid, date, jsonb, bigint) from public, anon, authenticated;
 grant execute on function public.save_activity_day(text, uuid, date, jsonb, bigint) to service_role;
 
--- Releases are public downloads; only the release pipeline may upload files.
--- Multipart releases stay below the Free plan's 50 MB per-object limit.
 insert into storage.buckets (id, name, public, file_size_limit)
 values ('app-releases', 'app-releases', true, 52428800)
 on conflict (id) do nothing;

@@ -1,11 +1,6 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-/**
- * The Predict 360 mark: an almost-closed ring (the "360") around three bars of
- * uneven height (typing rhythm). Line art with a transparent background; it
- * takes the text colour, so it works on black and on white.
- */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg

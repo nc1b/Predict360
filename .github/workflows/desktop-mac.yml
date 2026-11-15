@@ -1,8 +1,5 @@
 name: Desktop app (macOS)
 
-# Builds the macOS app on a GitHub-hosted Mac and uploads the .dmg/.zip as a
-# workflow artifact (download it from the run page). Unsigned, so first launch
-# needs right-click -> Open. Run from the Actions tab or push a version tag.
 
 on:
   workflow_dispatch:

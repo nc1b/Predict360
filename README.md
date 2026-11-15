@@ -23,7 +23,9 @@ Write two sentences in the morning, or opt into all-day tracking on your compute
 
 Built for the **Veritas AI International High School Hackathon 2026 — AI + Health track**.
 
-Some days feel off before you can say why. Predict 360 gives one person — for example, a remote worker managing a chronic condition — a private way to notice that, using signals a computer already sees: how you type and how active you are. Every result is compared with **your own baseline**, never with other people.
+Maya, a fictional 35-year-old remote worker who manages chronic migraine, uses a two-sentence check-in to notice when her typing rhythm changes. A change is a reminder to note how she feels in her usual symptom log. She can also opt into all-day activity tracking to see how her routine varies.
+
+[One-page project write-up](WRITEUP.md)
 
 ## Two ways to track
 
@@ -33,19 +35,21 @@ Some days feel off before you can say why. Predict 360 gives one person — for 
 | What you do | Type two sentences | Turn tracking on; pause anytime |
 | What it measures | Key-hold time, pause between sentences, rhythm | Aggregate activity: clicks, key presses, scroll, active vs idle |
 | What it never keeps | Your words (they never leave the text box) | Words, key values, window titles, screenshots, raw keystroke logs |
-| Result | Score and flags right after you finish | A daily trend once there is enough data |
+| Result | Model classification, score and flags | A daily trend once there is enough data |
 
 Results are labelled by mode, and a **"Gathering data"** state is shown until there is enough input.
 
 ## The AI
 
-The core model is a **scikit-learn classifier trained on the public [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) dataset** (25 participants, 2,686 labelled minutes). From one minute of keyboard and mouse activity, it predicts whether a person was working in a **neutral** condition or a **strained** one (interrupted or under time pressure). This is work context, not a diagnosis.
+The live morning check-in uses **logistic regression** to classify timing as close to usual or different. It uses three changes relative to a personal baseline: key-hold duration, sentence pause and typing rhythm. The model was trained on simulated sessions and runs without an AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
 
-An optional assistant (Hack Club AI proxy) explains results and answers questions about your trends. It receives **numbers only**, never your words.
+An optional assistant explains the numbers using [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) through the [Hack Club AI proxy](https://ai.hackclub.com/). The assistant receives numeric results and messages entered in its chat box. The sentences typed during check-ins stay in the browser.
 
 ## Measured results
 
-All numbers are on **people the model never trained on** (leave-participants-out, 5-fold). False positives and false negatives are reported separately, as the brief requires.
+**Live check-in model.** On 360 generated sessions from six unseen simulated profiles, the model flagged **19 of 180 unchanged sessions (10.6% false positives)** and missed **45 of 180 scripted changes (25.0% false negatives)**. An always-usual baseline had zero false positives and missed all 180 changes. A distraction can trigger the same flag as a deliberate pause. These results measure timing changes in simulated data.
+
+**All-day tracking research.** We separately tested offline classifiers for neutral versus interrupted or time-pressured work minutes in the public SWELL-KW dataset. The numbers below are from held-out participants (five grouped folds). The desktop app shows descriptive trends in activity counts.
 
 | Model | Accuracy | Catches strain | False alarms (FPR) | Missed strain (FNR) | ROC-AUC |
 |---|---|---|---|---|---|
@@ -75,7 +79,7 @@ The morning check-in compares three timing features with your baseline (the medi
 
 | Dataset | Collection | Used for | Licence |
 |---|---|---|---|
-| [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) | 25 office workers, per-minute keyboard/mouse activity under neutral, interrupted and time-pressure conditions | Training and evaluating the all-day strain model | CC BY-NC-SA 4.0 |
+| [SWELL-KW](https://doi.org/10.17026/dans-x55-69zp) | 25 office workers, per-minute keyboard/mouse activity under neutral, interrupted and time-pressure conditions | Offline work-context research | CC BY-NC-SA 4.0 |
 | [CMU Keystroke Dynamics](https://www.cs.cmu.edu/~keystroke/) | 51 people typing a fixed password | Key-hold reference ranges (context only) | Public research dataset |
 | [Tappy](https://physionet.org/content/tappy/1.0.0/) | 192 people, free typing over time | Key-hold reference ranges (context only) | ODC-By 1.0 |
 | [Open-Meteo](https://open-meteo.com) | Modelled barometric pressure | Optional weather context | CC BY 4.0 |
@@ -111,6 +115,7 @@ Then open http://localhost:3000.
 |---|---|
 | `npm test` | Backend tests |
 | `npm run test:web` | Frontend tests |
+| `node scripts/train-typing-model.js` | Reproduce the check-in model and held-out synthetic results |
 | `python scripts/swell-strain-model.py` | Train and evaluate the strain model (downloads SWELL-KW and verifies its checksum) |
 | `npm start --prefix desktop` | Run the desktop app |
 | `npm run dist --prefix desktop` / `dist:mac` | Build the Windows / macOS app |
@@ -119,7 +124,7 @@ Then open http://localhost:3000.
 
 - The analysis API accepts only key kind and timing. Requests with text, key values or user IDs are rejected.
 - All-day tracking is opt-in, asks for permission, starts paused, and stores counts only.
-- The AI assistant receives numeric summaries, never typed words.
+- The optional AI assistant receives numeric summaries and messages explicitly entered in its chat box.
 - [Privacy Policy](https://predict360.vercel.app/privacy) · [Terms of Use](https://predict360.vercel.app/terms)
 
 ## Limitations
@@ -130,7 +135,7 @@ Then open http://localhost:3000.
 
 ## Credits
 
-Datasets listed above · scikit-learn, pandas, matplotlib · React, Express, Electron · Clerk · Supabase · Hack Club AI · Arcade (demo video) · Claude (AI coding assistant; every part reviewed by the team).
+[Datasets and research limits](SOURCES.md), [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), [React](https://react.dev/), [Express](https://expressjs.com/), [Electron](https://www.electronjs.org/), [Clerk](https://clerk.com/), [Supabase](https://supabase.com/), [Arcade](https://www.arcade.software/) (demo), and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) (development assistance).
 
 <div align="center">
 <sub>Predict 360 · Veritas AI High School Hackathon 2026 · This project is a prototype and is not medical advice.</sub>

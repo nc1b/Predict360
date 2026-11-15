@@ -7,7 +7,6 @@ export class ApiError extends Error {}
 
 export class AiUnconfiguredError extends ApiError {}
 
-/** POST /api/analyze. Sends timing only: kind, downMs, upMs. */
 export async function analyze(body: AnalyzeRequest): Promise<AnalyzeResponse> {
   let res: Response;
   try {
@@ -24,7 +23,6 @@ export async function analyze(body: AnalyzeRequest): Promise<AnalyzeResponse> {
   try {
     json = await res.json();
   } catch {
-    // fall through to the generic message
   }
   if (!res.ok) {
     const err = (json as { error?: { message?: string; details?: { message: string }[] } } | null)?.error;
@@ -38,11 +36,6 @@ export async function analyze(body: AnalyzeRequest): Promise<AnalyzeResponse> {
   return json as AnalyzeResponse;
 }
 
-/**
- * POST /api/explain. Sends only the numeric summary of a result — score, status,
- * the three feature values and their comparison with the user's usual. No text,
- * no keystrokes. Returns a short plain-language explanation from the AI proxy.
- */
 export async function explain(result: AnalyzeResponse, weather: WeatherContext | null | undefined, token: string): Promise<string> {
   const summary = {
     readinessScore: result.readinessScore,
@@ -70,7 +63,6 @@ export async function explain(result: AnalyzeResponse, weather: WeatherContext |
   try {
     json = await res.json();
   } catch {
-    // fall through
   }
   if (!res.ok) {
     const code = (json as { error?: { code?: string; message?: string } } | null)?.error?.code;
@@ -100,10 +92,6 @@ export interface ChatHistoryItem {
   };
 }
 
-/**
- * POST /api/chat. Sends the conversation plus a numbers-only summary of the
- * user's check-in history as context. No journal text or keystrokes are sent.
- */
 export async function chat(messages: ChatMessage[], history: ChatHistoryItem[], token: string): Promise<string> {
   let res: Response;
   try {
@@ -120,7 +108,6 @@ export async function chat(messages: ChatMessage[], history: ChatHistoryItem[], 
   try {
     json = await res.json();
   } catch {
-    // fall through
   }
   if (!res.ok) {
     const code = (json as { error?: { code?: string; message?: string } } | null)?.error?.code;

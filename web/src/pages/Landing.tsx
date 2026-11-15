@@ -12,12 +12,6 @@ import { ModesSection, ResearchMapSection } from '@/components/blocks/landing-se
 import { SiteFooter } from '@/components/blocks/site-footer';
 import { SiteNav } from '@/components/blocks/site-nav';
 
-/**
- * A soft glow on the page background that follows your scroll position, so the
- * backdrop shifts depending on where you are. Subtle and theme-aware (it tints
- * with the foreground colour), and disabled under prefers-reduced-motion. It
- * paints on <body>, which shows through the transparent landing sections.
- */
 function useScrollBackdrop() {
   React.useEffect(() => {
     const body = document.body;

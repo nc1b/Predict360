@@ -1,6 +1,4 @@
 'use strict';
-// GitHub Actions OIDC proves which repository built the release. No stored
-// Supabase service key or publishing secret is needed in CI.
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');

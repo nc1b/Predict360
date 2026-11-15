@@ -29,26 +29,13 @@ function feature(name, value, samples) {
   };
 }
 
-/**
- * Collect the raw samples behind the three features from one ordered session.
- *
- * Rules (see README "Feature rules"):
- * - Dwell: upMs - downMs for every non-edit keystroke.
- * - Sentence pause: keydown of a sentence_end to keydown of the next `character`.
- *   Spaces and edits in between are skipped. A run of sentence_end keys ("?!")
- *   measures from the last one. A sentence_end with no later character adds nothing.
- * - Flight: keydown-to-keydown intervals between adjacent non-edit keystrokes
- *   inside a sentence. The chain ends at the sentence_end (inclusive) and restarts
- *   at the first character of the next sentence, so the boundary gap is never a
- *   flight interval. An edit breaks the chain instead of being bridged.
- */
 function collectSamples(keystrokes) {
   const dwells = [];
   const pauses = [];
   const flights = [];
 
-  let boundaryDownMs = null; // keydown of the pending sentence_end, if any
-  let prevDownMs = null; // previous keydown in the current within-sentence chain
+  let boundaryDownMs = null;
+  let prevDownMs = null;
 
   for (const k of keystrokes) {
     if (k.kind === 'edit') {
@@ -66,7 +53,7 @@ function collectSamples(keystrokes) {
     }
 
     if (boundaryDownMs !== null) {
-      if (k.kind === 'space') continue; // still in the gap between sentences
+      if (k.kind === 'space') continue;
       pauses.push(k.downMs - boundaryDownMs);
       boundaryDownMs = null;
       prevDownMs = k.downMs;

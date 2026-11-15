@@ -81,7 +81,6 @@ describe('KeystrokeRecorder', () => {
     at(700);
     rec.keyUp({ key: 'A', code: 'KeyA' });
     rec.keyUp({ key: 'Shift', code: 'ShiftLeft' });
-    // Timing starts at the first recorded key, not at Shift.
     expect(rec.finish()).toEqual([{ kind: 'character', downMs: 0, upMs: 650 }]);
   });
 
@@ -130,7 +129,7 @@ describe('KeystrokeRecorder', () => {
     for (const ch of keys) {
       at(t);
       rec.keyDown({ key: ch, code: `K${ch}${t}` });
-      at(t + 130); // released after the next key goes down
+      at(t + 130);
       rec.keyUp({ key: ch, code: `K${ch}${t}` });
       t += 90;
     }

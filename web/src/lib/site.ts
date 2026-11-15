@@ -4,13 +4,11 @@ export const DOWNLOAD_URL = `${REPO_URL}/releases/latest`;
 
 export const MAC_DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/Predict360-macOS.dmg`;
 
-/** Front-page product video (generated with Arcade). Empty src hides the section. */
 export const PROJECT_VIDEO = {
   src: '/overview.mp4',
   poster: '/overview-poster.png',
 };
 
-// Free-to-use Unsplash photos, shown in greyscale like the Iris Checks hero.
 export const HERO_IMAGES = {
   dark: {
     src: 'https://images.unsplash.com/photo-1648757838556-2ca6ec323d55?w=2000&q=80&auto=format&fit=crop',

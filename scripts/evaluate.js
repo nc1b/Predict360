@@ -1,9 +1,5 @@
 'use strict';
 
-// Judging evidence: run every labeled fixture through the scoring algorithm and
-// through a naive comparator that always returns 100 with no flags.
-// Usage: npm run evaluate            (markdown table)
-//        npm run evaluate -- --json  (raw results)
 
 const { fixtures, baselineSessions } = require('../fixtures/synthetic');
 const { analyze, naiveAnalyze } = require('../src/scoring');

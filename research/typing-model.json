@@ -1,0 +1,25 @@
+{
+  "method": "Logistic regression trained on generated timing sessions",
+  "trainingProfiles": 12,
+  "testProfiles": 6,
+  "trainingSessions": 720,
+  "testSessions": 360,
+  "weights": [
+    -1.41349288,
+    6.88529373,
+    5.18569975,
+    5.71432101
+  ],
+  "baseline": {
+    "trueNegatives": 180,
+    "falsePositives": 0,
+    "falseNegatives": 180,
+    "truePositives": 0
+  },
+  "model": {
+    "trueNegatives": 161,
+    "falsePositives": 19,
+    "falseNegatives": 45,
+    "truePositives": 135
+  }
+}

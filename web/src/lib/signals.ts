@@ -14,7 +14,6 @@ export interface Signal {
   research: { conditions: string; finding: string; cite: string; href: string };
 }
 
-/** The three typing signals. Numbers quoted here come from the repo's test results. */
 export const SIGNALS: Signal[] = [
   {
     id: 'dwell',

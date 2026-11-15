@@ -65,7 +65,7 @@ function Explanation({ result, baselineCount }: { result: AnalyzeResponse; basel
     );
   }
   if (result.flags.length === 0) {
-    return <p className="text-sm leading-relaxed text-foreground">Your typing rhythm matched your usual check-ins.</p>;
+    return <p className="text-sm leading-relaxed text-foreground">No individual timing measure crossed its flag threshold.</p>;
   }
   return (
     <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
@@ -88,7 +88,6 @@ export function ResultCard({
   className,
 }: {
   result: AnalyzeResponse;
-  /** Usable earlier check-ins, for the "n more to go" message. */
   baselineCount?: number;
   caption?: string;
   className?: string;
@@ -97,6 +96,15 @@ export function ResultCard({
   return (
     <Card className={cn('p-6', className)} aria-live="polite">
       <p className="text-sm text-muted-foreground">{caption}</p>
+      {result.typingPattern && (
+        <div className="mb-5 mt-2 border-b border-border pb-4">
+          <p className="text-lg font-semibold">
+            {result.typingPattern === 'different' ? 'Typing pattern changed' : 'Typing pattern close to usual'}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Timing model trained on simulated check-ins</p>
+        </div>
+      )}
+      {score !== null && <p className="text-xs text-muted-foreground">Timing score based on your baseline</p>}
       <div className="mt-1 flex flex-wrap items-baseline gap-3">
         <span className="text-7xl font-bold leading-none tracking-tight tabular-nums text-foreground">
           {score === null ? '–' : score}

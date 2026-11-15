@@ -50,7 +50,6 @@ function MacDownload({ primary }: { primary: boolean }) {
   );
 }
 
-/** Shows the download for the visitor's computer, with a link to the other platform. */
 export function DownloadDesktop({ primary = false }: { primary?: boolean }) {
   const os = useOS();
   const mac = os === 'mac';

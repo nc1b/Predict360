@@ -42,6 +42,7 @@ test('POST /api/analyze scores a fixture', async () => {
   assert.equal(status, 200);
   assert.equal(json.readinessScore, 65);
   assert.equal(json.status, 'some_deviation');
+  assert.equal(json.typingPattern, 'different');
   assert.deepEqual(json.flags, ['long_sentence_pause']);
   assert.equal(json.features.sentencePauseMs.value, 4000);
   assert.equal(json.comparisons.sentencePauseMs.baselineMs, 700);

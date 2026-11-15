@@ -180,7 +180,6 @@ test('POST /api/explain forwards only numbers to the proxy and returns its text'
       assert.match(text, /not medical advice/);
       const userMessage = sentBody.messages.find((m) => m.role === 'user').content;
       assert.match(userMessage, /4220 ms/);
-      // Nothing but numbers: no text/keystroke fields anywhere in the outgoing request.
       const wire = JSON.stringify(sentBody);
       assert.ok(!/keystrokes|downMs|upMs|journal/i.test(wire));
     });

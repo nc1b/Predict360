@@ -10,6 +10,8 @@ const { validateActivityRequest, analyzeActivity } = require('./activity');
 const { benchmarks, weatherContextText } = require('./research');
 const { validateWeather, getWeatherContext } = require('./weather');
 const { verifyAiRequest } = require('./auth');
+const { timingInputs, predictTiming } = require('./typing-model');
+const { weights: typingWeights } = require('../research/typing-model.json');
 
 function errorBody(code, message, details) {
   const error = { code, message };
@@ -25,17 +27,10 @@ function jsonBody(limit) {
       }
       next();
     },
-    // Parse primitives too so the schema validator gives a consistent 400.
-    // Disallow compressed uploads to keep the byte limit a predictable CPU bound.
     express.json({ limit, strict: false, inflate: false }),
   ];
 }
 
-/**
- * Build the Express app. Nothing is stored: each request is processed in memory
- * and discarded. The access log records method, path, status and duration only,
- * never request bodies.
- */
 function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*', staticDir = null,
   aiClient = ai, aiTimeoutMs = 15000, maxAiConcurrent = 4, authenticateAi = verifyAiRequest } = {}) {
   const app = express();
@@ -45,14 +40,11 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
   app.use((req, res, next) => {
     const started = Date.now();
     res.on('finish', () => {
-      // A caller can put private text in an unknown URL. Log matched route names
-      // only, never arbitrary paths or query strings.
       log(`${req.method} ${req.route?.path || '[unmatched]'} ${res.statusCode} ${Date.now() - started}ms`);
     });
     next();
   });
 
-  // The frontend will be served from a different origin during development.
   app.use((req, res, next) => {
     res.set('X-Content-Type-Options', 'nosniff');
     if (/^\/api(?:\/|$)/.test(req.path) || req.path === '/health') res.set('Cache-Control', 'no-store');
@@ -97,12 +89,14 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
           .status(400)
           .json(errorBody('invalid_request', `The request has validation problems.${more}`, result.errors));
       }
-      res.json(analyze(req.body));
+      const analysis = analyze(req.body);
+      const typingPattern = analysis.readinessScore === null
+        ? null
+        : predictTiming(timingInputs(analysis.features, analysis.baseline), typingWeights);
+      res.json({ ...analysis, typingPattern });
     }
   );
 
-  // Optional: a plain-language explanation of a result, via the Hack Club AI proxy.
-  // Only numbers are forwarded to the model (see ai.js); never text or keystrokes.
   app.post(
     ['/api/explain', '/api/activity/explain'],
     jsonBody(LIMITS.maxExplainBodyBytes),
@@ -153,9 +147,6 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
     }
   );
 
-  // Optional: a multi-turn assistant that summarises the user's check-in trends.
-  // Only the numeric history is forwarded as context (see ai.js); the chat
-  // messages are the user's own words, typed to the assistant on purpose.
   app.post(
     '/api/chat',
     jsonBody(LIMITS.maxExplainBodyBytes),
@@ -196,7 +187,6 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
     }
   );
 
-  // Optional: serve the built frontend (web/dist) so one process runs the whole demo.
   if (staticDir) {
     app.use(express.static(staticDir));
     app.use((req, res, next) => {
@@ -212,7 +202,6 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
       .json(errorBody('not_found', 'Unknown route. Available: GET /health, POST /api/analyze, POST /api/explain.'));
   });
 
-  // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
     if (err && err.type === 'entity.too.large') {
       return res
@@ -228,7 +217,6 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
     if (err && ['request.aborted', 'request.size.invalid'].includes(err.type)) {
       return res.status(400).json(errorBody('invalid_request', 'The request body was incomplete.'));
     }
-    // Log the error type only: parser messages can quote the request body.
     log('error internal');
     res.status(500).json(errorBody('internal_error', 'Unexpected server error.'));
   });

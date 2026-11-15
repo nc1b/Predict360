@@ -1,6 +1,3 @@
-// Floating navbar in the style of the Iris Checks site: brand block on the left,
-// a segmented section switcher in the middle with a sliding active pill, and
-// theme toggle plus account actions on the right. A thin bar shows scroll progress.
 
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';

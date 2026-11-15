@@ -45,7 +45,6 @@ class ActivityTracker extends EventEmitter {
   tick() {
     if (!this.running) return;
     const now = this.now();
-    // Sleep and clock changes never become hours of fake monitored time.
     if (now < this.cursor || now - this.cursor > 30000) {
       this.cursor = now;
       this.activeUntil = 0;
@@ -71,11 +70,10 @@ class ActivityTracker extends EventEmitter {
     this.activeUntil = now + IDLE_MS;
     if (type === 'keydown') {
       if (this.held.has(keycode)) return;
-      this.held.add(keycode); // used only to discard repeat; never persisted
+      this.held.add(keycode);
       this.bucket(now).keyPresses++;
     } else if (type === 'mousedown') this.bucket(now).clicks++;
     else if (type === 'wheel') this.bucket(now).scrollEvents++;
-    // mousemove marks activity but neither coordinates nor event histories survive.
   }
   pause() {
     this.tick();

@@ -1,5 +1,3 @@
-// Footer in the layout of the Iris Checks site: a call to action, link columns,
-// round icon buttons and a sun/moon theme switch.
 
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Code, FlaskConical, Moon, Sun } from 'lucide-react';

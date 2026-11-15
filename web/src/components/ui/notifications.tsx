@@ -1,5 +1,3 @@
-// Stack of dismissible inline alerts (success, info, warning, error).
-// Modeled on the 21st.dev "Dismissible Alert Stack" component.
 
 import * as React from 'react';
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from 'lucide-react';
@@ -25,7 +23,6 @@ export function useNotices() {
   const [notices, setNotices] = React.useState<Notice[]>([]);
   const push = React.useCallback((notice: Omit<Notice, 'id'> & { id?: string }) => {
     const id = notice.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    // A notice with a fixed id replaces the earlier one instead of stacking.
     setNotices((prev) => [{ ...notice, id }, ...prev.filter((n) => n.id !== id)].slice(0, 4));
   }, []);
   const dismiss = React.useCallback((id: string) => setNotices((prev) => prev.filter((n) => n.id !== id)), []);

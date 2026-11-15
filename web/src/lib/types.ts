@@ -32,6 +32,7 @@ export interface Comparison {
 
 export interface AnalyzeResponse {
   readinessScore: number | null;
+  typingPattern?: 'usual' | 'different' | null;
   status: Status;
   reasons: string[];
   features: Features;

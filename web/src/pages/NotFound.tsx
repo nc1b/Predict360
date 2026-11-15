@@ -1,5 +1,3 @@
-// Minimal 404: status code and message on one line with a divider, and one
-// outline button home.
 
 import { Link } from 'react-router-dom';
 import { SiteNav } from '@/components/blocks/site-nav';

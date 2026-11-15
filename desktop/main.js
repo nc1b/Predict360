@@ -103,8 +103,6 @@ async function handleLink(link) {
     const remote = await cloud('activity', 'GET', undefined, account.token);
     const own = remote.days.filter((row) => row.device_id === store.deviceId && validateDay(row.summary).length === 0);
     pause();
-    // The cloud is authoritative after reconnect, so deleted/offline old queues
-    // cannot resurrect history. Continue this device's existing revision.
     store.save(account.userId, own.map((row) => row.summary), Math.max(0, ...own.map((row) => row.revision)));
     await setAccount(account);
     syncMessage = 'Connected. Choose Start tracking when you are ready.';
@@ -124,7 +122,7 @@ else {
     credentialsAvailable = await safeStorage.isAsyncEncryptionAvailable();
     if (process.platform === 'linux' && safeStorage.getSelectedStorageBackend() === 'basic_text') credentialsAvailable = false;
     if (secureCredentials()) {
-      try { const saved = read(sessionFile(), {}), decrypted = await safeStorage.decryptStringAsync(Buffer.from(saved.encrypted, 'base64')), account = JSON.parse(decrypted.result); if (new Date(account.expiresAt).getTime() > Date.now()) await setAccount(account); } catch { /* sign in again */ }
+      try { const saved = read(sessionFile(), {}), decrypted = await safeStorage.decryptStringAsync(Buffer.from(saved.encrypted, 'base64')), account = JSON.parse(decrypted.result); if (new Date(account.expiresAt).getTime() > Date.now()) await setAccount(account); } catch { }
     }
     if (process.defaultApp) app.setAsDefaultProtocolClient('predict360', process.execPath, [path.resolve(process.argv[1])]);
     else app.setAsDefaultProtocolClient('predict360');

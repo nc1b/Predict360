@@ -160,7 +160,6 @@ function validateBaseline(baseline, c) {
   });
 }
 
-/** Returns { errors: [{ path, message }], truncated }. Empty errors means valid. */
 function validateAnalyzeRequest(body) {
   const c = new Collector();
   if (!isPlainObject(body)) {

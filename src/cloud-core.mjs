@@ -1,5 +1,3 @@
-// Shared request handler for the hosted sync service. All authorization happens
-// before repository access. Desktop credentials are random, revocable tokens.
 import { Buffer } from 'node:buffer';
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 const fail = (message, status = 400) => json({ error: { message } }, status);
@@ -94,7 +92,6 @@ export function createCloudHandler({ repository, verifyWebToken, validateDay, va
         return json({ ok: true });
       }
       if (route === 'activity' && request.method === 'DELETE') {
-        // Revoke every desktop so an offline device cannot resurrect deleted data.
         await repository.deleteActivity(userId);
         return json({ ok: true, reconnectRequired: true });
       }
@@ -107,7 +104,6 @@ export function createCloudHandler({ repository, verifyWebToken, validateDay, va
       if (route === 'checkins' && request.method === 'DELETE') { await repository.deleteCheckins(userId); return json({ ok: true }); }
       return fail('Unknown sync route.', 404);
     } catch {
-      // Database errors can contain credentials or submitted data.
       return fail('Sync is temporarily unavailable. Your local data is safe.', 503);
     }
   };

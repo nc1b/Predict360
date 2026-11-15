@@ -1,9 +1,5 @@
 'use strict';
 
-// Stress test on synthetic typists: for several simulated typing profiles, build a
-// 5-session baseline, then score many seeded sessions per scenario and count how
-// often each flag fires. All data is generated; no real people are involved.
-// Usage: npm run robustness
 
 const { generateSession } = require('../fixtures/synthetic');
 const { analyze } = require('../src/scoring');
@@ -14,7 +10,6 @@ const PROFILES = [
   { name: 'slow', dwellMean: 140, dwellJitter: 25, flightMean: 260, flightJitter: 55, pauseMs: 1200 },
 ];
 
-// Each scenario changes one thing relative to the profile's ordinary typing.
 const SCENARIOS = [
   { name: 'ordinary', expected: null, change: () => ({}) },
   { name: 'longer_key_holds', expected: 'long_key_hold', change: () => ({ dwellScale: 1.8 }) },
@@ -50,7 +45,6 @@ function run(sessionsPerCell = 300) {
       let exactMatch = 0;
       let scoreSum = 0;
       for (let seed = 1; seed <= sessionsPerCell; seed++) {
-        // Ordinary pause wobbles +/-10% like the baseline sessions do.
         const pauseMs = Math.round(profile.pauseMs * PAUSE_WOBBLE[seed % PAUSE_WOBBLE.length]);
         const keystrokes = generateSession({ ...profile, seed, pauseMs, ...scenario.change(profile) });
         const r = analyze({ keystrokes, baseline });
@@ -90,7 +84,6 @@ function toMarkdown(rows) {
   return lines.join('\n');
 }
 
-// Sensitivity sweep on the average profile: how small a change still raises its flag?
 const SWEEPS = [
   { flag: 'long_key_hold', label: 'key holds x', sizes: [1.05, 1.1, 1.2, 1.3, 1.5], change: (p, x) => ({ dwellScale: x }) },
   {
