@@ -1,5 +1,7 @@
 export const REPO_URL = 'https://github.com/nc1b/Predict360';
 
+export const DOWNLOAD_URL = `${REPO_URL}/releases/latest`;
+
 /** Front-page product video (generated with Arcade). Empty src hides the section. */
 export const PROJECT_VIDEO = {
   src: '/overview.mp4',

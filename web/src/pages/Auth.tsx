@@ -86,7 +86,7 @@ const flat = {
 
 export function Login() {
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue your morning check-ins.">
+    <AuthShell title="Welcome back" subtitle="Sign in to see your daily typing rhythm.">
       <SignIn routing="path" path="/login" signUpUrl={`/signup?returnTo=${encodeURIComponent(returnPath())}`} forceRedirectUrl={returnPath()} appearance={flat} />
     </AuthShell>
   );

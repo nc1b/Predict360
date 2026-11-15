@@ -23,7 +23,7 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ to = '/', tagline = 'Morning check-in', className }: { to?: string; tagline?: string; className?: string }) {
+export function Logo({ to = '/', tagline = 'Daily typing rhythm', className }: { to?: string; tagline?: string; className?: string }) {
   return (
     <Link
       to={to}

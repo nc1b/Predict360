@@ -3,12 +3,13 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, ChevronDown, Keyboard, PenLine, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, ChevronDown, Download, Keyboard, Laptop, PenLine, ShieldCheck, Timer, UserRoundCheck } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { buttonClass } from '@/components/ui/button';
 import { QRCode } from '@/components/ui/qr-code';
 import { SIGNALS } from '@/lib/signals';
-import { REPO_URL } from '@/lib/site';
+import { DOWNLOAD_URL, REPO_URL } from '@/lib/site';
+import { deviceNoun, downloadLabel, useOS } from '@/lib/os';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,78 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 const cardHover = 'transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5';
+
+function ModeFeature({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex gap-2 text-sm text-muted-foreground">
+      <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground/60" />
+      <span>{children}</span>
+    </li>
+  );
+}
+
+export function ModesSection() {
+  const { user } = useAuth();
+  const os = useOS();
+  const device = deviceNoun(os);
+  return (
+    <section id="modes" className="scroll-mt-24 border-t">
+      <div className="mx-auto max-w-5xl px-6 py-24">
+        <Eyebrow>Two ways to track</Eyebrow>
+        <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Pick how you check in</h2>
+        <p className="mt-4 max-w-xl text-muted-foreground">
+          Write two sentences in the morning, or opt into all-day tracking on your {device}. Switch whenever you want — each
+          result is labelled by mode and compared with your own baseline.
+        </p>
+
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
+          <article className={cn('flex h-full flex-col rounded-3xl border bg-card p-6', cardHover)}>
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-foreground text-background">
+              <PenLine className="size-5" aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-2xl font-bold">Morning check-in</h3>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">One minute, in the browser</p>
+            <p className="mt-4 text-sm">
+              Type two sentences. Predict 360 reads the rhythm of that check-in and shows your result right away.
+            </p>
+            <ul className="mt-5 space-y-2 border-t pt-5">
+              <ModeFeature>Nothing to install — works in any desktop browser.</ModeFeature>
+              <ModeFeature>Timing only; your words never leave the box.</ModeFeature>
+              <ModeFeature>No background permission needed.</ModeFeature>
+            </ul>
+            <Link to={user ? '/app' : '/signup'} className={buttonClass({ className: 'mt-6 w-fit' })}>
+              Start a check-in <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </article>
+
+          <article className={cn('flex h-full flex-col rounded-3xl border bg-card p-6', cardHover)}>
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-foreground text-background">
+              <Laptop className="size-5" aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-2xl font-bold">All-day tracking</h3>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">Opt-in desktop app</p>
+            <p className="mt-4 text-sm">
+              Install the app and opt in. It builds your typing-rhythm trend through the day, on your {device}.
+            </p>
+            <ul className="mt-5 space-y-2 border-t pt-5">
+              <ModeFeature>Opt-in, asks permission, and starts paused — pause anytime.</ModeFeature>
+              <ModeFeature>Counts only: clicks, key presses, focus. Never words, key values, or screenshots.</ModeFeature>
+              <ModeFeature>A daily trend appears once there&apos;s enough data.</ModeFeature>
+            </ul>
+            <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer" className={buttonClass({ variant: 'outline', className: 'mt-6 w-fit' })}>
+              <Download className="size-4" aria-hidden="true" /> {downloadLabel(os)}
+            </a>
+          </article>
+        </div>
+
+        <p className="mt-6 max-w-2xl text-xs text-muted-foreground">
+          A &ldquo;Gathering data&rdquo; state shows when there isn&apos;t enough input yet. Predict 360 is a prototype and
+          not a medical device.
+        </p>
+      </div>
+    </section>
+  );
+}
 
 export function SignalsSection() {
   return (
@@ -308,8 +381,9 @@ export function AboutSection() {
           <Eyebrow>About</Eyebrow>
           <h2 className="mt-3 text-balance text-3xl font-bold md:text-4xl">A student project with a simple goal</h2>
           <p className="mt-4 text-muted-foreground">
-            Some mornings feel off before you can say why. Predict 360 explores whether a one-minute typing check-in can give
-            you a quick, private way to notice that, by comparing today with your own usual.
+            Some days feel off before you can say why. Predict 360 explores whether your typing rhythm — from a quick
+            morning check-in or opt-in tracking through the day — can give you a private way to notice that, by comparing
+            today with your own usual.
           </p>
           <p className="mt-4 text-muted-foreground">
             It was built for the Veritas AI High School Hackathon 2026. This project is a prototype and is not medical advice.
