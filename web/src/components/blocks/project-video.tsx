@@ -10,10 +10,8 @@ export function ProjectVideo() {
   return (
     <section id="video" className="scroll-mt-24 border-t">
       <div className="mx-auto max-w-5xl px-6 py-24">
-        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Watch</p>
-        <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight md:text-5xl">
-          See Predict 360 in 30 seconds
-        </h2>
+        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Trailer</p>
+        <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight md:text-5xl">Watch the trailer</h2>
         <p className="mt-4 max-w-xl text-muted-foreground">
           What it measures, the score, the assistant, the desktop app and cloud sync — the whole project at a glance.
         </p>
