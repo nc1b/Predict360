@@ -1,7 +1,7 @@
 # Predict 360
 
 **Track** — Health  
-**Team** — [Add team member names and high schools]
+**Team** — Divij Velagapudi and Sahaj Kalia
 
 This project is a prototype and is not medical advice.
 
