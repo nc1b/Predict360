@@ -22,7 +22,8 @@ const SYSTEM_PROMPT = [
 const ACTIVITY_PROMPT = [
   'Explain the numeric computer-activity summary in 2 to 3 short, clear sentences.',
   'Counts cover only the time the user enabled tracking. Idle means no input for 60 seconds.',
-  'Describe patterns and suggest an optional break. Do not infer content, app names, productivity, hydration, illness, diagnosis, or fitness to work.',
+  'Describe the counts plainly and specifically, using whole numbers. Avoid generic wellness advice; mention a break only if active minutes are 90 or more.',
+  'Do not infer content, app names, productivity, hydration, illness, diagnosis, or fitness to work.',
   'Finish by noting these counts describe computer use, not health.',
 ].join('\n');
 
@@ -80,8 +81,8 @@ function buildActivitySummaryText(result) {
   return [
     `Clicks: ${totals.clicks}. Key presses: ${totals.keyPresses}. Scroll events: ${totals.scrollEvents}.`,
     `Tracked minutes: ${Math.round(totals.trackedMs / 60000)}. Active minutes: ${Math.round(totals.activeMs / 60000)}. Idle minutes: ${Math.round(totals.idleMs / 60000)}.`,
-    `Interactions per active minute: ${totals.interactionsPerActiveMinute ?? 'unavailable'}.`,
-    result.comparison ? `Active share change vs prior days: ${result.comparison.activePercentagePointChange} percentage points. Interaction rate change: ${result.comparison.interactionsPerActiveMinuteChange}.` : 'Not enough earlier days for a baseline comparison.',
+    `Interactions per active minute: ${totals.interactionsPerActiveMinute === null ? 'unavailable' : Math.round(totals.interactionsPerActiveMinute)}.`,
+    result.comparison ? `Active share change vs prior days: ${Math.round(result.comparison.activePercentagePointChange)} percentage points. Interaction rate change: ${Math.round(result.comparison.interactionsPerActiveMinuteChange)} per active minute.` : 'Not enough earlier days for a baseline comparison.',
   ].join('\n') + '\n' + activityResearchContext();
 }
 
@@ -112,7 +113,7 @@ async function callAi(summaryText, { signal, mode = 'typing' } = {}) {
 
 
 const CHAT_SYSTEM_PROMPT = [
-  'You are the assistant for Predict 360, an experimental morning typing check-in.',
+  'You are the assistant for Predict 360, an experimental two-sentence typing check-in.',
   "Each check-in has the user type two sentences; the app measures only timing (key hold time, the pause between sentences, and how even the rhythm is) and compares it with the user's own usual. You never see what they wrote.",
   "You may be given a list of the user's recent check-ins as numbers only. Use it to answer questions and summarise trends plainly and supportively.",
   'Keep replies short and friendly (usually under 120 words), in plain language.',

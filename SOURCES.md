@@ -4,7 +4,7 @@ Predict 360 uses **public datasets only for its research reference pipeline**. P
 
 The reference ranges describe each dataset. The rule-based check-in score uses hand-set thresholds. The live timing classifier is logistic regression trained on generated timing changes, and compares each check-in with the same person's earlier sessions. The public datasets provide reference context and an offline work-context experiment. No clinical accuracy improvement, universal millisecond cutoff, migraine aura detection, or hydration inference has been established.
 
-The [typing model script](scripts/train-typing-model.js) uses the [synthetic session generator](fixtures/synthetic.js). It fits weights on 720 sessions from 12 simulated typists and tests on 360 from six different simulated typists. The [evaluation report](research/typing-model.json) records false positives and false negatives against an always-usual baseline. The generated examples contain timings and key categories.
+The [typing model script](scripts/train-typing-model.js) uses the [synthetic session generator](fixtures/synthetic.js). It fits weights on 720 sessions from 12 simulated typists and tests on 360 from six different simulated typists. The [evaluation report](research/typing-model.json) records false positives and false negatives against an always-usual baseline and against the hand-set rule, plus results for each test typist. Because the simulator produces both the baselines and the scripted changes, these results are a sanity test, not evidence on real people. The generated examples contain timings and key categories.
 
 ## 1. CMU Keystroke Dynamics Benchmark
 

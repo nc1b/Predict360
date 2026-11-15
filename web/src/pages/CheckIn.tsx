@@ -241,7 +241,7 @@ export default function CheckIn() {
                 Today&apos;s two sentences
               </label>
               <p id="journal-help" className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Write two sentences about how your morning is going. End the first with a period, then keep typing.
+                Write two sentences about how your day or shift is going. End the first with a period, then keep typing.
               </p>
               <textarea
                 id="journal"

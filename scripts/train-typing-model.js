@@ -4,7 +4,7 @@ const { writeFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { generateSession } = require('../fixtures/synthetic');
 const { extractFeatures } = require('../src/features');
-const { buildBaseline } = require('../src/scoring');
+const { buildBaseline, analyze } = require('../src/scoring');
 const { timingInputs, predictTiming } = require('../src/typing-model');
 
 function random(seed) {
@@ -47,7 +47,8 @@ function examples(profileStart, profileCount) {
       const shift = change ? Math.floor(i / 2) % 3 : null;
       const keystrokes = session(i + 5, shift);
       const features = extractFeatures(keystrokes);
-      rows.push({ features: timingInputs(features, baseline), change, shift, keystrokes, sessions });
+      const ruleFlags = analyze({ keystrokes, baseline: { sessions } }).flags.length > 0;
+      rows.push({ profile: id, features: timingInputs(features, baseline), change, shift, keystrokes, sessions, ruleFlags });
     }
   }
   return rows;
@@ -77,7 +78,7 @@ function fit(rows) {
 function measure(rows, predict) {
   const counts = { trueNegatives: 0, falsePositives: 0, falseNegatives: 0, truePositives: 0 };
   for (const row of rows) {
-    const flagged = predict(row.features) === 'different';
+    const flagged = predict(row.features, row) === 'different';
     const key = row.change
       ? (flagged ? 'truePositives' : 'falseNegatives')
       : (flagged ? 'falsePositives' : 'trueNegatives');
@@ -98,13 +99,22 @@ const report = {
   trainingSessions: train.length,
   testSessions: test.length,
   weights,
+  inputs: 'Increase over the personal baseline, max(0, log(1 + current) - log(1 + baseline)), for key hold, sentence pause and rhythm',
+  caveat: 'Simulated typists only. The scripted changes (1.15x to 2x) come from the same simulator that generated the baselines, so this is a sanity test, not evidence on real people.',
   baseline: measure(test, () => 'usual'),
+  ruleBaseline: measure(test, (_, row) => (row.ruleFlags ? 'different' : 'usual')),
   model: measure(test, (features) => predictTiming(features, weights)),
+  byProfile: Array.from({ length: testProfiles }, (_, i) => ({
+    profile: i + 1,
+    ...measure(test.filter((row) => row.profile === trainingProfiles + i), (features) => predictTiming(features, weights)),
+  })),
 };
 
 writeFileSync(join(__dirname, '../research/typing-model.json'), JSON.stringify(report, null, 2) + '\n');
-const missed = test.find(({ shift, features }) => shift === 0 && predictTiming(features, weights) === 'usual');
-if (!missed) throw new Error('The held-out example must show a missed change in key holds.');
+const missed = test.find(({ shift, features }) => shift === 0 && predictTiming(features, weights) === 'usual')
+  || test.find(({ change, features }) => change && predictTiming(features, weights) === 'usual');
+if (!missed) throw new Error('The held-out example must show a missed change.');
+console.error(`Missed example: shift ${missed.shift}`);
 const example = { keystrokes: missed.keystrokes, baseline: { sessions: missed.sessions } };
 writeFileSync(join(__dirname, '../fixtures/json/held_out_missed_change.request.json'), JSON.stringify(example, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));

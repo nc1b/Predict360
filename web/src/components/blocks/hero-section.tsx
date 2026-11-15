@@ -39,7 +39,7 @@ export function HeroSection() {
               className="animate-element group mx-auto flex w-fit items-center gap-2 rounded-lg border bg-background p-1 pr-3 transition-colors hover:bg-accent lg:ml-0"
             >
               <span className="rounded-[calc(var(--radius)-0.25rem)] bg-muted px-2 py-1 text-xs">Research prototype</span>
-              <span className="text-sm">Morning check-in or all-day on Windows &amp; Mac</span>
+              <span className="text-sm">Two-sentence check-in or all-day on Windows &amp; Mac</span>
               <span className="block h-4 w-px bg-border" />
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </a>
@@ -48,7 +48,7 @@ export function HeroSection() {
               A daily view of your <span className="text-muted-foreground">typing rhythm.</span>
             </h1>
             <p className="animate-element animate-delay-200 mt-8 text-muted-foreground">
-              Write two sentences in the morning, or opt into all-day tracking on Windows or Mac. Either way, Predict 360
+              Write two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Either way, Predict 360
               compares your typing rhythm with your own usual — counts and timing only, never your words. Switch whenever you
               want. It&apos;s a hackathon prototype, not a medical device, and it can&apos;t diagnose anything.
             </p>

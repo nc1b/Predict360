@@ -247,7 +247,7 @@ Minimum samples per session: dwell 20, sentence pause 1, flight intervals 20.
 
 ## Scoring rules
 
-`POST /api/analyze` also returns `typingPattern` (`usual`, `different`, or `null` when the baseline or samples are insufficient). The classifier uses `log(1 + current) - log(1 + baseline)` for each of the three timing measures. The weights and held-out synthetic results are in [the model report](../research/typing-model.json). Reproduce them with `node scripts/train-typing-model.js`.
+`POST /api/analyze` also returns `typingPattern` (`usual`, `different`, or `null` when the baseline or samples are insufficient). The classifier uses `max(0, log(1 + current) - log(1 + baseline))` for each of the three timing measures, so only increases count, the same as the rule score. On the held-out simulated set it catches 144/180 changes with 9/180 false alarms; the rule catches 143 with 7. The weights and held-out synthetic results are in [the model report](../research/typing-model.json). Reproduce them with `node scripts/train-typing-model.js`.
 
 - **Baseline**: for each feature, the median across prior sessions that met that feature's
   minimum samples. At least 3 such sessions are required per feature.

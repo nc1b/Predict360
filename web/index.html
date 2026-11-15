@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Predict 360: a two-sentence morning check-in that compares your typing rhythm with your own usual. Prototype, not medical advice." />
+    <meta name="description" content="Predict 360: a private two-sentence check-in that compares your typing timing with your own usual. Prototype, not medical advice." />
+    <meta property="og:title" content="Predict 360" />
+    <meta property="og:description" content="Predict 360: a private two-sentence check-in that compares your typing timing with your own usual. Prototype, not medical advice." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://predict360.vercel.app" />
+    <meta property="og:image" content="https://predict360.vercel.app/overview-poster.png" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <title>Predict 360</title>
     <script>
@@ -17,6 +22,11 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Predict 360</h1>
+      <p>A two-sentence check-in that compares your typing timing (key holds, pauses, rhythm) with your own usual. Your words never leave the browser. Built for the Veritas AI High School Hackathon 2026, Health track. This project is a prototype and is not medical advice.</p>
+      <p>Code and write-up: <a href="https://github.com/nc1b/Predict360">github.com/nc1b/Predict360</a>. Turn on JavaScript to use the app.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

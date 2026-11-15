@@ -31,9 +31,10 @@ function TypingModelDemo() {
   }
 
   const { falsePositives, falseNegatives, truePositives, trueNegatives } = typingModel.model;
+  const rule = typingModel.ruleBaseline;
   return (
     <section className="mt-8 space-y-4" aria-labelledby="typing-model-heading">
-      <h2 id="typing-model-heading" className="text-2xl font-semibold">Try the morning check-in model</h2>
+      <h2 id="typing-model-heading" className="text-2xl font-semibold">Try the check-in model</h2>
       <p className="text-sm leading-relaxed text-muted-foreground">
         Choose a simulated typing session to run it through the same model used in the app. Each example includes five
         earlier sessions to serve as its baseline. The demo requires no account and saves no entries.
@@ -49,11 +50,14 @@ function TypingModelDemo() {
       {error && <p role="alert" className="text-sm">{error}</p>}
       {result && <ResultCard result={result.analysis} baselineCount={5} caption={result.label} />}
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Across {typingModel.testSessions} sessions from {typingModel.testProfiles} unseen simulated typists, the model
-        flagged {falsePositives} of {falsePositives + trueNegatives} unchanged sessions and missed {falseNegatives} of{' '}
-        {falseNegatives + truePositives} scripted changes. An always-usual baseline produced zero false alarms and missed
-        every change. Try <strong>Missed timing change</strong> for a held-out example with longer key holds that the
-        model classified as close to usual. <strong>Distracted typist</strong> shows how an interruption can also flag a change.
+        <strong className="text-foreground">A sanity test on simulated typists, not real people.</strong> The same
+        simulator made the baselines and the scripted changes. Across {typingModel.testSessions} sessions from{' '}
+        {typingModel.testProfiles} unseen simulated typists, the model caught {truePositives} of{' '}
+        {falseNegatives + truePositives} changes and flagged {falsePositives} of {falsePositives + trueNegatives} unchanged
+        sessions. The hand-set rule did about as well ({rule.truePositives} caught, {rule.falsePositives} false alarms), so
+        the model only ties a simple rule. Always guessing “usual” caught nothing. Try{' '}
+        <strong>Missed timing change</strong> for a held-out example with 27% longer key holds that the model called usual
+        (the rule flagged it). <strong>Distracted typist</strong> shows how an interruption can also flag a change.
       </p>
     </section>
   );

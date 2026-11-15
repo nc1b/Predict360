@@ -52,7 +52,7 @@ function render(state) {
   element('status').className = state.running ? 'status running' : 'status';
   element('connection').textContent = state.connected ? 'Connected to your website account' : 'Connect your account to begin';
   element('sync-message').textContent = state.syncMessage;
-  element('ai-text').textContent = state.aiText || 'Get a short explanation of your latest activity totals. Only numeric summaries are sent.';
+  element('ai-text').textContent = state.aiText ? state.aiText + ' (AI-written from counts; can be wrong.)' : 'Get a short summary written by GPT-4o mini (via Hack Club AI) from your activity counts. Only numbers are sent, and it can be wrong.';
   element('connect').hidden = state.connected;
   element('start').hidden = !state.connected || state.running;
   element('pause').hidden = !state.running;

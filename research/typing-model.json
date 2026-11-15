@@ -5,21 +5,73 @@
   "trainingSessions": 720,
   "testSessions": 360,
   "weights": [
-    -1.41349288,
-    6.88529373,
-    5.18569975,
-    5.71432101
+    -2.18840285,
+    7.62038916,
+    6.63902206,
+    6.61257756
   ],
+  "inputs": "Increase over the personal baseline, max(0, log(1 + current) - log(1 + baseline)), for key hold, sentence pause and rhythm",
+  "caveat": "Simulated typists only. The scripted changes (1.15x to 2x) come from the same simulator that generated the baselines, so this is a sanity test, not evidence on real people.",
   "baseline": {
     "trueNegatives": 180,
     "falsePositives": 0,
     "falseNegatives": 180,
     "truePositives": 0
   },
+  "ruleBaseline": {
+    "trueNegatives": 173,
+    "falsePositives": 7,
+    "falseNegatives": 37,
+    "truePositives": 143
+  },
   "model": {
-    "trueNegatives": 161,
-    "falsePositives": 19,
-    "falseNegatives": 45,
-    "truePositives": 135
-  }
+    "trueNegatives": 171,
+    "falsePositives": 9,
+    "falseNegatives": 36,
+    "truePositives": 144
+  },
+  "byProfile": [
+    {
+      "profile": 1,
+      "trueNegatives": 21,
+      "falsePositives": 9,
+      "falseNegatives": 1,
+      "truePositives": 29
+    },
+    {
+      "profile": 2,
+      "trueNegatives": 30,
+      "falsePositives": 0,
+      "falseNegatives": 5,
+      "truePositives": 25
+    },
+    {
+      "profile": 3,
+      "trueNegatives": 30,
+      "falsePositives": 0,
+      "falseNegatives": 7,
+      "truePositives": 23
+    },
+    {
+      "profile": 4,
+      "trueNegatives": 30,
+      "falsePositives": 0,
+      "falseNegatives": 7,
+      "truePositives": 23
+    },
+    {
+      "profile": 5,
+      "trueNegatives": 30,
+      "falsePositives": 0,
+      "falseNegatives": 5,
+      "truePositives": 25
+    },
+    {
+      "profile": 6,
+      "trueNegatives": 30,
+      "falsePositives": 0,
+      "falseNegatives": 11,
+      "truePositives": 19
+    }
+  ]
 }

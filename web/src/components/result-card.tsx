@@ -101,10 +101,10 @@ export function ResultCard({
           <p className="text-lg font-semibold">
             {result.typingPattern === 'different' ? 'Typing pattern changed' : 'Typing pattern close to usual'}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">Timing model trained on simulated check-ins</p>
+          <p className="mt-1 text-sm text-muted-foreground">Timing model trained on simulated check-ins. The score and flags below use fixed thresholds, so the two can disagree on small changes.</p>
         </div>
       )}
-      {score !== null && <p className="text-xs text-muted-foreground">Timing score based on your baseline</p>}
+      {score !== null && <p className="text-xs text-muted-foreground">Similarity to your usual timing (100 = same as usual)</p>}
       <div className="mt-1 flex flex-wrap items-baseline gap-3">
         <span className="text-7xl font-bold leading-none tracking-tight tabular-nums text-foreground">
           {score === null ? '–' : score}

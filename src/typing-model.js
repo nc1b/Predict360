@@ -3,7 +3,7 @@
 const { FEATURES } = require('./config');
 
 function timingInputs(features, baseline) {
-  return FEATURES.map((name) => Math.log1p(features[name].value) - Math.log1p(baseline.features[name].value));
+  return FEATURES.map((name) => Math.max(0, Math.log1p(features[name].value) - Math.log1p(baseline.features[name].value)));
 }
 
 function predictTiming(inputs, weights) {

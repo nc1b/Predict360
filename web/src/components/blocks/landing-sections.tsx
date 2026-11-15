@@ -33,7 +33,7 @@ export function ModesSection() {
         <Eyebrow>Two ways to track</Eyebrow>
         <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Pick how you check in</h2>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Write two sentences in the morning, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
+          Write two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
           result is labelled by mode and compared with your own baseline.
         </p>
 
@@ -42,7 +42,7 @@ export function ModesSection() {
             <span className="flex size-11 items-center justify-center rounded-2xl bg-foreground text-background">
               <PenLine className="size-5" aria-hidden="true" />
             </span>
-            <h3 className="mt-5 text-2xl font-bold">Morning check-in</h3>
+            <h3 className="mt-5 text-2xl font-bold">Two-sentence check-in</h3>
             <p className="mt-1 text-sm font-medium text-muted-foreground">One minute, in the browser</p>
             <p className="mt-4 text-sm">
               Type two sentences. Predict 360 reads the rhythm of that check-in and shows your result right away.
@@ -225,7 +225,7 @@ export function SignalsSection() {
 
 const STEPS = [
   { icon: UserRoundCheck, title: 'Open the check-in', body: 'Sign in, or continue as a guest. It works in any desktop browser.' },
-  { icon: PenLine, title: 'Write two sentences', body: 'Say how your morning is going. End the first sentence with a period.' },
+  { icon: PenLine, title: 'Write two sentences', body: 'Say how your shift is going. End the first sentence with a period.' },
   { icon: Timer, title: 'Timing is measured', body: 'Key holds, the pause between sentences, and rhythm. The words are discarded.' },
   { icon: Keyboard, title: 'Compare with your usual', body: 'After three check-ins you get a score from 0 to 100 against your own baseline.' },
 ];
@@ -447,7 +447,7 @@ export function AboutSection() {
           <h2 className="mt-3 text-balance text-3xl font-bold md:text-4xl">A student project with a simple goal</h2>
           <p className="mt-4 text-muted-foreground">
             Some days feel off before you can say why. Predict 360 explores whether your typing rhythm — from a quick
-            morning check-in or opt-in tracking through the day — can give you a private way to notice that, by comparing
+            two-sentence check-in or opt-in tracking through the day — can give you a private way to notice that, by comparing
             today with your own usual.
           </p>
           <p className="mt-4 text-muted-foreground">

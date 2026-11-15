@@ -11,11 +11,13 @@ Compare your typing with your personal baseline without saving the words you typ
 
 ![Track](https://img.shields.io/badge/Track-AI%20%2B%20Health-111111)
 ![Status](https://img.shields.io/badge/Status-Prototype-555555)
-![Tests](https://img.shields.io/badge/Tests-73%20backend%20%C2%B7%2019%20frontend-111111)
+![Tests](https://img.shields.io/badge/Tests-74%20backend%20%C2%B7%2019%20frontend-111111)
 
 </div>
 
 > **This project is a prototype and is not medical advice.** It describes changes in typing timing relative to your own usual. It does not detect, diagnose, or distinguish any illness.
+>
+> Not affiliated with 360factors or its Predict360 risk and compliance software, which shares the name.
 
 ---
 
@@ -23,15 +25,15 @@ Compare your typing with your personal baseline without saving the words you typ
 
 Built for the **Veritas AI International High School Hackathon 2026 — AI + Health track**.
 
-**Predict 360** is designed for a nurse who wants to compare their typing rhythm with their usual pattern during a break near the end of a 12-hour shift. The check-in takes about 30 seconds and uses a personal baseline after at least three usable prior sessions.
+**Predict 360** is designed for a nurse who wants to compare their typing rhythm with their usual pattern during a break near the end of a 12-hour shift. The check-in takes about 30 seconds and uses a personal baseline after at least three usable prior sessions. It reports a change in timing, not tiredness, fitness to work, or any condition.
 
-Neither mode ever logs what you type: typed words stay in your browser and are cleared immediately. Users can also opt into desktop activity tracking to see aggregate workload patterns across their shift or day.
+The data belongs to the user. There is no employer dashboard, and the check-in should run on a personal device: a shared ward computer would mix several people's typing into one baseline.
 
-[One-page project write-up](WRITEUP.md)
+Neither mode ever logs what you type: typed words stay in your browser and are cleared immediately. Users can also opt into desktop activity tracking to see activity counts across their shift or day.
 
 ## Two ways to track
 
-| | **Morning check-in** | **All-day tracking** |
+| | **Two-sentence check-in** | **All-day tracking** |
 |---|---|---|
 | Where | Any desktop browser | Opt-in desktop app (Windows, macOS) |
 | What you do | Type two sentences | Turn tracking on; pause anytime |
@@ -43,13 +45,23 @@ Results are labelled by mode, and a **"Gathering data"** state is shown until th
 
 ## The AI
 
-The live morning check-in uses **logistic regression** to classify timing as close to usual or different. It uses three changes relative to a personal baseline: key-hold duration, sentence pause and typing rhythm. The model was trained on simulated sessions and runs without an AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
+The live check-in uses **logistic regression** to classify timing as close to usual or different. Its inputs are how much each of three measures rose above the person's own baseline: key-hold duration, sentence pause and typing rhythm. The model was trained on simulated sessions and runs without an AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
 
 An optional assistant explains the numbers using [GPT-4o mini](https://platform.openai.com/docs/models/gpt-4o-mini) through the [Hack Club AI proxy](https://ai.hackclub.com/). The assistant receives numeric results and messages entered in its chat box. The sentences typed during check-ins stay in the browser.
 
 ## Measured results
 
-**Live check-in model.** On 360 generated sessions from six unseen simulated profiles, accuracy was **82.2% vs. 50.0%** for the always-usual baseline. The model flagged **19 of 180 unchanged sessions (10.6% false positives)** and missed **45 of 180 scripted changes (25.0% false negatives)**. An always-usual baseline had zero false positives and missed all 180 changes. A distraction can trigger the same flag as a deliberate pause. These results measure timing changes in simulated data.
+**Live check-in model: a sanity test on simulated typists.** No real people were tested. We generated typists, scripted timing changes into some of their sessions, and checked whether the model finds them. Because the same simulator makes both the baselines and the changes, this shows the pipeline works as designed, not that it works on people. Held-out set: 360 sessions from six simulated typists the model never trained on.
+
+| Method | Accuracy | Changes caught (of 180) | False alarms (of 180 unchanged) |
+|---|---|---|---|
+| Always "usual" | 50.0% | 0 (0%) | 0 (0%) |
+| Hand-set rule (thresholds below) | 87.8% | 143 (79%) | 7 (3.9%) |
+| Logistic regression (live) | 87.5% | 144 (80%) | 9 (5.0%) |
+
+The trained model only ties the simple rule; it does not beat it. An earlier version, which also counted *decreases* from the baseline, did worse than the rule (135 caught, 19 false alarms), so we changed it to look only at increases. All 9 false alarms came from one of the six simulated typists, whose baseline happened to be unusually steady. With only six typists, these percentages are rough (95% interval for false alarms: about 3–9%).
+
+**Where it fails.** A held-out typist held keys 27% longer than usual and the model still said "usual" (the rule did flag it). A distraction raises the same flag as a deliberate pause: the tool sees a change from your usual, never its cause.
 
 **All-day tracking research.** We separately tested offline classifiers for neutral versus interrupted or time-pressured work minutes in the public SWELL-KW dataset. The numbers below are from held-out participants (five grouped folds). The desktop app shows descriptive trends in activity counts.
 
@@ -61,7 +73,7 @@ An optional assistant explains the numbers using [GPT-4o mini](https://platform.
 
 Logistic regression ranked interrupted or time-pressured minutes above neutral minutes only slightly better than chance (0.59 ROC-AUC). At the tested threshold, it had lower accuracy than the majority baseline and flagged fewer neutral minutes. These results describe office-task conditions.
 
-**Where it fails:** 42% of genuinely calm minutes are still flagged. In the morning check-in, a distraction produces the same "longer pause" flag as a deliberate pause — the tool detects a change from your usual, never its cause.
+**Where it fails:** 42% of genuinely calm minutes are still flagged. In the check-in, a distraction produces the same "longer pause" flag as a deliberate pause — the tool detects a change from your usual, never its cause.
 
 Graphs (confusion matrix, ROC, precision–recall, feature weights, flagged rate by condition) are on the [evaluation page](https://predict360.vercel.app/evaluation). Full fixture, confounder and sensitivity results are in the [technical reference](docs/TECHNICAL.md#measured-results).
 
@@ -69,7 +81,7 @@ Graphs (confusion matrix, ROC, precision–recall, feature weights, flagged rate
 
 ## Scoring rules
 
-The morning check-in compares three timing features with your baseline (the median of at least three earlier check-ins). Points are deducted only when a feature rises above your usual:
+The check-in compares three timing features with your baseline (the median of at least three earlier check-ins). Points are deducted only when a feature rises above your usual:
 
 | Feature | Flag | No deduction up to | Full deduction at | Max points |
 |---|---|---|---|---|
@@ -88,7 +100,7 @@ The morning check-in compares three timing features with your baseline (the medi
 | [Tappy](https://physionet.org/content/tappy/1.0.0/) | 192 people, free typing over time | Key-hold reference ranges (context only) | ODC-By 1.0 |
 | [Open-Meteo](https://open-meteo.com) | Modelled barometric pressure | Optional weather context | CC BY 4.0 |
 
-No single dataset validates both modes. The morning check-in pipeline is tested on clearly labelled **synthetic** typing sessions.
+No single dataset validates both modes. The check-in pipeline is tested on clearly labelled **synthetic** typing sessions.
 
 ## Architecture
 
