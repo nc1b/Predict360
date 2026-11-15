@@ -9,7 +9,7 @@ import { buttonClass } from '@/components/ui/button';
 import { QRCode } from '@/components/ui/qr-code';
 import { SIGNALS } from '@/lib/signals';
 import { DOWNLOAD_URL, REPO_URL } from '@/lib/site';
-import { deviceNoun, downloadLabel, useOS } from '@/lib/os';
+import { downloadLabel, useOS } from '@/lib/os';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -30,14 +30,13 @@ function ModeFeature({ children }: { children: React.ReactNode }) {
 export function ModesSection() {
   const { user } = useAuth();
   const os = useOS();
-  const device = deviceNoun(os);
   return (
     <section id="modes" className="scroll-mt-24 border-t">
       <div className="mx-auto max-w-5xl px-6 py-24">
         <Eyebrow>Two ways to track</Eyebrow>
         <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Pick how you check in</h2>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Write two sentences in the morning, or opt into all-day tracking on your {device}. Switch whenever you want — each
+          Write two sentences in the morning, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
           result is labelled by mode and compared with your own baseline.
         </p>
 
@@ -66,9 +65,9 @@ export function ModesSection() {
               <Laptop className="size-5" aria-hidden="true" />
             </span>
             <h3 className="mt-5 text-2xl font-bold">All-day tracking</h3>
-            <p className="mt-1 text-sm font-medium text-muted-foreground">Opt-in desktop app</p>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">Opt-in desktop app for Windows and Mac</p>
             <p className="mt-4 text-sm">
-              Install the app and opt in. It builds your typing-rhythm trend through the day, on your {device}.
+              Install the app and opt in. It builds your typing-rhythm trend through the day, on Windows or Mac.
             </p>
             <ul className="mt-5 space-y-2 border-t pt-5">
               <ModeFeature>Opt-in, asks permission, and starts paused — pause anytime.</ModeFeature>
