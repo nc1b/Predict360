@@ -1,6 +1,6 @@
 {
   "name": "predict360-desktop",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Opt-in daily activity tracking with website account sync.",
   "main": "main.js",
@@ -59,7 +59,10 @@
         "dmg",
         "zip"
       ],
-      "artifactName": "Predict360-macOS.${ext}"
+      "artifactName": "Predict360-macOS.${ext}",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
     },
     "nsis": {
       "oneClick": true,

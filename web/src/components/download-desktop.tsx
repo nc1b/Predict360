@@ -43,7 +43,8 @@ function MacDownload({ primary }: { primary: boolean }) {
         {primary ? 'Download .DMG for Mac' : 'Download for Mac'}
       </a>
       <p className="mt-2 max-w-xs text-xs text-muted-foreground">
-        For Apple silicon Macs (M1 or later). First launch: right-click the app and choose Open.
+        For Apple silicon Macs (M1 or later). Drag it to Applications. If macOS blocks it on first launch, open System
+        Settings → Privacy &amp; Security and choose <strong>Open Anyway</strong>.
       </p>
     </div>
   );
