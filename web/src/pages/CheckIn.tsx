@@ -330,7 +330,7 @@ export default function CheckIn() {
                   </p>
                   <WeatherContextPanel onChange={setWeather} />
                 </Card>
-                <ReferenceContext features={shown.result.features} />
+                <ReferenceContext result={shown.result} />
               </>
             ) : (
               <Card className="p-6">
