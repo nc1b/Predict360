@@ -133,6 +133,21 @@ export function SignalsSection() {
                 </div>
               </dl>
 
+              <div className="mt-5 rounded-2xl border bg-muted/50 p-4 text-sm">
+                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Studied in research on</p>
+                <p className="mt-1.5 font-semibold">{s.research.conditions}</p>
+                <p className="mt-1.5 text-muted-foreground">{s.research.finding}</p>
+                <a
+                  href={s.research.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-xs font-medium underline underline-offset-4 hover:opacity-70"
+                >
+                  {s.research.cite}
+                </a>
+                <p className="mt-2 text-[11px] text-muted-foreground">Correlation in published studies, not a diagnosis. Predict 360 is not validated to detect it.</p>
+              </div>
+
               <p className="mt-auto pt-6 text-sm">
                 <span className="text-muted-foreground">If flagged: </span>
                 <span className="font-medium">{s.flag}</span>
