@@ -42,6 +42,7 @@ export function SiteFooter() {
               <a href="/#how-it-works" className={linkClass}>How it works</a>
               <a href="/#evidence" className={linkClass}>Evidence</a>
               <a href="/#faq" className={linkClass}>FAQ</a>
+              <Link to="/evaluation" className={linkClass}>Model evaluation</Link>
               <Link to="/sources" className={linkClass}>Sources & research limits</Link>
               <Link to="/privacy" className={linkClass}>Privacy Policy</Link>
               <Link to="/terms" className={linkClass}>Terms of Use</Link>

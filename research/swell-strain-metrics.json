@@ -1,0 +1,58 @@
+{
+  "dataset": "SWELL-KW computer-interaction minute features",
+  "source": "https://doi.org/10.17026/dans-x55-69zp",
+  "license": "CC BY-NC-SA 4.0",
+  "sha256": "b9799737fc6d86b40776079e0c755465ba8ce5b3d1796010954805fd7ba09f44",
+  "rows": 2686,
+  "participants": 25,
+  "strain_prevalence": 0.6176,
+  "task": "Predict strained (interrupted/time-pressure) vs neutral work minute from keyboard+mouse activity.",
+  "evaluation": "Leave-participants-out StratifiedGroupKFold (5-fold); pooled out-of-fold predictions.",
+  "baseline_majority_class": {
+    "tn": 0,
+    "fp": 1027,
+    "fn": 0,
+    "tp": 1659,
+    "accuracy": 0.6176,
+    "precision": 0.6176,
+    "recall_strain": 1.0,
+    "specificity": 0.0,
+    "false_positive_rate": 1.0,
+    "false_negative_rate": 0.0
+  },
+  "models": {
+    "logistic_regression": {
+      "tn": 596,
+      "fp": 431,
+      "fn": 752,
+      "tp": 907,
+      "accuracy": 0.5596,
+      "precision": 0.6779,
+      "recall_strain": 0.5467,
+      "specificity": 0.5803,
+      "false_positive_rate": 0.4197,
+      "false_negative_rate": 0.4533,
+      "roc_auc": 0.5919,
+      "pr_auc": 0.6924
+    },
+    "random_forest": {
+      "tn": 436,
+      "fp": 591,
+      "fn": 493,
+      "tp": 1166,
+      "accuracy": 0.5964,
+      "precision": 0.6636,
+      "recall_strain": 0.7028,
+      "specificity": 0.4245,
+      "false_positive_rate": 0.5755,
+      "false_negative_rate": 0.2972,
+      "roc_auc": 0.6027,
+      "pr_auc": 0.71
+    }
+  },
+  "flagged_rate_by_condition": {
+    "neutral": 0.4197,
+    "interrupted": 0.5266,
+    "time_pressure": 0.5768
+  }
+}
