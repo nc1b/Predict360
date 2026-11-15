@@ -84,3 +84,51 @@ export async function explain(result: AnalyzeResponse, weather: WeatherContext |
   if (typeof text !== 'string') throw new ApiError("Couldn't get an explanation right now.");
   return text;
 }
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatHistoryItem {
+  date: string;
+  readinessScore: number | null;
+  features: {
+    dwellMs: { value: number | null };
+    sentencePauseMs: { value: number | null };
+    flightVolatilityMs: { value: number | null };
+  };
+}
+
+/**
+ * POST /api/chat. Sends the conversation plus a numbers-only summary of the
+ * user's check-in history as context. No journal text or keystrokes are sent.
+ */
+export async function chat(messages: ChatMessage[], history: ChatHistoryItem[], token: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ messages, history }),
+      signal: AbortSignal.timeout(25000),
+    });
+  } catch {
+    throw new ApiError("Can't reach the assistant.");
+  }
+  let json: unknown = null;
+  try {
+    json = await res.json();
+  } catch {
+    // fall through
+  }
+  if (!res.ok) {
+    const code = (json as { error?: { code?: string; message?: string } } | null)?.error?.code;
+    const message = (json as { error?: { message?: string } } | null)?.error?.message;
+    if (code === 'ai_unconfigured') throw new AiUnconfiguredError(message ?? 'AI chat is not configured.');
+    throw new ApiError(message ?? "The assistant couldn't reply right now.");
+  }
+  const text = (json as { text?: string } | null)?.text;
+  if (typeof text !== 'string') throw new ApiError("The assistant couldn't reply right now.");
+  return text;
+}

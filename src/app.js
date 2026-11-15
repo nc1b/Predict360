@@ -153,6 +153,49 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
     }
   );
 
+  // Optional: a multi-turn assistant that summarises the user's check-in trends.
+  // Only the numeric history is forwarded as context (see ai.js); the chat
+  // messages are the user's own words, typed to the assistant on purpose.
+  app.post(
+    '/api/chat',
+    jsonBody(LIMITS.maxExplainBodyBytes),
+    async (req, res) => {
+      if (!aiClient.isConfigured()) {
+        return res.status(503).json(errorBody('ai_unconfigured', 'AI chat is not configured on this server.'));
+      }
+      try {
+        if (!await authenticateAi(req)) return res.status(401).json(errorBody('unauthorized', 'Sign in to use the assistant.'));
+      } catch { return res.status(503).json(errorBody('auth_unavailable', 'Could not verify your account. Please try again.')); }
+      const prepared = aiClient.prepareChat(req.body);
+      if (prepared.error) return res.status(400).json(errorBody('invalid_request', prepared.error));
+      if (aiInFlight >= maxAiConcurrent) {
+        res.set('Retry-After', '5');
+        return res.status(429).json(errorBody('ai_busy', 'The assistant is busy. Please try again shortly.'));
+      }
+      aiInFlight++;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), aiTimeoutMs);
+      const onClose = () => { if (!res.writableEnded) controller.abort(); };
+      res.on('close', onClose);
+      try {
+        const text = await aiClient.chat(prepared.messages, { signal: controller.signal });
+        res.json({ text });
+      } catch (err) {
+        log('error ai');
+        if (!res.destroyed) {
+          const timedOut = controller.signal.aborted;
+          res
+            .status(timedOut ? 504 : 502)
+            .json(errorBody(timedOut ? 'ai_timeout' : 'ai_error', "The assistant couldn't reply right now. Please try again."));
+        }
+      } finally {
+        clearTimeout(timer);
+        res.off('close', onClose);
+        aiInFlight--;
+      }
+    }
+  );
+
   // Optional: serve the built frontend (web/dist) so one process runs the whole demo.
   if (staticDir) {
     app.use(express.static(staticDir));

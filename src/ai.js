@@ -123,4 +123,100 @@ async function callAi(summaryText, { signal, mode = 'typing' } = {}) {
   return text.trim();
 }
 
-module.exports = { isConfigured, buildSummaryText, buildActivitySummaryText, callAi, AI_ENDPOINT, AI_MODEL };
+// --- Multi-turn assistant -------------------------------------------------
+// The user's chat messages are their own words, typed to the assistant on
+// purpose. The check-in HISTORY passed as context is numbers only (see
+// buildHistoryText); no journal text or keystrokes are ever included.
+
+const CHAT_SYSTEM_PROMPT = [
+  'You are the assistant for Predict 360, an experimental morning typing check-in.',
+  "Each check-in has the user type two sentences; the app measures only timing (key hold time, the pause between sentences, and how even the rhythm is) and compares it with the user's own usual. You never see what they wrote.",
+  "You may be given a list of the user's recent check-ins as numbers only. Use it to answer questions and summarise trends plainly and supportively.",
+  'Keep replies short and friendly (usually under 120 words), in plain language.',
+  'Rules you must follow:',
+  '- This is about typing timing only. Never give medical advice.',
+  '- Never name or imply any illness, condition, disorder or diagnosis.',
+  '- Never say whether the person is healthy, unwell, or fit to work.',
+  '- A difference is just a difference from their usual, with ordinary possible causes such as distraction, a different keyboard, or tiredness.',
+  '- Use only the supplied numbers and references. Never invent accuracy, a disease threshold, or a causal explanation.',
+  '- If asked for medical advice or a diagnosis, gently decline and suggest talking to a professional.',
+  '- If there is no check-in data yet, say so and invite them to do a check-in.',
+].join('\n');
+
+const MAX_CHAT_MESSAGES = 20;
+const MAX_CHAT_CHARS = 2000;
+const MAX_HISTORY_ITEMS = 30;
+
+/** Numbers-only description of a list of past check-ins, for chat context. */
+function buildHistoryText(history) {
+  if (!Array.isArray(history) || history.length === 0) return null;
+  const rows = [];
+  for (const item of history.slice(-MAX_HISTORY_ITEMS)) {
+    if (!item || typeof item !== 'object') continue;
+    const date = typeof item.date === 'string' && /^[0-9T:.\-Z ]{1,32}$/.test(item.date) ? item.date.slice(0, 10) : '?';
+    const score = num(item.readinessScore, 100);
+    const f = item.features && typeof item.features === 'object' ? item.features : {};
+    const parts = [];
+    for (const key of Object.keys(FEATURE_LABELS)) {
+      const v = num(f[key] && f[key].value);
+      if (v !== null) parts.push(`${FEATURE_LABELS[key]} ${Math.round(v)}ms`);
+    }
+    if (score === null && parts.length === 0) continue;
+    rows.push(`${date}: score ${score === null ? 'n/a' : score}${parts.length ? ', ' + parts.join(', ') : ''}`);
+  }
+  return rows.length ? rows.join('\n') : null;
+}
+
+/** Validate a chat body and build the message list sent to the model. */
+function prepareChat(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return { error: 'Send { messages: [...] }.' };
+  const raw = Array.isArray(body.messages) ? body.messages : null;
+  if (!raw || raw.length === 0) return { error: 'messages must be a non-empty array.' };
+  if (raw.length > MAX_CHAT_MESSAGES) return { error: `Too many messages (max ${MAX_CHAT_MESSAGES}).` };
+  const messages = [];
+  for (const m of raw) {
+    if (!m || typeof m !== 'object') return { error: 'Each message must be an object.' };
+    if (m.role !== 'user' && m.role !== 'assistant') return { error: 'Each message role must be user or assistant.' };
+    if (typeof m.content !== 'string' || m.content.length === 0) return { error: 'Each message needs string content.' };
+    if (m.content.length > MAX_CHAT_CHARS) return { error: `A message is too long (max ${MAX_CHAT_CHARS} chars).` };
+    messages.push({ role: m.role, content: m.content });
+  }
+  if (messages[messages.length - 1].role !== 'user') return { error: 'The last message must be from the user.' };
+  const historyText = buildHistoryText(body.history);
+  const system = [
+    { role: 'system', content: CHAT_SYSTEM_PROMPT },
+    {
+      role: 'system',
+      content: historyText
+        ? `The user's recent check-ins (numbers only, oldest first):\n${historyText}\n\nPublic research context (not diagnostic thresholds):\n${typingResearchContext()}`
+        : 'The user has no saved check-ins yet.',
+    },
+  ];
+  return { messages: [...system, ...messages] };
+}
+
+async function chat(messages, { signal } = {}) {
+  const res = await fetch(AI_ENDPOINT, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.HACKCLUB_AI_KEY}`, 'Content-Type': 'application/json' },
+    signal,
+    body: JSON.stringify({ model: AI_MODEL, temperature: 0.5, max_tokens: 400, messages }),
+  });
+  if (!res.ok) throw new Error(`upstream ${res.status}`);
+  const data = await res.json();
+  const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (typeof text !== 'string' || text.trim().length === 0) throw new Error('empty completion');
+  return text.trim();
+}
+
+module.exports = {
+  isConfigured,
+  buildSummaryText,
+  buildActivitySummaryText,
+  buildHistoryText,
+  prepareChat,
+  chat,
+  callAi,
+  AI_ENDPOINT,
+  AI_MODEL,
+};

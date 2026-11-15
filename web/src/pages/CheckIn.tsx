@@ -3,6 +3,7 @@ import { UserButton } from '@clerk/react';
 import { Keyboard, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { Logo } from '@/components/logo';
+import { Chat } from '@/components/chat';
 import { ResultCard, StatusBadge } from '@/components/result-card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -383,6 +384,10 @@ export default function CheckIn() {
               <p className="mt-2 text-xs text-muted-foreground">Scores use check-ins from this browser so different keyboards are not mixed.</p>
             </Card>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <Chat history={history} getToken={getToken} />
         </div>
       </main>
     </div>
