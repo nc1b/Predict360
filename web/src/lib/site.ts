@@ -2,8 +2,9 @@ export const REPO_URL = 'https://github.com/nc1b/Predict360';
 
 /** Front-page product video (generated with Arcade). Empty src hides the section. */
 export const PROJECT_VIDEO = {
-  src: '',
-  poster: '',
+  src: 'https://cdn.arcade.software/mp4s/GxXlNoNHqOuQO6koKbiz_cczvtmgvvD2L9uCzBzok.mp4',
+  poster:
+    'https://cdn.arcade.software/wizard-videos/K8jiGkiOoetf4hDGNwgc/thumbnails/GxXlNoNHqOuQO6koKbiz-1-ef9aedfd-30d6-442d-825b-6b91b8305bf7.png',
 };
 
 // Free-to-use Unsplash photos, shown in greyscale like the Iris Checks hero.
