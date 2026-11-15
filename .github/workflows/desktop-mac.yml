@@ -1,0 +1,46 @@
+name: Desktop app (macOS)
+
+# Builds the macOS app on a GitHub-hosted Mac and uploads the .dmg/.zip as a
+# workflow artifact (download it from the run page). Unsigned, so first launch
+# needs right-click -> Open. Run from the Actions tab or push a version tag.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefix ..
+          npm ci
+
+      - name: Build the macOS app
+        run: npm run dist:mac
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload the macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: predict360-macos
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.zip
+          if-no-files-found: error

@@ -13,7 +13,8 @@ async function main() {
   const svg = fs.readFileSync(path.join(root, 'web/public/icon.svg'), 'utf8').replace(/<style>.*?<\/style>/s, '').replace('<g stroke-width', '<g stroke="#000" stroke-width');
   const png = path.join(target, 'icon.png');
   // Transparent background (no white fill), so the app icon has no backdrop.
-  await sharp(Buffer.from(svg)).resize(256, 256).png().toFile(png);
+  // 1024px so electron-builder can also generate the macOS .icns from it.
+  await sharp(Buffer.from(svg)).resize(1024, 1024).png().toFile(png);
   const pngToIco = (await import('png-to-ico')).default;
   fs.writeFileSync(path.join(target, 'icon.ico'), await pngToIco(png));
 }

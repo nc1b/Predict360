@@ -9,7 +9,9 @@
     "start": "electron .",
     "predist": "node ../scripts/prepare-desktop.js",
     "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist:portable": "electron-builder --win portable",
+    "predist:mac": "node ../scripts/prepare-desktop.js",
+    "dist:mac": "electron-builder --mac"
   },
   "devDependencies": {
     "electron": "45.3.2",
@@ -49,6 +51,15 @@
         "nsis"
       ],
       "artifactName": "Predict360-${version}-Windows.exe"
+    },
+    "mac": {
+      "icon": "assets/icon.png",
+      "category": "public.app-category.healthcare-fitness",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "artifactName": "Predict360-${version}-macOS.${ext}"
     },
     "nsis": {
       "oneClick": true,

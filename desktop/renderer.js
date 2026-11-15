@@ -1,4 +1,25 @@
 'use strict';
+// Theme (dark by default; persisted light/dark toggle in the header).
+(function () {
+  try {
+    const saved = localStorage.getItem('p360.desktop.theme');
+    if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+  } catch (e) {}
+  const btn = document.getElementById('theme-toggle');
+  const sync = () => {
+    if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? 'Dark' : 'Light';
+  };
+  sync();
+  if (btn)
+    btn.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('p360.desktop.theme', next);
+      } catch (e) {}
+      sync();
+    });
+})();
 const element = (id) => document.getElementById(id);
 const duration = (ms) => { const minutes = Math.floor(ms / 60000); return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`; };
 const pending = new Set(), animations = new WeakMap();

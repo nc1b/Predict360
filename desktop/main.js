@@ -129,7 +129,8 @@ else {
     if (process.defaultApp) app.setAsDefaultProtocolClient('predict360', process.execPath, [path.resolve(process.argv[1])]);
     else app.setAsDefaultProtocolClient('predict360');
     Menu.setApplicationMenu(null);
-    win = new BrowserWindow({ width: 1100, height: 820, minWidth: 760, minHeight: 620, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
+    win = new BrowserWindow({ width: 500, height: 760, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
+      backgroundColor: '#0b0b0c', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
       webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('will-navigate', (event) => event.preventDefault());
