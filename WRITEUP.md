@@ -5,9 +5,11 @@
 
 This project is a prototype and is not medical advice.
 
+**Try it in under a minute.** Open the [interactive evaluation](https://predict360.vercel.app/evaluation) and choose **Distracted typist** and **Missed timing change**. The examples use the same analysis as the live app and include five prior check-ins, so you can see a result without creating an account. The model flags the distracted typist's longer pause but misses the other typist's longer key holds.
+
 ## The problem
 
-Imagine you're near the end of a 12-hour nursing shift. You still have notes to chart, and it's hard to notice when your typing feels different from usual. We wanted to give nurses a 30-second way to check in privately during a break.
+Imagine you're near the end of a 12-hour nursing shift. You still have notes to chart, and it's hard to notice when your typing feels different from usual. We wanted to give nurses a 30-second way to check in privately during a break, so a shift-to-shift change is easier to notice and reflect on.
 
 ## What we built
 
@@ -15,11 +17,11 @@ Type two sentences on a physical keyboard. After three usable prior check-ins, P
 
 ## What we added
 
-**Our own idea.** We compare each person with their own earlier check-ins. The interactive evaluation lets a judge run the same check-in model on examples, including one it gets wrong.
+**Our own idea.** Two people can type at very different speeds on an ordinary day. We compare each person with their own earlier check-ins on the same device and use a short typing task that fits into a shift break without retaining what they write.
 
 ## How it works
 
-We trained the live logistic regression model on 720 generated sessions from 12 simulated typist profiles. Each profile had its own baseline, and we held out six other profiles for testing. The model uses changes in the three timing measures because each can be compared with a person's usual range. In a separate offline experiment, we used 2,686 complete one-minute records from 25 participants in the public SWELL-KW dataset. We classified neutral office tasks versus tasks with interruptions or time pressure, holding out entire participants in each of five folds.
+We trained the live logistic regression model on 720 generated sessions from 12 simulated typist profiles. Each profile had its own baseline, and we held out six other profiles for testing. The model uses changes in the three timing measures because each can be compared with a person's usual range. Logistic regression gives a readable weight for each change and runs without an external AI key. In a separate offline experiment, we used 2,686 complete one-minute records from 25 participants in the public SWELL-KW dataset. We classified neutral office tasks versus tasks with interruptions or time pressure, holding out entire participants in each of five folds.
 
 ## Results
 
