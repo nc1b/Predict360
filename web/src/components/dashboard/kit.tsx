@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 export type Tone = 'good' | 'warn' | 'bad' | 'idle';
 
 const DOT: Record<Tone, string> = {
-  good: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]',
+  good: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,165,134,0.65)]',
   warn: 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]',
   bad: 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.55)]',
   idle: 'bg-muted-foreground/50',
@@ -94,10 +94,10 @@ export function Toggle({ checked, onChange, label, id }: { checked: boolean; onC
       onClick={() => onChange(!checked)}
       className={cn(
         'relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        checked ? 'bg-emerald-500' : 'bg-track'
+        checked ? 'bg-emerald-600' : 'bg-track'
       )}
     >
-      <span className={cn('absolute top-0.5 size-5 rounded-full bg-white shadow transition-[left] duration-200', checked ? 'left-[22px]' : 'left-0.5')} />
+      <span className={cn('absolute top-0.5 size-5 rounded-full bg-[#f3f0ea] shadow transition-[left] duration-200', checked ? 'left-[22px]' : 'left-0.5')} />
     </button>
   );
 }
@@ -138,7 +138,7 @@ export function WirePattern({ className }: { className?: string }) {
       <defs>
         <linearGradient id="wire" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0%" stopColor="var(--chart)" stopOpacity="0.7" />
-          <stop offset="100%" stopColor="#f472b6" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#34a586" stopOpacity="0.2" />
         </linearGradient>
       </defs>
       {squares.map((i) => (

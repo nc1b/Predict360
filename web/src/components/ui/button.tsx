@@ -16,7 +16,8 @@ const variants = {
   outline: 'border border-input bg-background text-foreground hover:bg-accent',
   ghost: 'text-foreground hover:bg-accent',
   destructive: 'border border-input bg-background text-destructive hover:bg-accent',
-  brand: 'bg-gradient-to-b from-emerald-400 to-emerald-600 text-white shadow-[0_6px_20px_-8px_rgba(16,185,129,0.7)] hover:brightness-110',
+  brand:
+    'border border-emerald-400/30 bg-gradient-to-b from-emerald-500 to-emerald-700 text-[#f3f0ea] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_6px_20px_-8px_rgba(4,95,75,0.85)] hover:brightness-110',
   chip: 'border border-border bg-secondary/80 text-foreground hover:bg-accent',
 };
 

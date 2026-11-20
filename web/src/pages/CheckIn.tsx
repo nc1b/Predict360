@@ -545,7 +545,7 @@ export default function CheckIn() {
 
                   {/* Research */}
                   <Card className="relative overflow-hidden p-5 xl:col-span-4">
-                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="#f472b6" />
+                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="var(--chart)" />
                     <div className="relative">
                       <div className="flex items-center gap-2"><BookOpen className="size-5 text-pink-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Research</h2></div>
                       <p className="text-xs text-muted-foreground">What the model can and cannot detect</p>
@@ -556,7 +556,7 @@ export default function CheckIn() {
 
                   {/* Desktop */}
                   <Card className="relative overflow-hidden p-5 xl:col-span-4">
-                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="#34d399" />
+                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="#34a586" />
                     <div className="relative">
                       <div className="flex items-center gap-2"><Download className="size-5 text-emerald-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Desktop app</h2></div>
                       <p className="text-xs text-muted-foreground">Track activity across your apps</p>
