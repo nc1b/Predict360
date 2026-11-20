@@ -49,7 +49,7 @@ export function DailyAnalysisCard({
           <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             <Sparkles className="size-3.5" aria-hidden="true" /> Daily analysis
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">Written by Claude Opus from your numbers only</p>
+          <p className="mt-1 text-xs text-muted-foreground">Written by Claude Opus 5.5 from your numbers only</p>
         </div>
         {(text || canRun) && (
           <Button variant="outline" size="sm" className="rounded-full" onClick={onRun} disabled={busy || !canRun}>

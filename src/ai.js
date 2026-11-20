@@ -2,10 +2,14 @@
 
 const Anthropic = require('@anthropic-ai/sdk').default;
 
-// Sonnet answers the quick, per-check-in requests (explanations and chat).
-// Opus writes the once-a-day analysis that compares today with the user's history.
-const FAST_MODEL = 'claude-sonnet-5-5';
-const DEEP_MODEL = 'claude-opus-5-5';
+// Every AI feature (explanations, chat, daily analysis) uses Claude Opus 5.5.
+// Requests go through the Hack Club AI proxy with HACKCLUB_AI_KEY; if ANTHROPIC_API_KEY is set
+// instead, they go straight to the Anthropic API with the same model.
+const MODEL = 'claude-opus-5-5';
+const HACKCLUB_ENDPOINT = 'https://ai.hackclub.com/proxy/v1/chat/completions';
+const HACKCLUB_MODEL = 'anthropic/claude-opus-5.5';
+const FAST_MODEL = MODEL;
+const DEEP_MODEL = MODEL;
 // If a model declines, the API reruns the request on a suitable fallback model in the same call.
 const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 const { LIMITS, SCORING, STATUS_BANDS } = require('./config');
@@ -38,8 +42,15 @@ const FEATURE_LABELS = {
   flightVolatilityMs: 'typing rhythm variation',
 };
 
+const hasKey = (name) => typeof process.env[name] === 'string' && process.env[name].trim().length > 0;
+/** 'anthropic' when an Anthropic key is set, else 'hackclub' when a Hack Club AI key is set, else null. */
+function provider() {
+  if (hasKey('ANTHROPIC_API_KEY')) return 'anthropic';
+  if (hasKey('HACKCLUB_AI_KEY')) return 'hackclub';
+  return null;
+}
 function isConfigured() {
-  return typeof process.env.ANTHROPIC_API_KEY === 'string' && process.env.ANTHROPIC_API_KEY.trim().length > 0;
+  return provider() !== null;
 }
 
 let client = null;
@@ -49,8 +60,25 @@ function getClient() {
   return client;
 }
 
-/** One Messages API call; returns the reply text or throws. */
+/** Hack Club AI proxy (chat-completions format), used with the project's existing HACKCLUB_AI_KEY. */
+async function completeViaHackClub({ system, messages, maxTokens, signal }) {
+  const res = await fetch(HACKCLUB_ENDPOINT, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.HACKCLUB_AI_KEY}`, 'Content-Type': 'application/json' },
+    signal,
+    body: JSON.stringify({ model: HACKCLUB_MODEL, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, ...messages] }),
+  });
+  if (!res.ok) throw new Error(`upstream ${res.status}`);
+  const data = await res.json();
+  const choice = data && data.choices && data.choices[0];
+  const text = choice && choice.message && choice.message.content;
+  if (typeof text !== 'string' || text.trim().length === 0) throw new Error('empty completion');
+  return text.trim();
+}
+
+/** One model call; returns the reply text or throws. */
 async function complete({ model, system, messages, effort, maxTokens, signal }) {
+  if (provider() === 'hackclub') return completeViaHackClub({ system, messages, maxTokens, signal });
   const response = await getClient().beta.messages.create(
     {
       model,
@@ -254,4 +282,7 @@ module.exports = {
   dailyAnalysis,
   FAST_MODEL,
   DEEP_MODEL,
+  HACKCLUB_MODEL,
+  HACKCLUB_ENDPOINT,
+  provider,
 };

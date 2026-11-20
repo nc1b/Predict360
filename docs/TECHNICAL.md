@@ -4,7 +4,7 @@ Predict 360 is an opt-in desktop activity tracker and website dashboard for a ha
 
 The desktop app starts paused. It never saves typed words, key values, pointer coordinates, screenshots, or application names. Tracking is visible in the system tray and pauses on screen lock or sleep.
 
-AI explanations and chat use **Claude Sonnet 5.5**, and the daily analysis uses **Claude Opus 5.5**, through the Anthropic API with `ANTHROPIC_API_KEY` set in Vercel. Requests enable server-side refusal fallbacks. The key stays server-side, and explanation requests require a verified website or desktop account. Public CMU, Tappy, and SWELL-KW reference summaries are reproducible from public data; optional Open-Meteo pressure is contextual only. See [Sources and research limits](SOURCES.md). No disease detector was trained, no clinical accuracy improvement is established, and computer activity cannot establish hydration or readiness to work.
+AI explanations, chat and the daily analysis all use **Claude Opus 5.5** (`anthropic/claude-opus-5.5`) through the Hack Club AI proxy, with the existing `HACKCLUB_AI_KEY` in Vercel. If `ANTHROPIC_API_KEY` is set instead, `src/ai.js` calls the Anthropic API directly with the same model and server-side refusal fallbacks. The key stays server-side, and explanation requests require a verified website or desktop account. Public CMU, Tappy, and SWELL-KW reference summaries are reproducible from public data; optional Open-Meteo pressure is contextual only. See [Sources and research limits](SOURCES.md). No disease detector was trained, no clinical accuracy improvement is established, and computer activity cannot establish hydration or readiness to work.
 
 ## Setup
 

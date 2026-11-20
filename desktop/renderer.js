@@ -85,7 +85,7 @@ function render(state) {
   element('start').hidden = !state.connected || state.running;
   element('pause').hidden = !state.running;
 
-  element('ai-text').textContent = state.aiText ? state.aiText + ' (Written by Claude Sonnet from counts; it can be wrong.)' : 'A short summary of today written by Claude Sonnet. Only numbers are sent, and it can be wrong.';
+  element('ai-text').textContent = state.aiText ? state.aiText + ' (Written by Claude Opus 5.5 from counts; it can be wrong.)' : 'A short summary of today written by Claude Opus 5.5. Only numbers are sent, and it can be wrong.';
   element('ai-text').classList.toggle('muted', !state.aiText);
 
   for (const button of document.querySelectorAll('[data-action]')) {

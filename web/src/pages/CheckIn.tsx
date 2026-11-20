@@ -479,7 +479,7 @@ export default function CheckIn() {
                       <DotWave className="absolute -right-6 bottom-0 h-32 w-64 opacity-80" />
                       <div className="relative">
                         <div className="flex items-center gap-2"><Brain className="size-5 text-violet-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Daily analysis</h2></div>
-                        <p className="text-xs text-muted-foreground">Claude Opus · numbers only</p>
+                        <p className="text-xs text-muted-foreground">Claude Opus 5.5 · numbers only</p>
                         <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={analysis ? 'good' : analysisBusy ? 'warn' : 'idle'} />{analysis ? 'Written today' : analysisBusy ? 'Writing…' : 'Not run today'}</p>
                         {analysis && <div className="max-w-[90%] text-sm"><AnalysisText text={analysis} /></div>}
                         {analysisError && <p role="alert" className="mt-2 text-sm text-destructive">{analysisError}</p>}
@@ -493,7 +493,7 @@ export default function CheckIn() {
                     <DotWave className="absolute -right-6 bottom-0 h-32 w-64 opacity-60" hue="var(--gauge)" />
                     <div className="relative">
                       <div className="flex items-center gap-2"><Sparkles className="size-5 text-sky-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Explain my result</h2></div>
-                      <p className="text-xs text-muted-foreground">Claude Sonnet · plain words</p>
+                      <p className="text-xs text-muted-foreground">Claude Opus 5.5 · plain words</p>
                       <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={shown ? 'good' : 'idle'} />{shown ? 'Result ready' : 'Check in first'}</p>
                       {aiText && <p className="mt-3 max-w-[90%] text-sm leading-relaxed">{aiText}</p>}
                       <ChipButton className="mt-4" onClick={explainResult} disabled={!shown || aiBusy}>{aiBusy ? 'Thinking' : aiText ? 'Again' : 'Explain'}</ChipButton>

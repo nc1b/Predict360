@@ -10,7 +10,7 @@ An opt-in activity tracker across applications, connected to your website accoun
 4. Sign in with your usual account, choose **Connect this account**, then **Return to desktop**. Allow the browser to open Predict 360.
 5. Choose **Start tracking**. Pause at any time in the window or system tray.
 
-The dashboard shows clicks, key presses, scroll counts, and active/idle time. Activity is grouped by local day and hour, saved locally, and synced about once a minute. The website dashboard refreshes about once a minute. **Explain my day** asks Claude Sonnet (through the website backend) for a short summary, sending only numeric counts and public research context.
+The dashboard shows clicks, key presses, scroll counts, and active/idle time. Activity is grouped by local day and hour, saved locally, and synced about once a minute. The website dashboard refreshes about once a minute. **Explain my day** asks Claude Opus 5.5 (through the website backend) for a short summary, sending only numeric counts and public research context.
 
 The app never saves typed words, key values, pointer coordinates, screenshots, or application names. Mouse movement marks activity. No input for 60 seconds counts as idle. Tracking pauses during sleep or screen lock and resumes afterwards. Once started, tracking runs in the background: closing the window leaves the app in the system tray (menu bar on macOS), and the app starts hidden when you sign in to your computer and resumes tracking. **Pause** stops tracking and turns off launch at login. **Quit and stop tracking** in the tray stops it until you next sign in to your computer.
 

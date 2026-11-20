@@ -85,8 +85,8 @@ export function ModelSection() {
             Trained on real typing. Tested on people it had never seen.
           </h2>
           <p className="mt-5 text-pretty text-muted-foreground">
-            Two kinds of AI work together. Our own models, trained and evaluated on public research data, measure your typing. Anthropic&apos;s latest Claude
-            models turn those numbers into plain-language explanations and a daily analysis.
+            Two kinds of AI work together. Our own models, trained and evaluated on public research data, measure your typing. Anthropic&apos;s Claude Opus 5.5
+            turns those numbers into plain-language explanations and a daily analysis.
           </p>
         </div>
 
@@ -173,9 +173,9 @@ export function ModelSection() {
           <Eyebrow>Powered by Claude</Eyebrow>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
-              { icon: Brain, name: 'Claude Opus 5.5', role: 'Daily analysis', body: "Anthropic's most capable Opus model compares today with your recent check-ins, energy and computer activity, and writes a short daily read-out.", tone: 'text-violet-400 border-violet-500/30 bg-violet-500/10' },
-              { icon: Sparkles, name: 'Claude Sonnet 5.5', role: 'Explanations and chat', body: 'Fast and capable: explains each result in plain words, answers questions about your trend, and summarises the desktop app’s activity.', tone: 'text-sky-400 border-sky-500/30 bg-sky-500/10' },
-              { icon: Lock, name: 'Privacy by design', role: 'Numbers only', body: 'Claude receives timing figures, never the words you type. Instructions forbid diagnosis, and refusals fall back safely to another model.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' },
+              { icon: Brain, name: 'Claude Opus 5.5', role: 'Daily analysis', body: "Anthropic's latest Opus model compares today with your recent check-ins, energy and computer activity, and writes a short daily read-out.", tone: 'text-violet-400 border-violet-500/30 bg-violet-500/10' },
+              { icon: Sparkles, name: 'Claude Opus 5.5', role: 'Explanations and chat', body: 'The same model explains each result in plain words, answers questions about your trend, and summarises the desktop app’s activity.', tone: 'text-sky-400 border-sky-500/30 bg-sky-500/10' },
+              { icon: Lock, name: 'Privacy by design', role: 'Numbers only', body: 'Claude receives timing figures, never the words you type, and its instructions forbid any diagnosis.', tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' },
             ].map((m) => (
               <div key={m.name} className="panel rounded-2xl border border-border p-6">
                 <span className={cn('flex size-11 items-center justify-center rounded-xl border', m.tone)}><m.icon className="size-5" aria-hidden="true" /></span>

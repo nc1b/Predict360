@@ -130,8 +130,9 @@ test('busy explanations return 429 while health and analysis keep working', asyn
 });
 
 test('POST /api/explain returns 503 when no AI key is configured', async () => {
-  const prev = process.env.ANTHROPIC_API_KEY;
+  const prev = process.env.ANTHROPIC_API_KEY, prevHc = process.env.HACKCLUB_AI_KEY;
   delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.HACKCLUB_AI_KEY;
   try {
     await withServer(async (base) => {
       const res = await post(base, { summary: sampleSummary });
@@ -140,6 +141,7 @@ test('POST /api/explain returns 503 when no AI key is configured', async () => {
     });
   } finally {
     if (prev !== undefined) process.env.ANTHROPIC_API_KEY = prev;
+    if (prevHc !== undefined) process.env.HACKCLUB_AI_KEY = prevHc;
   }
 });
 
@@ -156,7 +158,7 @@ test('POST /api/explain rejects a body with no usable summary', async () => {
   }
 });
 
-test('POST /api/explain sends only numbers to Claude Sonnet and returns its text', async () => {
+test('POST /api/explain sends only numbers to Claude Opus 5.5 and returns its text', async () => {
   process.env.ANTHROPIC_API_KEY = 'test-key';
   const realFetch = global.fetch;
   let sentBody = null;
@@ -177,7 +179,7 @@ test('POST /api/explain sends only numbers to Claude Sonnet and returns its text
       assert.equal(res.status, 200);
       const { text } = await res.json();
       assert.match(text, /not medical advice/);
-      assert.equal(sentBody.model, 'claude-sonnet-5-5');
+      assert.equal(sentBody.model, 'claude-opus-5-5');
       assert.equal(sentBody.fallbacks, 'default');
       assert.match(sentBody.messages[0].content, /4220 ms/);
       assert.ok(!/keystrokes|downMs|upMs|journal/i.test(JSON.stringify(sentBody)));

@@ -47,7 +47,7 @@ Results are labelled by mode, and a **"Gathering data"** state is shown until th
 
 The live check-in uses **logistic regression trained on real typing** from the public [CMU Keystroke Dynamics Benchmark](https://www.cs.cmu.edu/~keystroke/) (51 people). Its inputs are how far key-hold time, sentence pause and typing rhythm rose above the person's own baseline. It has four readable weights and runs in the app without any AI service key. [Try the examples without signing in](https://predict360.vercel.app/evaluation).
 
-Claude explains the numbers: **Claude Sonnet 5.5** writes the per-check-in explanation and answers the assistant chat, and **Claude Opus 5.5** writes a daily analysis that compares today with your recent check-ins, self-reported energy and computer activity. Claude receives numeric results and messages entered in the chat box only. The check-in score itself still comes from the validated logistic-regression model above, not from Claude. The sentences typed during check-ins stay in the browser.
+Claude explains the numbers: **Claude Opus 5.5** writes the per-check-in explanation, answers the assistant chat, and writes a daily analysis that compares today with your recent check-ins, self-reported energy and computer activity. Claude receives numeric results and messages entered in the chat box only. The check-in score itself still comes from the validated logistic-regression model above, not from Claude. The sentences typed during check-ins stay in the browser.
 
 ## Measured results
 
@@ -157,7 +157,7 @@ Then open http://localhost:3000.
 
 ## Credits
 
-[Datasets and research limits](SOURCES.md), [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), [React](https://react.dev/), [Express](https://expressjs.com/), [Electron](https://www.electronjs.org/), [Clerk](https://clerk.com/), [Supabase](https://supabase.com/), [Arcade](https://www.arcade.software/) (demo), [Claude Sonnet 5.5 and Opus 5.5](https://www.anthropic.com/claude) via the Anthropic API (explanations, chat and daily analysis), and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) (development assistance).
+[Datasets and research limits](SOURCES.md), [scikit-learn](https://scikit-learn.org/), [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), [React](https://react.dev/), [Express](https://expressjs.com/), [Electron](https://www.electronjs.org/), [Clerk](https://clerk.com/), [Supabase](https://supabase.com/), [Arcade](https://www.arcade.software/) (demo), [Claude Opus 5.5](https://www.anthropic.com/claude) via the [Hack Club AI proxy](https://ai.hackclub.com/) (explanations, chat and daily analysis), and [Claude](https://claude.ai/) and [ChatGPT](https://chatgpt.com/) (development assistance).
 
 <div align="center">
 <sub>Predict 360 · Veritas AI High School Hackathon 2026 · This project is a prototype and is not medical advice.</sub>

@@ -72,7 +72,7 @@ test('daily analysis: numbers only, Opus model, auth and validation enforced', a
   assert.match(text, /95 active minutes/);
   assert.equal(ai.buildDailyText({}), null);
   assert.equal(ai.DEEP_MODEL, 'claude-opus-5-5');
-  assert.equal(ai.FAST_MODEL, 'claude-sonnet-5-5');
+  assert.equal(ai.FAST_MODEL, 'claude-opus-5-5');
 
   let sent = null;
   const client = { isConfigured: () => true, buildDailyText: ai.buildDailyText, dailyAnalysis: async (t) => { sent = t; return 'Steady day.\n- Key hold close to usual.\nPrototype, not medical advice.'; } };
@@ -87,4 +87,30 @@ test('daily analysis: numbers only, Opus model, auth and validation enforced', a
     assert.match((await res.json()).text, /Steady day/);
     assert.ok(!sent.includes('secret words'));
   });
+});
+
+test('with only a Hack Club key, requests go through the proxy to Claude Opus 5.5', async () => {
+  const saved = { a: process.env.ANTHROPIC_API_KEY, h: process.env.HACKCLUB_AI_KEY };
+  delete process.env.ANTHROPIC_API_KEY;
+  process.env.HACKCLUB_AI_KEY = 'hc-test';
+  const realFetch = global.fetch;
+  let sent = null, auth = null, url = null;
+  global.fetch = async (u, opts) => {
+    url = String(u); sent = JSON.parse(opts.body); auth = opts.headers.Authorization;
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'Steady day. Prototype, not medical advice.' } }] }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    assert.equal(ai.provider(), 'hackclub');
+    assert.equal(ai.isConfigured(), true);
+    const text = await ai.dailyAnalysis('Recent check-ins: 2026-11-14: score 90');
+    assert.match(text, /Steady day/);
+    assert.equal(url, 'https://ai.hackclub.com/proxy/v1/chat/completions');
+    assert.equal(sent.model, 'anthropic/claude-opus-5.5');
+    assert.equal(auth, 'Bearer hc-test');
+    assert.equal(sent.messages[0].role, 'system');
+  } finally {
+    global.fetch = realFetch;
+    if (saved.a === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = saved.a;
+    if (saved.h === undefined) delete process.env.HACKCLUB_AI_KEY; else process.env.HACKCLUB_AI_KEY = saved.h;
+  }
 });
