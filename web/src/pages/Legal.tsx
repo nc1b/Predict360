@@ -1,30 +1,96 @@
 import { Link } from 'react-router-dom';
-import { Logo } from '@/components/logo';
-
-const privacy = [
-  ['What Predict 360 does', 'Predict 360 is a research prototype for personal computer-activity reflection. The Windows app records only after you connect an account and choose Start tracking. It starts paused and can be paused or stopped from its window or system tray.'],
-  ['Information collected', 'Clerk handles account and sign-in information, such as the email address and profile details you provide. Predict 360 associates saved summaries with your account id and random device identifiers. Desktop summaries contain hourly click, key-press and scroll counts, tracked time, and active/idle time. A website typing check-in sends timing categories and timestamps for analysis and saves only numeric feature summaries and results.'],
-  ['Information we do not record', 'The desktop app does not save typed words, key values, pointer positions, screenshots, application names, or browsing history. The journal text remains in the website field and is cleared after a completed check-in. Optional energy answers used for personal planning remain in the current page or app session and are not synced to employers or the database.'],
-  ['How information is used', 'Summaries provide your activity dashboard, your own typing baseline, sync between your devices, and optional explanations. Personal planning suggestions use recorded usage and an optional energy answer. They are not health findings or employment assessments. Private app-user records are not inputs to the public-dataset research reference pipeline.'],
-  ['Service providers', 'Clerk provides authentication, Supabase stores account-linked summaries and public installer downloads, and Vercel hosts the website and API. If you request an AI explanation, numeric summaries and public research aggregates are sent through Hack Club AI to its model providers. Journal words and raw keystrokes are not forwarded to the AI. Optional city/date weather lookups are sent to Open-Meteo; only pressure numbers may be included in an explanation. Website photographs are loaded from Unsplash. These providers may process connection metadata under their own policies.'],
-  ['Local storage and cookies', 'Essential account cookies and tokens support sign-in. The browser stores a local summary cache, pending sync entries, random device id, and theme preference. The desktop stores up to 30 daily summaries locally and encrypts its account credential with the operating system credential facility when available. If secure credential storage is unavailable, reconnecting is required after restarting. The app does not contain advertising trackers.'],
-  ['Retention', 'The website displays the latest 30 check-in summaries and approximately 30 days of activity. Older cloud activity is pruned when that account next writes activity. Check-in records and inactive account records can remain until deleted; the display limit is not a promise that all older records have been erased. Desktop credentials expire after 30 days or when revoked. Hosting, authentication, and infrastructure providers may retain operational logs or backups under their own policies.'],
-  ['Your controls and deletion', 'Use Delete activity and Delete history in your signed-in dashboard to remove saved app summaries. Deleting activity also revokes desktop connections. Offline devices may retain a local copy until they reconnect or you remove local app data; revoked devices clear queued data when they next contact the service. Disconnect or quit the desktop app to stop that installation. Account settings are available through the account button. Delete your app summaries before closing your Clerk account, because closing an account does not currently trigger automatic deletion of all Supabase records.'],
-  ['Sharing and security', 'The app does not sell activity data or provide an employer dashboard with your private results. Saved records are account-scoped and private database tables are protected from anonymous access. We use encrypted connections and operating-system credential encryption where available, but no service can promise perfect security. Employers do not receive your energy answers or personal plans through this app.'],
-  ['Eligibility, changes, and support', 'Use the service only if you can agree to these terms under the law that applies to you; a parent or guardian must oversee use where required. This prototype is not intended to solicit data from children below the applicable digital-consent age. Material policy changes will be reflected on this page. For project questions, use the project support link below and do not post account credentials, personal activity, or health information in a public issue.'],
-];
-const terms = [
-  ['Agreement and scope', 'These terms apply to the Predict 360 website, downloadable desktop app, and connected sync service. Use the service only if you have authority to agree to these terms and to install software on the computer you use. If you disagree, do not use it or stop using it.'],
-  ['A personal research prototype', 'Predict 360 describes computer activity and experimental differences from your own typing baseline. Public datasets provide descriptive context. No diagnostic model, clinical accuracy improvement, or fitness-for-work determination has been validated. Results are not medical advice, a diagnosis, a hydration measurement, or a productivity rating. Seek an appropriate qualified professional for medical or workplace decisions.'],
-  ['Account and installation', 'Keep your account secure, use accurate information, and do not share sign-in credentials. Connect a desktop only to your own authorized account. Tracking is opt-in and starts paused. Closing a running window leaves tracking active in the system tray; Pause or Quit stops it. You are responsible for knowing when tracking is enabled on your installation.'],
-  ['Suggestions and AI', 'AI explanations can be incomplete or incorrect. Break, workload, or optional half-day suggestions are personal reflection prompts, especially when you report low energy. You decide whether to act and must follow any applicable workplace arrangements. The app does not approve leave, require time off, or certify that a person is ready or unfit to work.'],
-  ['Appropriate use', 'Do not use Predict 360 for covert monitoring, access to another person’s account, unsupported health claims, or automatic hiring, eligibility, disciplinary, insurance, or other consequential decisions. Do not interfere with the service, bypass access controls, distribute malicious files, or attempt to extract private records. Workplace use requires appropriate authorization and transparent notice; the current app does not provide employer screening or employee-health scoring.'],
-  ['Your information and third parties', 'Your use is subject to the Privacy Policy. You retain your rights in information you provide and authorize the processing needed to operate the requested features. Clerk, Supabase, Vercel, Hack Club AI and its model providers, Open-Meteo, and other linked services have their own applicable terms and policies. Public reference datasets keep their original attribution and license requirements; see Sources & research limits.'],
-  ['Availability and responsibility', 'This prototype is provided as available, without a promise of uninterrupted operation, specific accuracy, data recovery, or suitability for a particular purpose. To the extent permitted by applicable law, the project is not responsible for indirect losses from reliance on its outputs. These terms do not remove rights or liabilities that cannot legally be excluded. Keep independent records of information you need.'],
-  ['Stopping use and changes', 'You can pause tracking, disconnect a device, delete saved summaries, and stop using the service. Access may be limited for misuse or operational reasons. Features and terms can change as the prototype develops; updated terms will appear here. If you do not accept an update, stop using the service. Contact the project through the support link below for non-sensitive questions.'],
-];
+import { ArrowUp, FileText, Printer, ShieldCheck } from 'lucide-react';
+import { SiteNav } from '@/components/blocks/site-nav';
+import { SiteFooter } from '@/components/blocks/site-footer';
+import { PRIVACY, SUPPORT_URL, TERMS, type LegalDoc } from '@/lib/legal';
+import { cn } from '@/lib/utils';
 
 export default function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
-  const title = kind === 'privacy' ? 'Privacy Policy' : 'Terms of Use';
-  return <main className="mx-auto max-w-3xl px-6 py-10"><Logo /><nav className="mt-7 flex flex-wrap gap-5 text-sm underline"><Link to="/">Home</Link><Link to="/app">Dashboard</Link><Link to={kind === 'privacy' ? '/terms' : '/privacy'}>{kind === 'privacy' ? 'Terms of Use' : 'Privacy Policy'}</Link><Link to="/sources">Sources</Link></nav><h1 className="mt-10 text-4xl font-bold tracking-tight">{title}</h1><p className="mt-3 text-sm text-muted-foreground">Effective November 14, 2026 · Predict 360 research prototype</p><div className="mt-8 space-y-8">{(kind === 'privacy' ? privacy : terms).map(([heading, text]) => <section key={heading}><h2 className="text-xl font-semibold">{heading}</h2><p className="mt-3 text-sm leading-7 text-muted-foreground">{text}</p></section>)}</div><p className="mt-10 border-t pt-5 text-sm"><a href="https://github.com/nc1b/Predict360/issues" target="_blank" rel="noreferrer" className="underline">Project support</a> — public issues are for non-sensitive questions only. Use the dashboard controls to delete private app records.</p></main>;
+  const doc: LegalDoc = kind === 'privacy' ? PRIVACY : TERMS;
+  const other = kind === 'privacy' ? { to: '/terms', label: 'Terms of Service', icon: FileText } : { to: '/privacy', label: 'Privacy Policy', icon: ShieldCheck };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="print:hidden"><SiteNav /></div>
+      <main className="mx-auto max-w-6xl px-6 pb-20 pt-28 print:pt-0">
+        <header className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Legal</p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-[-0.03em] md:text-5xl">{doc.title}</h1>
+          {doc.alsoKnownAs && <p className="mt-2 text-sm text-muted-foreground">Also referred to as our {doc.alsoKnownAs}.</p>}
+          <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+            <span className="rounded-full border border-border px-3 py-1 text-muted-foreground">Effective {doc.effective}</span>
+            <Link to={other.to} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 hover:bg-accent print:hidden">
+              <other.icon className="size-3.5" aria-hidden="true" /> {other.label}
+            </Link>
+            <button type="button" onClick={() => window.print()} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 hover:bg-accent print:hidden">
+              <Printer className="size-3.5" aria-hidden="true" /> Print or save as PDF
+            </button>
+          </div>
+        </header>
+
+        <section aria-labelledby="summary" className="panel mt-10 max-w-3xl rounded-2xl border border-border p-6">
+          <h2 id="summary" className="font-semibold">The short version</h2>
+          <p className="mt-1 text-xs text-muted-foreground">A plain-language summary. The full text below is what applies.</p>
+          <ul className="mt-4 space-y-2 text-sm leading-relaxed">
+            {doc.summary.map((s) => (
+              <li key={s} className="flex gap-2.5"><span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-emerald-400" />{s}</li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="mt-12 grid gap-10 lg:grid-cols-[15rem_1fr]">
+          <nav aria-label="Contents" className="print:hidden lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-y-auto">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Contents</p>
+            <ol className="mt-3 space-y-1 text-sm">
+              {doc.sections.map((s, i) => (
+                <li key={s.id}>
+                  <a href={`#${s.id}`} className="flex gap-2 rounded-lg px-2 py-1 text-muted-foreground hover:bg-accent hover:text-foreground">
+                    <span className="w-5 shrink-0 tabular-nums">{i + 1}.</span>{s.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
+          <article className="max-w-3xl">
+            {doc.sections.map((s, i) => (
+              <section key={s.id} id={s.id} className={cn('scroll-mt-24 border-t border-border py-8', i === 0 && 'border-t-0 pt-0')}>
+                <h2 className="text-xl font-semibold tracking-tight">
+                  <span className="mr-2 text-muted-foreground tabular-nums">{i + 1}.</span>{s.title}
+                </h2>
+                {s.intro && <p className="mt-2 text-sm font-medium text-amber-500 dark:text-amber-300">{s.intro}</p>}
+                <ol className="mt-4 space-y-3">
+                  {s.clauses.map((c, j) => (
+                    <li key={j} className="flex gap-3 text-[15px] leading-7 text-muted-foreground">
+                      <span className="w-9 shrink-0 font-medium tabular-nums text-foreground/70">{i + 1}.{j + 1}</span>
+                      <div>
+                        <p>{c.text}</p>
+                        {c.points && (
+                          <ul className="mt-2 space-y-1.5">
+                            {c.points.map((p) => (
+                              <li key={p} className="flex gap-2.5"><span aria-hidden="true" className="mt-3 size-1 shrink-0 rounded-full bg-muted-foreground" />{p}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border p-5 text-sm print:hidden">
+              <p className="text-muted-foreground">
+                Questions? <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="text-foreground underline">Project support</a>. Public, so no personal or health details.
+              </p>
+              <a href="#top" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <ArrowUp className="size-4" aria-hidden="true" /> Back to top
+              </a>
+            </div>
+          </article>
+        </div>
+      </main>
+      <div className="print:hidden"><SiteFooter /></div>
+    </div>
+  );
 }
