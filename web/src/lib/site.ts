@@ -6,7 +6,8 @@ export const MAC_DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/Predict360
 
 export const PROJECT_VIDEO = {
   src: '/overview.mp4',
-  poster: '/overview-poster.png',
+  poster: '/overview-poster.webp',
+  posterLight: '/overview-poster-light.webp',
 };
 
 export const HERO_IMAGES = {

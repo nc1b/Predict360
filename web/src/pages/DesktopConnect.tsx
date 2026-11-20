@@ -33,7 +33,7 @@ export default function DesktopConnect() {
       <p className="mt-4 text-sm text-muted-foreground">Connect as {user.name}. The desktop will sync activity counts with this account. Recording stays paused until you choose Start tracking.</p>
       {link ? <a href={link} className="mt-6 inline-block rounded-xl bg-foreground px-5 py-3 text-sm text-background">Return to desktop</a> : <Button className="mt-6" disabled={busy} onClick={connect}>{busy ? 'Connecting…' : 'Connect this account'}</Button>}
       {link && <p className="mt-3 text-xs text-muted-foreground">Allow your browser to open Predict 360. This sign-in link expires in two minutes.</p>}
-      {error && <p className="mt-4 text-sm text-red-700" role="alert">{error}</p>}
+      {error && <p className="mt-4 text-sm text-destructive" role="alert">{error}</p>}
     </>}
   </Card></main>;
 }

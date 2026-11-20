@@ -5,76 +5,147 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Palette: Deep Violet & Charcoal with Emerald Accent.
+ *   #1A0B2E deep violet  — headlines, depth, brand identity
+ *   #0F0F0F near-black   — dark-mode background
+ *   #045F4B emerald      — CTAs and highlights
+ *   #F3F0EA warm off-white — light background / dark-mode text
+ */
 :root {
   --radius: 0.875rem;
 
-  --background: #f4f5f7;
-  --foreground: #0e1013;
-  --card: #ffffff;
-  --card-foreground: #0e1013;
-  --popover: #ffffff;
-  --popover-foreground: #0e1013;
-  --primary: #0e1013;
-  --primary-foreground: #ffffff;
-  --secondary: #eceef1;
-  --secondary-foreground: #0e1013;
-  --muted: #eceef1;
-  --muted-foreground: #5f6570;
-  --accent: #e6e8ec;
-  --accent-foreground: #0e1013;
-  --destructive: #c0392b;
-  --border: #e2e4e9;
-  --input: #d6d9df;
-  --ring: #10b981;
-  --track: #e2e4e9;
-  --brand: #10b981;
-  --brand-foreground: #04150e;
-  --gauge: #38bdf8;
-  --chart: #a78bfa;
+  --background: #f3f0ea;
+  --foreground: #1a0b2e;
+  --card: #fffdfa;
+  --card-foreground: #1a0b2e;
+  --popover: #fdfcf9;
+  --popover-foreground: #1a0b2e;
+  --primary: #1a0b2e;
+  --primary-foreground: #f3f0ea;
+  --secondary: #ebe6dd;
+  --secondary-foreground: #1a0b2e;
+  --muted: #ebe6dd;
+  --muted-foreground: #5e5668;
+  --accent: #e5dfd4;
+  --accent-foreground: #1a0b2e;
+  --destructive: #b3261e;
+  --border: #e0d9cd;
+  --input: #d3cbbe;
+  --ring: #045f4b;
+  --track: #e0d9cd;
+  --brand: #045f4b;
+  --brand-foreground: #f3f0ea;
+  --gauge: #066e57;
+  --chart: #7a55b5;
   --panel-from: #ffffff;
-  --panel-to: #fafbfc;
+  --panel-to: #fcfaf6;
+  --panel-shadow: 0 0 0 1px rgba(26, 11, 46, 0.015), 0 1px 2px rgba(26, 11, 46, 0.05), 0 14px 32px -18px rgba(26, 11, 46, 0.16);
+  --grid-line: rgba(26, 11, 46, 0.06);
 
-  --near: #e3f4ef;
-  --near-foreground: #0f5f58;
-  --some: #fdecd2;
-  --some-foreground: #8a4b08;
-  --large: #e9e5f7;
-  --large-foreground: #4a3a8c;
+  --near: #dcefe7;
+  --near-foreground: #045f4b;
+  --some: #f8e9cf;
+  --some-foreground: #7a4708;
+  --large: #e9e1f4;
+  --large-foreground: #4a2d78;
+
+  /* Accent shades used as text/icons are darker on cream so they stay readable. */
+  --color-emerald-300: #0f8065;
+  --color-emerald-400: #066e57;
+  --color-violet-300: #7a55b5;
+  --color-violet-400: #613e98;
+  --color-sky-300: #7a55b5;
+  --color-sky-400: #7a55b5;
+  --color-pink-400: #7a55b5;
+  --color-amber-300: #b7700c;
+  --color-amber-400: #d48a12;
+  --color-amber-500: #a8640a;
 }
 
 .dark {
-  --background: #0a0b0d;
-  --foreground: #f3f4f6;
-  --card: #121417;
-  --card-foreground: #f3f4f6;
-  --popover: #15171b;
-  --popover-foreground: #f3f4f6;
-  --primary: #f3f4f6;
-  --primary-foreground: #0a0b0d;
-  --secondary: #1a1d21;
-  --secondary-foreground: #f3f4f6;
-  --muted: #1a1d21;
-  --muted-foreground: #8b919c;
-  --accent: #1f2227;
-  --accent-foreground: #f3f4f6;
-  --destructive: #f87171;
-  --border: #22252a;
-  --input: #2b2f35;
-  --ring: #34d399;
-  --track: #2a2d33;
-  --brand: #22c58b;
-  --brand-foreground: #03140d;
-  --gauge: #5ec8f2;
-  --chart: #b18cf5;
-  --panel-from: #15171b;
-  --panel-to: #0f1113;
+  --background: #0f0f0f;
+  --foreground: #f3f0ea;
+  --card: #141217;
+  --card-foreground: #f3f0ea;
+  --popover: #17141c;
+  --popover-foreground: #f3f0ea;
+  --primary: #f3f0ea;
+  --primary-foreground: #0f0f0f;
+  --secondary: #1b1822;
+  --secondary-foreground: #f3f0ea;
+  --muted: #1b1822;
+  --muted-foreground: #9c96a6;
+  --accent: #231f2c;
+  --accent-foreground: #f3f0ea;
+  --destructive: #f0857a;
+  --border: #26222e;
+  --input: #312c3b;
+  --ring: #2e9e80;
+  --track: #2a2633;
+  --brand: #045f4b;
+  --brand-foreground: #f3f0ea;
+  --gauge: #3fb08f;
+  --chart: #9a7bd0;
+  --panel-from: #16131b;
+  --panel-to: #111014;
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --grid-line: rgba(243, 240, 234, 0.045);
 
-  --near: #0d2b28;
-  --near-foreground: #8fdccd;
-  --some: #33230a;
-  --some-foreground: #f3c27d;
-  --large: #221c40;
-  --large-foreground: #c4b8f0;
+  --near: #0b2620;
+  --near-foreground: #7fd0b6;
+  --some: #2e2210;
+  --some-foreground: #e9c27f;
+  --large: #1f1531;
+  --large-foreground: #c2aee8;
+
+  --color-emerald-300: #5fc0a3;
+  --color-emerald-400: #34a586;
+  --color-violet-300: #b49bdf;
+  --color-violet-400: #9a7bd0;
+  --color-sky-300: #cfc2ec;
+  --color-sky-400: #b9a6e6;
+  --color-pink-400: #c7a6e8;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+}
+
+/*
+ * Re-tune Tailwind's accent scales to the palette so every `emerald-*`, `violet-*`,
+ * `sky-*` and `pink-*` utility in the app follows it without per-file overrides.
+ * emerald-700 is the brand #045F4B; violet-950 is the brand #1A0B2E.
+ */
+@theme {
+  --color-emerald-50: #e8f5f1;
+  --color-emerald-100: #c9eadf;
+  --color-emerald-200: #97d5c2;
+  --color-emerald-300: #5fc0a3;
+  --color-emerald-400: #34a586;
+  --color-emerald-500: #0f8065;
+  --color-emerald-600: #066e57;
+  --color-emerald-700: #045f4b;
+  --color-emerald-800: #034a3b;
+  --color-emerald-900: #02362b;
+  --color-emerald-950: #01231c;
+
+  --color-violet-50: #f4f0fa;
+  --color-violet-100: #e6ddf4;
+  --color-violet-200: #cdbbea;
+  --color-violet-300: #b49bdf;
+  --color-violet-400: #9a7bd0;
+  --color-violet-500: #7a55b5;
+  --color-violet-600: #613e98;
+  --color-violet-700: #4a2d78;
+  --color-violet-800: #33205a;
+  --color-violet-900: #241540;
+  --color-violet-950: #1a0b2e;
+
+  /* Secondary accents become softer violets so the UI stays two-tone. */
+  --color-sky-300: #cfc2ec;
+  --color-sky-400: #b9a6e6;
+  --color-sky-500: #9d86d6;
+  --color-pink-400: #c7a6e8;
 }
 
 @theme inline {
@@ -139,6 +210,12 @@
 @keyframes dialogIn {
   from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: none; }
+}
+
+/* Typing caret: solid while keys are flowing, gently blinking when idle. */
+@keyframes caretBlink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
 }
 
 @keyframes faq-scroll {
@@ -213,7 +290,35 @@
 /* Dashboard panels: soft vertical gradient with a faint top highlight. */
 .panel {
   background: linear-gradient(180deg, var(--panel-from), var(--panel-to));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--panel-shadow);
+}
+
+/* Faint square grid that fades out from the top centre; sits behind hero content. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 35%, transparent 75%);
+}
+
+/* A 1px gradient hairline border (violet → emerald) around any rounded box. */
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-violet-500) 55%, transparent), var(--border) 45%, color-mix(in srgb, var(--color-emerald-500) 55%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Landing page motion: soft fade-up on load, and sections that reveal as they scroll in. */

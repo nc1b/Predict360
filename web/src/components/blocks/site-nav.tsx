@@ -124,7 +124,7 @@ export function SiteNav() {
               )}
               <Link
                 to={user ? '/app' : '/signup'}
-                className="hidden h-10 items-center gap-2 whitespace-nowrap rounded-xl bg-foreground px-4 text-sm font-medium text-background transition-opacity hover:opacity-85 sm:flex"
+                className="hidden h-10 items-center gap-2 whitespace-nowrap rounded-xl border border-emerald-400/30 bg-gradient-to-b from-emerald-500 to-emerald-700 px-4 text-sm font-medium text-[#f3f0ea] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition hover:brightness-110 sm:flex"
               >
                 {user ? 'Open check-in' : 'Start check-in'}
                 <ArrowRight className="size-4" aria-hidden="true" />
@@ -162,7 +162,7 @@ export function SiteNav() {
                 )}
                 <Link
                   to={user ? '/app' : '/signup'}
-                  className="flex h-10 items-center justify-center gap-2 rounded-xl bg-foreground text-sm font-medium text-background"
+                  className="flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-700 text-sm font-medium text-[#f3f0ea]"
                 >
                   {user ? 'Open check-in' : 'Start check-in'}
                 </Link>

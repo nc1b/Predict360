@@ -13,7 +13,7 @@ export function LogoMark({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M38.6 13.8A18 18 0 1 0 42 24" />
-      <path d="M17 20v8M24 15v18M31 21v6" />
+      <path d="M17 20v8M24 15v18M31 21v6" className="stroke-emerald-700 dark:stroke-emerald-400" />
     </svg>
   );
 }
