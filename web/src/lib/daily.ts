@@ -92,3 +92,28 @@ export function loadAnalysis(storage: StorageLike, userId: string, now = new Dat
 export function saveAnalysis(storage: StorageLike, userId: string, text: string, now = new Date()): void {
   storage.setItem(analysisKey(userId), JSON.stringify({ day: localDay(now), text }));
 }
+
+export interface DashboardPrefs {
+  /** Open the daily check-in on sign-in until today's is done. */
+  promptAtLogin: boolean;
+  /** Write the Claude daily analysis automatically after the first check-in of the day. */
+  autoAnalysis: boolean;
+}
+const prefsKey = (userId: string) => `p360.prefs.${userId}`;
+export const DEFAULT_PREFS: DashboardPrefs = { promptAtLogin: true, autoAnalysis: true };
+
+export function loadPrefs(storage: StorageLike, userId: string): DashboardPrefs {
+  try {
+    const saved = JSON.parse(storage.getItem(prefsKey(userId)) ?? '{}');
+    return {
+      promptAtLogin: typeof saved.promptAtLogin === 'boolean' ? saved.promptAtLogin : DEFAULT_PREFS.promptAtLogin,
+      autoAnalysis: typeof saved.autoAnalysis === 'boolean' ? saved.autoAnalysis : DEFAULT_PREFS.autoAnalysis,
+    };
+  } catch {
+    return { ...DEFAULT_PREFS };
+  }
+}
+
+export function savePrefs(storage: StorageLike, userId: string, prefs: DashboardPrefs): void {
+  storage.setItem(prefsKey(userId), JSON.stringify(prefs));
+}

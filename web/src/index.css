@@ -8,25 +8,31 @@
 :root {
   --radius: 0.875rem;
 
-  --background: #f7f5f0;
-  --foreground: #1c1b19;
+  --background: #f4f5f7;
+  --foreground: #0e1013;
   --card: #ffffff;
-  --card-foreground: #1c1b19;
+  --card-foreground: #0e1013;
   --popover: #ffffff;
-  --popover-foreground: #1c1b19;
-  --primary: #1c1b19;
-  --primary-foreground: #faf8f4;
-  --secondary: #efece6;
-  --secondary-foreground: #1c1b19;
-  --muted: #efece6;
-  --muted-foreground: #6b675f;
-  --accent: #ebe7df;
-  --accent-foreground: #1c1b19;
-  --destructive: #b3261e;
-  --border: #e6e1d8;
-  --input: #dcd6cb;
-  --ring: #8a857b;
-  --track: #e9e4da;
+  --popover-foreground: #0e1013;
+  --primary: #0e1013;
+  --primary-foreground: #ffffff;
+  --secondary: #eceef1;
+  --secondary-foreground: #0e1013;
+  --muted: #eceef1;
+  --muted-foreground: #5f6570;
+  --accent: #e6e8ec;
+  --accent-foreground: #0e1013;
+  --destructive: #c0392b;
+  --border: #e2e4e9;
+  --input: #d6d9df;
+  --ring: #10b981;
+  --track: #e2e4e9;
+  --brand: #10b981;
+  --brand-foreground: #04150e;
+  --gauge: #38bdf8;
+  --chart: #a78bfa;
+  --panel-from: #ffffff;
+  --panel-to: #fafbfc;
 
   --near: #e3f4ef;
   --near-foreground: #0f5f58;
@@ -37,25 +43,31 @@
 }
 
 .dark {
-  --background: #121110;
-  --foreground: #f4f1ea;
-  --card: #1b1a18;
-  --card-foreground: #f4f1ea;
-  --popover: #1b1a18;
-  --popover-foreground: #f4f1ea;
-  --primary: #f4f1ea;
-  --primary-foreground: #121110;
-  --secondary: #24221f;
-  --secondary-foreground: #f4f1ea;
-  --muted: #24221f;
-  --muted-foreground: #a39e94;
-  --accent: #2c2a26;
-  --accent-foreground: #f4f1ea;
-  --destructive: #f2b8b5;
-  --border: #2c2a26;
-  --input: #3a3732;
-  --ring: #a39e94;
-  --track: #2c2a26;
+  --background: #0a0b0d;
+  --foreground: #f3f4f6;
+  --card: #121417;
+  --card-foreground: #f3f4f6;
+  --popover: #15171b;
+  --popover-foreground: #f3f4f6;
+  --primary: #f3f4f6;
+  --primary-foreground: #0a0b0d;
+  --secondary: #1a1d21;
+  --secondary-foreground: #f3f4f6;
+  --muted: #1a1d21;
+  --muted-foreground: #8b919c;
+  --accent: #1f2227;
+  --accent-foreground: #f3f4f6;
+  --destructive: #f87171;
+  --border: #22252a;
+  --input: #2b2f35;
+  --ring: #34d399;
+  --track: #2a2d33;
+  --brand: #22c58b;
+  --brand-foreground: #03140d;
+  --gauge: #5ec8f2;
+  --chart: #b18cf5;
+  --panel-from: #15171b;
+  --panel-to: #0f1113;
 
   --near: #0d2b28;
   --near-foreground: #8fdccd;
@@ -67,7 +79,7 @@
 
 @theme inline {
   --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-display: 'Inter Variable', 'Inter', system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -88,6 +100,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-track: var(--track);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-gauge: var(--gauge);
+  --color-chart: var(--chart);
   --color-near: var(--near);
   --color-near-foreground: var(--near-foreground);
   --color-some: var(--some);
@@ -184,12 +200,18 @@
     text-underline-offset: 4px;
   }
   .font-display {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-family: var(--font-sans);
+    font-weight: 650;
+    letter-spacing: -0.025em;
   }
 }
 
 .cl-footerItem {
   display: none !important;
+}
+
+/* Dashboard panels: soft vertical gradient with a faint top highlight. */
+.panel {
+  background: linear-gradient(180deg, var(--panel-from), var(--panel-to));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
 }

@@ -181,7 +181,7 @@ export function DailyCheckInDialog({
               <Button variant="ghost" onClick={close}>
                 Not now
               </Button>
-              <Button data-autofocus onClick={() => setStep('type')}>
+              <Button variant="brand" data-autofocus onClick={() => setStep('type')}>
                 Next <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </div>
@@ -239,7 +239,7 @@ export function DailyCheckInDialog({
                     Start over
                   </Button>
                 )}
-                <Button onClick={finish} disabled={busy || count === 0}>
+                <Button variant="brand" onClick={finish} disabled={busy || count === 0}>
                   {busy ? 'Analyzing…' : 'Finish check-in'}
                 </Button>
               </div>
@@ -272,7 +272,7 @@ export function DailyCheckInDialog({
               {outcome.streak}-day streak
             </p>
             <div className="mt-6">
-              <Button className="w-full" size="lg" onClick={close}>
+              <Button variant="brand" className="w-full" size="lg" onClick={close}>
                 See my dashboard
               </Button>
             </div>

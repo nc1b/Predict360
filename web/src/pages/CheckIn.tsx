@@ -1,23 +1,25 @@
 import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { UserButton } from '@clerk/react';
-import { Activity, BookOpen, CalendarDays, Check, ChevronDown, Flame, History as HistoryIcon, PenLine, Sparkles, Sun, Target } from 'lucide-react';
+import { Activity, BookOpen, Brain, ChevronDown, Download, FileText, Fingerprint, Flame, History as HistoryIcon, House, Keyboard, Lock, Moon, PenLine, Settings2, ShieldCheck, Sparkles, Sun, TrendingUp, Zap } from 'lucide-react';
 import type { Energy } from '../../../src/workday.mjs';
 import { clerkEnabled, useAuth } from '@/auth-context';
-import { Logo } from '@/components/logo';
+import { LogoMark } from '@/components/logo';
 import { Chat } from '@/components/chat';
 import { ReferenceContext } from '@/components/reference-context';
 import { ResultCard, StatusBadge } from '@/components/result-card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/blocks/theme-toggle';
+import { setTheme, useIsDark } from '@/lib/theme';
+import { AreaChart, ChipButton, DotWave, Gauge, Meter, StatusDot, StatusLine, Toggle, WirePattern, type Tone } from '@/components/dashboard/kit';
+import { STATUS_LABEL } from '@/components/result-card';
 import { NotificationStack, useNotices } from '@/components/ui/notifications';
 import { ActivityDashboard } from '@/components/activity-dashboard';
 import { WeatherContextPanel, type WeatherContext } from '@/components/weather-context';
 import { DailyCheckInDialog, type CheckInOutcome } from '@/components/daily-checkin-dialog';
 import { analyze, ApiError, AiUnconfiguredError, dailyAnalysis, explain } from '@/lib/api';
-import { DailyAnalysisCard } from '@/components/daily-analysis';
+import { AnalysisText } from '@/components/daily-analysis';
 import { ResearchConditions, WhatItDetects } from '@/components/research-conditions';
 import { toHistoryItems } from '@/components/chat';
 import type { Keystroke } from '@/lib/capture';
@@ -32,7 +34,7 @@ import {
   MIN_BASELINE_SESSIONS,
   type HistoryEntry,
 } from '@/lib/history';
-import { checkedInOn, daysThisWeek, dismissDaily, loadAnalysis, loadEnergy, localDay, saveAnalysis, saveEnergy, shouldPromptDaily, streak as streakOf } from '@/lib/daily';
+import { checkedInOn, daysThisWeek, dismissDaily, loadPrefs, savePrefs, type DashboardPrefs, loadAnalysis, loadEnergy, localDay, saveAnalysis, saveEnergy, shouldPromptDaily, streak as streakOf } from '@/lib/daily';
 import type { AnalyzeResponse } from '@/lib/types';
 import { accountSync, cloud, clearPending, queueCheckin, syncCheckins } from '@/lib/cloud';
 import { cn } from '@/lib/utils';
@@ -47,10 +49,10 @@ const timeFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute:
 const ENERGY_LABEL = { low: 'Running low', steady: 'About usual', good: 'Feeling good' } as const;
 
 const TABS = [
-  { id: 'today', label: 'Today', icon: Sun },
-  { id: 'history', label: 'History', icon: HistoryIcon },
-  { id: 'activity', label: 'Activity', icon: Activity },
-  { id: 'research', label: 'Research', icon: BookOpen },
+  { id: 'today', label: 'Home', title: 'Today', icon: House },
+  { id: 'history', label: 'History', title: 'Check-in history', icon: HistoryIcon },
+  { id: 'activity', label: 'Activity', title: 'Computer activity', icon: Activity },
+  { id: 'research', label: 'Research', title: 'Research & detection', icon: BookOpen },
 ] as const;
 type Tab = (typeof TABS)[number]['id'];
 
@@ -108,7 +110,9 @@ export default function CheckIn() {
   // "Not now" lasts for this sign-in only; a new login asks again until today's check-in is done.
   const dismissStore = sessionId ? localStorage : sessionStorage;
   const sessionKey = sessionId ?? 'tab';
-  const [dailyOpen, setDailyOpen] = React.useState(() => shouldPromptDaily(history, dismissStore, userId, sessionKey));
+  const [prefs, setPrefsState] = React.useState<DashboardPrefs>(() => loadPrefs(localStorage, userId));
+  const setPrefs = (next: DashboardPrefs) => { setPrefsState(next); savePrefs(localStorage, userId, next); };
+  const [dailyOpen, setDailyOpen] = React.useState(() => loadPrefs(localStorage, userId).promptAtLogin && shouldPromptDaily(history, dismissStore, userId, sessionKey));
 
   const busyRef = React.useRef(false);
   busyRef.current = busy;
@@ -178,7 +182,7 @@ export default function CheckIn() {
     if (finished) {
       setTab('today');
       // One automatic analysis per day; later check-ins can refresh it by hand.
-      if (!loadAnalysis(localStorage, userId) && !analysisOff) void runAnalysis();
+      if (prefs.autoAnalysis && !loadAnalysis(localStorage, userId) && !analysisOff) void runAnalysis();
     }
   }
 
@@ -277,244 +281,387 @@ export default function CheckIn() {
     push({ id: 'saved', kind: 'success', title: 'History deleted', description: 'Your baseline starts again from zero.' });
   }
 
-  const stats = [
-    {
-      label: 'Today',
-      value: doneToday ? 'Checked in' : 'Not yet',
-      sub: lastToday ? `at ${timeFormat.format(new Date(lastToday.at))}` : 'About 30 seconds',
-      icon: doneToday ? Check : PenLine,
-      accent: doneToday ? 'bg-near text-near-foreground' : 'bg-muted text-muted-foreground',
-    },
-    { label: 'Streak', value: `${streak} ${streak === 1 ? 'day' : 'days'}`, sub: streak ? 'Keep it going' : 'Start one today', icon: Flame, accent: 'bg-some text-some-foreground' },
-    { label: 'This week', value: `${week} of 7`, sub: 'days checked in', icon: CalendarDays, accent: 'bg-muted text-foreground' },
-    {
-      label: 'Baseline',
-      value: baselineReady ? 'Ready' : `${usableCount} of ${MIN_BASELINE_SESSIONS}`,
-      sub: baselineReady ? 'Check-ins get a score' : 'Scores start at 3',
-      icon: Target,
-      accent: baselineReady ? 'bg-near text-near-foreground' : 'bg-muted text-foreground',
-    },
-  ];
+  const dark = useIsDark();
+  const scored = history.filter((h) => h.readinessScore !== null);
+  const lastScored = scored[scored.length - 1];
+  const latest = shown && !shown.caption.startsWith('Simulated') ? shown.result : null;
+  const scoreValue = latest?.readinessScore ?? lastToday?.readinessScore ?? null;
+  const scoreStatus = latest?.status ?? lastToday?.status ?? null;
+  const toneOf = (status: string | null): Tone =>
+    status === 'near_baseline' ? 'good' : status === 'some_deviation' ? 'warn' : status === 'large_deviation' ? 'bad' : 'idle';
+  const lastFeatures = latest?.features ?? lastToday?.features ?? history[history.length - 1]?.features ?? null;
+  const dwell = lastFeatures?.dwellMs.value ?? null;
+  const dwellUsual = latest?.comparisons.dwellMs?.baselineMs ?? null;
+  const dwellRatio = dwell !== null && dwellUsual ? dwell / dwellUsual : null;
+  const trend = scored.slice(-14).map((h) => h.readinessScore as number);
+  const energyTone: Tone = energy === 'good' ? 'good' : energy === 'steady' ? 'good' : energy === 'low' ? 'warn' : 'idle';
+  const current = TABS.find((t) => t.id === tab)!;
+  const scrollTo = (id: string) => { setTab('today'); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Logo to="/app" />
-          <nav aria-label="Dashboard" className="hidden items-center gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm sm:flex">
-            {TABS.map((t) => <TabButton key={t.id} tab={t} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+    <div className="min-h-screen bg-background text-foreground lg:p-4">
+      <div className="lg:flex lg:gap-4">
+        {/* Sidebar */}
+        <aside className="panel sticky top-4 hidden h-[calc(100vh-2rem)] w-60 shrink-0 flex-col rounded-2xl border border-border p-4 lg:flex">
+          <a href="/app" className="flex items-center gap-2 px-2 py-1">
+            <LogoMark className="size-7" />
+            <span className="text-lg font-bold tracking-tight">Predict 360</span>
+            <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">beta</span>
+          </a>
+          <nav aria-label="Dashboard" className="mt-6 space-y-1">
+            {TABS.map((t) => <SideItem key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
           </nav>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {clerkEnabled() && <UserButton />}
+          <p className="mt-6 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Tools</p>
+          <nav aria-label="Tools" className="mt-2 space-y-1">
+            <SideItem icon={PenLine} label="Daily check-in" onClick={() => setDailyOpen(true)} />
+            <SideItem icon={Brain} label="Daily analysis" onClick={() => scrollTo('daily-analysis')} />
+            <SideItem icon={Settings2} label="Preferences" onClick={() => scrollTo('preferences')} />
+            <SideItem icon={FileText} label="Sources & limits" href="/sources" />
+            <SideItem icon={ShieldCheck} label="Privacy" href="/privacy" />
+          </nav>
+          <div className="mt-auto space-y-3">
+            <button
+              type="button"
+              onClick={() => setTheme(dark ? 'light' : 'dark')}
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-border bg-secondary/60 px-3 py-2.5 text-left hover:bg-accent"
+            >
+              <span>
+                <span className="block text-[11px] text-muted-foreground">Theme</span>
+                <span className="text-sm font-medium">{dark ? 'Midnight' : 'Daylight'}</span>
+              </span>
+              {dark ? <Moon className="size-4 text-muted-foreground" aria-hidden="true" /> : <Sun className="size-4 text-muted-foreground" aria-hidden="true" />}
+            </button>
+            <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent p-3">
+              <p className="text-sm font-semibold">{doneToday ? 'Checked in today' : 'Daily check-in'}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{doneToday ? 'Check in again after a shift' : 'Two sentences · about 30 s'}</p>
+              <Button variant="brand" size="sm" className="mt-3 w-full" onClick={() => setDailyOpen(true)} disabled={busy}>
+                <PenLine className="size-4" aria-hidden="true" /> {doneToday ? 'Check in again' : 'Start check-in'}
+              </Button>
+            </div>
           </div>
-        </div>
-        <nav aria-label="Dashboard" className="mx-auto grid max-w-6xl grid-cols-4 gap-1 px-4 pb-3 sm:hidden">
-          {TABS.map((t) => <TabButton key={t.id} tab={t} active={tab === t.id} onClick={() => setTab(t.id)} className="flex-col gap-0.5 px-1 py-1.5 text-xs" />)}
-        </nav>
-      </header>
+        </aside>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-4xl leading-tight md:text-6xl">
-              {greeting()}, {user!.name}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {doneToday
-                ? 'You’ve checked in today. Nice work.'
-                : baselineReady
-                  ? 'Your daily check-in is waiting: two sentences, about 30 seconds.'
-                  : `Building your baseline: ${usableCount} of ${MIN_BASELINE_SESSIONS} check-ins done.`}
-            </p>
-          </div>
-          <Button size="lg" variant={doneToday ? 'outline' : 'default'} onClick={() => setDailyOpen(true)} disabled={busy}>
-            <PenLine className="size-4" aria-hidden="true" />
-            {doneToday ? 'Check in again' : 'Start daily check-in'}
-          </Button>
-        </div>
+        <div className="min-w-0 flex-1 pb-24 lg:pb-0">
+          {/* Top bar */}
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 bg-background/80 px-4 py-3 backdrop-blur-xl lg:static lg:bg-transparent lg:px-2 lg:py-2 lg:backdrop-blur-none">
+            <div className="flex items-center gap-3">
+              <LogoMark className="size-7 lg:hidden" />
+              <div>
+                <p className="text-xs text-muted-foreground">{greeting()}, {user!.name}</p>
+                <h1 className="text-2xl font-bold tracking-tight">{current.title}</h1>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="panel hidden items-center gap-3 rounded-xl border border-border px-3 py-2 md:flex">
+                <Lock className="size-4 text-emerald-400" aria-hidden="true" />
+                <div>
+                  <p className="text-xs font-semibold">Private mode</p>
+                  <p className="text-[11px] text-muted-foreground">Your words never leave this device</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => setTheme(dark ? 'light' : 'dark')} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} className="panel flex size-10 cursor-pointer items-center justify-center rounded-xl border border-border lg:hidden">
+                {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </button>
+              <div className="panel flex items-center gap-2.5 rounded-xl border border-border py-1.5 pl-1.5 pr-3">
+                {clerkEnabled() ? <UserButton /> : <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-sm font-bold text-white">{user!.name.slice(0, 1).toUpperCase()}</span>}
+                <span className="hidden text-sm font-semibold sm:block">{user!.name}</span>
+              </div>
+            </div>
+          </header>
 
-        <NotificationStack notices={notices} onDismiss={dismiss} className="mt-6 max-w-xl" />
+          <main className="px-4 pt-2 lg:px-2">
+            <NotificationStack notices={notices} onDismiss={dismiss} className="mb-4 max-w-xl" />
 
-        {tab === 'today' && (
-          <div className="mt-8 space-y-6">
-            <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {stats.map(({ label, value, sub, icon: Icon, accent }) => (
-                <Card key={label} className="flex items-start gap-3 p-4">
-                  <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl', accent)}>
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-xs text-muted-foreground">{label}</dt>
-                    <dd className="mt-0.5 font-display text-2xl leading-tight">{value}</dd>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
-                  </div>
-                </Card>
-              ))}
-            </dl>
+            {tab === 'today' && (
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+                  {/* Welcome */}
+                  <Card className="relative overflow-hidden p-6 md:row-span-2 xl:col-span-4">
+                    <WirePattern className="absolute -right-20 -top-6 size-72 opacity-50" />
+                    <div className="relative flex h-full flex-col">
+                      <p className="text-sm text-muted-foreground">Welcome back</p>
+                      <p className="text-4xl font-bold tracking-tight">{user!.name}</p>
+                      <div className="mt-auto space-y-3 pt-10">
+                        <StatusLine tone={doneToday ? 'good' : 'bad'} label="Today's check-in" detail={doneToday && lastToday ? `Done at ${timeFormat.format(new Date(lastToday.at))}` : 'Not done yet'} />
+                        <StatusLine tone={baselineReady ? 'good' : 'warn'} label="Baseline" detail={baselineReady ? 'Ready: check-ins get a score' : `${usableCount} of ${MIN_BASELINE_SESSIONS} check-ins`} />
+                        <StatusLine tone={streak > 0 ? 'good' : 'idle'} label="Streak" detail={`${streak} ${streak === 1 ? 'day' : 'days'} in a row`} />
+                        <StatusLine tone={energyTone} label="Energy" detail={energy ? ENERGY_LABEL[energy] : 'Not set today'} />
+                      </div>
+                      <div className="mt-6 flex justify-end">
+                        <ChipButton onClick={() => setDailyOpen(true)} disabled={busy}>{doneToday ? 'Check in again' : 'Check in'}</ChipButton>
+                      </div>
+                    </div>
+                  </Card>
 
-            <div className="grid items-start gap-6 lg:grid-cols-5">
-              <div className="space-y-6 lg:col-span-3">
-                {shown ? (
-                  <ResultCard result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
-                ) : (
-                  <Card className="p-6">
-                    <p className="text-sm text-muted-foreground">Today’s result</p>
-                    {lastToday ? (
-                      <>
-                        <div className="mt-3 flex flex-wrap items-baseline gap-3">
-                          <span className="font-display text-7xl leading-none tabular-nums">{lastToday.readinessScore ?? '–'}</span>
-                          <StatusBadge status={lastToday.status} />
-                        </div>
-                        <p className="mt-3 text-sm text-muted-foreground">
-                          Checked in at {timeFormat.format(new Date(lastToday.at))}.
-                          {lastToday.readinessScore === null && ' This one added to your baseline.'} Check in again after your next shift or break to compare.
+                  {/* Score */}
+                  <Card className="p-5 xl:col-span-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight">Similarity score</h2>
+                        <p className="text-xs text-muted-foreground">Today vs your usual typing</p>
+                        <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
+                          <StatusDot tone={toneOf(scoreStatus)} />
+                          {scoreStatus ? STATUS_LABEL[scoreStatus] : 'No check-in yet'}
                         </p>
-                      </>
+                      </div>
+                      <Gauge value={scoreValue === null ? null : scoreValue / 100} label={scoreValue === null ? '–' : String(scoreValue)} sub="of 100" />
+                    </div>
+                    <Meter className="mt-4" label="Baseline" value={Math.min(usableCount, MIN_BASELINE_SESSIONS) / MIN_BASELINE_SESSIONS} display={`${Math.min(usableCount, MIN_BASELINE_SESSIONS)} / ${MIN_BASELINE_SESSIONS}`} />
+                  </Card>
+
+                  {/* Streak */}
+                  <Card className="p-5 xl:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-bold tracking-tight">Streak</h2>
+                      <Flame className="size-5 text-amber-400" aria-hidden="true" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Days in a row</p>
+                    <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={streak > 0 ? 'good' : 'idle'} />{streak} {streak === 1 ? 'day' : 'days'}</p>
+                    <Meter className="mt-6" label="This week" value={week / 7} display={`${week}/7`} />
+                  </Card>
+
+                  {/* Check-ins */}
+                  <Card className="p-5 xl:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-bold tracking-tight">Check-ins</h2>
+                      <Fingerprint className="size-5 text-sky-400" aria-hidden="true" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Saved to your account</p>
+                    <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={history.length ? 'good' : 'idle'} />{history.length} total</p>
+                    <Meter className="mt-6" label="Scored" value={history.length ? scored.length / history.length : 0} display={`${scored.length}`} />
+                  </Card>
+
+                  {/* Key hold */}
+                  <Card className="p-5 xl:col-span-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight">Key hold</h2>
+                        <p className="text-xs text-muted-foreground">Median time a key stays down</p>
+                        <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
+                          <StatusDot tone={dwellRatio === null ? 'idle' : dwellRatio <= 1.15 ? 'good' : dwellRatio <= 1.4 ? 'warn' : 'bad'} />
+                          {dwellRatio === null ? (dwell === null ? 'No data yet' : 'No usual yet') : dwellRatio <= 1.15 ? 'Close to usual' : 'Longer than usual'}
+                        </p>
+                      </div>
+                      <Gauge value={dwell === null ? null : dwell / 200} label={dwell === null ? '–' : String(Math.round(dwell))} sub="ms" />
+                    </div>
+                    <Meter className="mt-4" label="Compared with usual" value={dwellRatio === null ? 0 : Math.min(1, dwellRatio / 2)} display={dwellRatio === null ? '–' : `${dwellRatio.toFixed(2)}×`} />
+                  </Card>
+
+                  {/* Trend */}
+                  <Card className="p-5 md:col-span-2 xl:col-span-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-bold tracking-tight">Score trend</h2>
+                        <p className="text-xs text-muted-foreground">Last {Math.max(trend.length, 0)} scored check-ins</p>
+                        <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={trend.length >= 2 ? 'good' : 'idle'} />{trend.length >= 2 ? `Latest ${lastScored?.readinessScore}` : 'Needs 2 scored check-ins'}</p>
+                      </div>
+                      {trend.length >= 2 && (
+                        <div className="flex gap-3 text-xs font-semibold tabular-nums">
+                          <span className="inline-flex items-center gap-1"><TrendingUp className="size-3.5 text-emerald-400" />{Math.max(...trend)}</span>
+                          <span className="inline-flex items-center gap-1 text-muted-foreground">low {Math.min(...trend)}</span>
+                        </div>
+                      )}
+                    </div>
+                    {trend.length >= 2 ? (
+                      <AreaChart className="mt-3" values={trend} max={100} label={`Scores from ${trend[0]} to ${trend[trend.length - 1]}`} />
                     ) : (
-                      <>
-                        <p className="mt-2 font-display text-3xl">You haven’t checked in today</p>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                          {baselineReady
-                            ? 'Type two sentences to see how today compares with your usual typing.'
-                            : 'Each check-in adds to your personal baseline. Scores start after 3.'}
-                        </p>
-                        <div className="mt-5 h-2 rounded-full bg-track" aria-hidden="true">
-                          <div
-                            className="h-2 rounded-full bg-foreground transition-[width] duration-500"
-                            style={{ width: `${(Math.min(usableCount, MIN_BASELINE_SESSIONS) / MIN_BASELINE_SESSIONS) * 100}%` }}
-                          />
-                        </div>
-                        <p className="mt-2 text-xs text-muted-foreground">Baseline: {Math.min(usableCount, MIN_BASELINE_SESSIONS)} of {MIN_BASELINE_SESSIONS}</p>
-                        <Button className="mt-5" onClick={() => setDailyOpen(true)} disabled={busy}>Start daily check-in</Button>
-                      </>
+                      <AreaChart className="mt-3 opacity-30" values={[40, 55, 48, 70, 62, 80, 74]} max={100} label="Sample trend shape" />
                     )}
                   </Card>
-                )}
-                {shown && <ReferenceContext result={shown.result} />}
-              </div>
+                </div>
 
-              <div className="space-y-6 lg:col-span-2">
-                {!analysisOff && (
-                  <DailyAnalysisCard text={analysis} busy={analysisBusy} error={analysisError} canRun={history.length > 0} onRun={runAnalysis} />
-                )}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold">Your energy today</h2>
-                  <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Your energy today">
-                    {(Object.keys(ENERGY_LABEL) as (keyof typeof ENERGY_LABEL)[]).map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        role="radio"
-                        aria-checked={energy === value}
-                        onClick={() => setEnergy(energy === value ? null : value)}
-                        className={cn(
-                          'cursor-pointer rounded-full border px-3.5 py-1.5 text-sm transition-colors',
-                          energy === value ? 'border-foreground bg-foreground text-background' : 'hover:bg-accent'
-                        )}
-                      >
-                        {ENERGY_LABEL[value]}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">Stays on this device. Used for suggestions on the Activity tab.</p>
-                </Card>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+                  {/* Daily analysis */}
+                  {!analysisOff && (
+                    <Card id="daily-analysis" className="relative overflow-hidden p-5 xl:col-span-4">
+                      <DotWave className="absolute -right-6 bottom-0 h-32 w-64 opacity-80" />
+                      <div className="relative">
+                        <div className="flex items-center gap-2"><Brain className="size-5 text-violet-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Daily analysis</h2></div>
+                        <p className="text-xs text-muted-foreground">Claude Opus · numbers only</p>
+                        <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={analysis ? 'good' : analysisBusy ? 'warn' : 'idle'} />{analysis ? 'Written today' : analysisBusy ? 'Writing…' : 'Not run today'}</p>
+                        {analysis && <div className="max-w-[90%] text-sm"><AnalysisText text={analysis} /></div>}
+                        {analysisError && <p role="alert" className="mt-2 text-sm text-destructive">{analysisError}</p>}
+                        <ChipButton className="mt-4" onClick={runAnalysis} disabled={analysisBusy || history.length === 0}>{analysisBusy ? 'Analyzing' : analysis ? 'Refresh' : 'Analyze'}</ChipButton>
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Explain */}
+                  <Card className="relative overflow-hidden p-5 xl:col-span-4">
+                    <DotWave className="absolute -right-6 bottom-0 h-32 w-64 opacity-60" hue="var(--gauge)" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2"><Sparkles className="size-5 text-sky-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Explain my result</h2></div>
+                      <p className="text-xs text-muted-foreground">Claude Sonnet · plain words</p>
+                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone={shown ? 'good' : 'idle'} />{shown ? 'Result ready' : 'Check in first'}</p>
+                      {aiText && <p className="mt-3 max-w-[90%] text-sm leading-relaxed">{aiText}</p>}
+                      <ChipButton className="mt-4" onClick={explainResult} disabled={!shown || aiBusy}>{aiBusy ? 'Thinking' : aiText ? 'Again' : 'Explain'}</ChipButton>
+                      {shown && <WeatherContextPanel onChange={setWeather} />}
+                    </div>
+                  </Card>
+
+                  {/* Preferences */}
+                  <Card id="preferences" className="p-5 md:col-span-2 xl:col-span-4 xl:row-span-2">
+                    <h2 className="text-xl font-bold tracking-tight">Preferences</h2>
+                    <p className="mt-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">General</p>
+                    <div className="mt-2 divide-y divide-border">
+                      <PrefRow label="Daily check-in when I sign in">
+                        <Toggle label="Daily check-in when I sign in" checked={prefs.promptAtLogin} onChange={(v) => setPrefs({ ...prefs, promptAtLogin: v })} />
+                      </PrefRow>
+                      <PrefRow label="Write my daily analysis automatically">
+                        <Toggle label="Write my daily analysis automatically" checked={prefs.autoAnalysis} onChange={(v) => setPrefs({ ...prefs, autoAnalysis: v })} />
+                      </PrefRow>
+                      <PrefRow label="Dark mode">
+                        <Toggle label="Dark mode" checked={dark} onChange={(v) => setTheme(v ? 'dark' : 'light')} />
+                      </PrefRow>
+                    </div>
+                    <p className="mt-5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Energy today</p>
+                    <div className="mt-2 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Your energy today">
+                      {(Object.keys(ENERGY_LABEL) as (keyof typeof ENERGY_LABEL)[]).map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={energy === value}
+                          onClick={() => setEnergy(energy === value ? null : value)}
+                          className={cn(
+                            'cursor-pointer rounded-xl border px-2 py-2 text-xs font-medium transition-colors',
+                            energy === value ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-300 dark:text-emerald-300' : 'border-border hover:bg-accent'
+                          )}
+                        >
+                          {ENERGY_LABEL[value]}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">Synced to your account. Never shared with an employer.</p>
+                    <a href="/sources" className="mt-5 flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/60 py-2.5 text-sm font-semibold hover:bg-accent">
+                      Sources & limits <ChevronDown className="size-4 -rotate-90" aria-hidden="true" />
+                    </a>
+                  </Card>
+
+                  {/* Research */}
+                  <Card className="relative overflow-hidden p-5 xl:col-span-4">
+                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="#f472b6" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2"><BookOpen className="size-5 text-pink-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Research</h2></div>
+                      <p className="text-xs text-muted-foreground">What the model can and cannot detect</p>
+                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone="good" />6 conditions reviewed</p>
+                      <ChipButton className="mt-4" onClick={() => setTab('research')}>Open</ChipButton>
+                    </div>
+                  </Card>
+
+                  {/* Desktop */}
+                  <Card className="relative overflow-hidden p-5 xl:col-span-4">
+                    <DotWave className="absolute -right-10 -bottom-4 h-28 w-60 opacity-50" hue="#34d399" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2"><Download className="size-5 text-emerald-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Desktop app</h2></div>
+                      <p className="text-xs text-muted-foreground">Track activity across your apps</p>
+                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone="good" />Windows · macOS</p>
+                      <ChipButton className="mt-4" onClick={() => setTab('activity')}>Activity</ChipButton>
+                    </div>
+                  </Card>
+                </div>
 
                 {shown && (
-                  <Card className="p-6">
-                    <div className="flex items-center justify-between gap-3">
-                      <h2 className="text-lg font-semibold">Explain in plain words</h2>
-                      <Button variant="outline" size="sm" className="rounded-full" onClick={explainResult} disabled={aiBusy}>
-                        <Sparkles className="size-4" aria-hidden="true" />
-                        {aiBusy ? 'Thinking…' : aiText ? 'Again' : 'Explain'}
-                      </Button>
-                    </div>
-                    <p className={cn('mt-3 text-sm leading-relaxed', !aiText && 'text-muted-foreground')}>
-                      {aiText ?? 'A short, plain summary of your numbers. The AI sees only the timing figures, never your words.'}
-                    </p>
-                    <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
-                      AI-generated from your numbers and public research. <a href="/sources" target="_blank" rel="noreferrer" className="underline">Sources & limits</a>. Not medical advice.
-                    </p>
-                    <WeatherContextPanel onChange={setWeather} />
-                  </Card>
+                  <div className="grid items-start gap-4 xl:grid-cols-12">
+                    <ResultCard className="xl:col-span-7" result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
+                    <div className="xl:col-span-5"><ReferenceContext result={shown.result} /></div>
+                  </div>
                 )}
 
-                <details className="group rounded-2xl border bg-card">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-6 [&::-webkit-details-marker]:hidden">
-                    <span>
-                      <span className="block text-lg font-semibold">See how scoring works</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">Try a simulated session. Nothing is saved.</span>
+                <details className="group panel rounded-2xl border border-border">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center gap-3">
+                      <Zap className="size-5 text-amber-400" aria-hidden="true" />
+                      <span>
+                        <span className="block font-semibold">See how scoring works</span>
+                        <span className="block text-xs text-muted-foreground">Run a simulated session. Nothing is saved.</span>
+                      </span>
                     </span>
                     <ChevronDown className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
                   </summary>
-                  <div className="flex flex-wrap gap-2 px-6 pb-6">
+                  <div className="flex flex-wrap gap-2 px-5 pb-5">
                     {DEMO_SESSIONS.map((d) => (
-                      <Button key={d.name} variant="outline" size="sm" className="rounded-full" disabled={busy} title={d.note} onClick={() => runDemo(d.name, d.label)}>
-                        {d.label}
+                      <Button key={d.name} variant="chip" size="sm" disabled={busy} title={d.note} onClick={() => runDemo(d.name, d.label)}>
+                        <Keyboard className="size-3.5" aria-hidden="true" />{d.label}
                       </Button>
                     ))}
                   </div>
                 </details>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {tab === 'history' && (
-          <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
-            <Card className="p-6">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold">Your check-ins</h2>
-                {history.length > 0 && (
-                  <Button variant="destructive" size="sm" onClick={deleteData} disabled={busy}>
-                    Delete history
-                  </Button>
-                )}
+            {tab === 'history' && (
+              <div className="grid items-start gap-4 lg:grid-cols-2">
+                <Card className="p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2"><HistoryIcon className="size-5 text-sky-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Your check-ins</h2></div>
+                    {history.length > 0 && (
+                      <Button variant="destructive" size="sm" onClick={deleteData} disabled={busy}>
+                        Delete history
+                      </Button>
+                    )}
+                  </div>
+                  <Calendar className="mt-4" events={history.map((h) => ({ at: h.at, status: h.status }))} />
+                  {history.length === 0 ? (
+                    <p className="mt-4 border-t pt-4 text-sm leading-relaxed text-muted-foreground">No check-ins yet. Your first one starts your baseline.</p>
+                  ) : (
+                    <ul className="mt-4 max-h-80 divide-y divide-border overflow-y-auto border-t border-border">
+                      {[...history].reverse().map((h) => (
+                        <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
+                          <span className="flex items-center gap-2.5 text-sm text-muted-foreground"><StatusDot tone={toneOf(h.status)} />{dateFormat.format(new Date(h.at))}</span>
+                          <span className="flex items-center gap-3">
+                            <StatusBadge status={h.status} />
+                            <span className="w-8 text-right text-sm font-semibold tabular-nums">{h.readinessScore ?? '–'}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {historySync && <p className="mt-3 text-xs text-muted-foreground" role="status">{historySync}</p>}
+                  <p className="mt-2 text-xs text-muted-foreground">Scores use check-ins from this browser so different keyboards are not mixed.</p>
+                </Card>
+                <div className="space-y-4">
+                  <Card className="p-5">
+                    <div className="flex items-center gap-2"><TrendingUp className="size-5 text-violet-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Score trend</h2></div>
+                    <p className="text-xs text-muted-foreground">Similarity to your usual timing (100 = same as usual)</p>
+                    {trend.length >= 2 ? (
+                      <AreaChart className="mt-4 h-36" values={trend} max={100} label={`Scores from ${trend[0]} to ${trend[trend.length - 1]}`} />
+                    ) : (
+                      <p className="mt-5 rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Your trend appears after two scored check-ins.</p>
+                    )}
+                  </Card>
+                  <Chat history={history} getToken={getToken} />
+                </div>
               </div>
-              <Calendar className="mt-4" events={history.map((h) => ({ at: h.at, status: h.status }))} />
-              {history.length === 0 ? (
-                <p className="mt-4 border-t pt-4 text-sm leading-relaxed text-muted-foreground">
-                  No check-ins yet. Your first one starts your baseline.
+            )}
+
+            {tab === 'research' && (
+              <div className="space-y-8">
+                <WhatItDetects />
+                <ResearchConditions />
+              </div>
+            )}
+
+            {tab === 'activity' && (
+              <div>
+                <ActivityDashboard energy={energy} onEnergy={setEnergy} />
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Your words are never recorded · <a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Use</a>
                 </p>
-              ) : (
-                <ul className="mt-4 max-h-80 divide-y divide-border overflow-y-auto border-t border-border">
-                  {[...history].reverse().map((h) => (
-                    <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
-                      <span className="text-sm text-muted-foreground">{dateFormat.format(new Date(h.at))}</span>
-                      <span className="flex items-center gap-3">
-                        <StatusBadge status={h.status} />
-                        <span className="w-8 text-right text-sm font-medium tabular-nums">{h.readinessScore ?? '–'}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {historySync && <p className="mt-3 text-xs text-muted-foreground" role="status">{historySync}</p>}
-              <p className="mt-2 text-xs text-muted-foreground">Scores use check-ins from this browser so different keyboards are not mixed.</p>
-            </Card>
-            <div className="space-y-6">
-              <ScoreTrend history={history} />
-              <Chat history={history} getToken={getToken} />
-            </div>
-          </div>
-        )}
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
 
-        {tab === 'research' && (
-          <div className="mt-8 space-y-8">
-            <WhatItDetects />
-            <ResearchConditions />
-          </div>
-        )}
-
-        {tab === 'activity' && (
-          <div className="mt-8">
-            <ActivityDashboard energy={energy} onEnergy={setEnergy} />
-            <p className="mt-4 text-xs text-muted-foreground">
-              Tracking starts paused · Your words are never recorded · <a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Use</a>
-            </p>
-          </div>
-        )}
-      </main>
+      {/* Mobile bottom navigation */}
+      <nav aria-label="Dashboard" className="panel fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-border p-1.5 lg:hidden">
+        {TABS.slice(0, 2).map((t) => <BottomItem key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+        <button type="button" onClick={() => setDailyOpen(true)} aria-label="Daily check-in" className="mx-auto flex size-11 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-600 text-white shadow-lg">
+          <PenLine className="size-5" />
+        </button>
+        {TABS.slice(2).map((t) => <BottomItem key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+      </nav>
 
       <DailyCheckInDialog
         open={dailyOpen}
@@ -529,76 +676,30 @@ export default function CheckIn() {
   );
 }
 
-function TabButton({
-  tab,
-  active,
-  onClick,
-  className,
-}: {
-  tab: (typeof TABS)[number];
-  active: boolean;
-  onClick: () => void;
-  className?: string;
-}) {
-  const Icon = tab.icon;
+function SideItem({ icon: Icon, label, active, onClick, href }: { icon: typeof House; label: string; active?: boolean; onClick?: () => void; href?: string }) {
+  const cls = cn(
+    'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    active
+      ? 'border border-emerald-500/25 bg-gradient-to-r from-emerald-500/15 to-transparent text-foreground'
+      : 'border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
+  );
+  const body = (<><Icon className={cn('size-[18px]', active && 'text-emerald-400')} aria-hidden="true" />{label}</>);
+  return href ? <a href={href} className={cls}>{body}</a> : <button type="button" onClick={onClick} aria-current={active ? 'page' : undefined} className={cls}>{body}</button>;
+}
+
+function BottomItem({ icon: Icon, label, active, onClick }: { icon: typeof House; label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground',
-        className
-      )}
-    >
-      <Icon className="size-4" aria-hidden="true" />
-      {tab.label}
+    <button type="button" onClick={onClick} aria-current={active ? 'page' : undefined} className={cn('flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[11px] font-medium', active ? 'text-emerald-400' : 'text-muted-foreground')}>
+      <Icon className="size-5" aria-hidden="true" />{label}
     </button>
   );
 }
 
-function ScoreTrend({ history }: { history: HistoryEntry[] }) {
-  const scored = history.filter((h) => h.readinessScore !== null).slice(-14);
+function PrefRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <Card className="p-6">
-      <h2 className="text-lg font-semibold">Score trend</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Similarity to your usual timing across your recent scored check-ins (100 = same as usual).</p>
-      {scored.length < 2 ? (
-        <p className="mt-6 rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          Your trend appears after two scored check-ins.
-        </p>
-      ) : (
-        <TrendChart points={scored.map((h) => ({ at: h.at, score: h.readinessScore as number }))} />
-      )}
-    </Card>
-  );
-}
-
-function TrendChart({ points }: { points: { at: string; score: number }[] }) {
-  const w = 320, h = 120, pad = 6;
-  const x = (i: number) => pad + (i / (points.length - 1)) * (w - pad * 2);
-  const y = (s: number) => pad + (1 - s / 100) * (h - pad * 2);
-  const line = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.score).toFixed(1)}`).join(' ');
-  const last = points[points.length - 1];
-  return (
-    <div className="mt-5">
-      <svg viewBox={`0 0 ${w} ${h}`} className="h-32 w-full overflow-visible" role="img" aria-label={`Scores from ${points[0].score} to ${last.score}`}>
-        {[0, 50, 100].map((g) => (
-          <line key={g} x1={pad} x2={w - pad} y1={y(g)} y2={y(g)} className="stroke-border" strokeDasharray="3 4" />
-        ))}
-        <path d={`${line} L${x(points.length - 1)},${h - pad} L${x(0)},${h - pad} Z`} className="fill-foreground/5" />
-        <path d={line} fill="none" className="stroke-foreground" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        {points.map((p, i) => (
-          <circle key={p.at} cx={x(i)} cy={y(p.score)} r="3" className="fill-background stroke-foreground" strokeWidth="2" vectorEffect="non-scaling-stroke">
-            <title>{`${dateFormat.format(new Date(p.at))}: ${p.score}`}</title>
-          </circle>
-        ))}
-      </svg>
-      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-        <span>{dateFormat.format(new Date(points[0].at))}</span>
-        <span>Latest: <span className="font-medium text-foreground tabular-nums">{last.score}</span></span>
-      </div>
+    <div className="flex items-center justify-between gap-4 py-3">
+      <span className="text-sm">{label}</span>
+      {children}
     </div>
   );
 }

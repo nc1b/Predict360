@@ -51,3 +51,15 @@ describe('daily check-in', () => {
     expect(loadEnergy(s, 'u', now)).toBe(null);
   });
 });
+
+describe('dashboard preferences', () => {
+  it('defaults on and round-trips', async () => {
+    const { loadPrefs, savePrefs } = await import('./daily');
+    const s = memoryStorage();
+    expect(loadPrefs(s, 'u')).toEqual({ promptAtLogin: true, autoAnalysis: true });
+    savePrefs(s, 'u', { promptAtLogin: false, autoAnalysis: true });
+    expect(loadPrefs(s, 'u').promptAtLogin).toBe(false);
+    s.setItem('p360.prefs.u', 'not json');
+    expect(loadPrefs(s, 'u')).toEqual({ promptAtLogin: true, autoAnalysis: true });
+  });
+});

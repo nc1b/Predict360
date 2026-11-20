@@ -4,14 +4,14 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 /** Renders the model's "headline + '- ' bullets" format without trusting it as HTML. */
-function AnalysisText({ text }: { text: string }) {
+export function AnalysisText({ text }: { text: string }) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   const bullets = lines.filter((l) => /^[-•*]\s+/.test(l)).map((l) => l.replace(/^[-•*]\s+/, ''));
   const prose = lines.filter((l) => !/^[-•*]\s+/.test(l));
   const [headline, ...rest] = prose;
   return (
     <div className="mt-4">
-      {headline && <p className="font-display text-2xl leading-snug">{headline}</p>}
+      {headline && <p className="text-lg font-semibold leading-snug">{headline}</p>}
       {bullets.length > 0 && (
         <ul className="mt-3 space-y-2">
           {bullets.map((b, i) => (
