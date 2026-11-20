@@ -1,9 +1,12 @@
 
 import { HLSVideoPlayer } from '@/components/ui/hls-video-player';
 import { PROJECT_VIDEO } from '@/lib/site';
+import { useIsDark } from '@/lib/theme';
 
 export function ProjectVideo() {
+  const dark = useIsDark();
   if (!PROJECT_VIDEO.src) return null;
+  const poster = (dark ? PROJECT_VIDEO.poster : PROJECT_VIDEO.posterLight) || PROJECT_VIDEO.poster;
   return (
     <section id="video" className="scroll-mt-24 border-t">
       <div className="mx-auto max-w-5xl px-6 py-24">
@@ -12,16 +15,16 @@ export function ProjectVideo() {
         <p className="mt-4 max-w-xl text-muted-foreground">
           One person, one day: a check-in, switching modes, and all-day tracking with the pause control.
         </p>
-        <div className="mt-10 overflow-hidden rounded-2xl border bg-card shadow-[0_24px_60px_-28px_rgba(0,0,0,0.35)]">
+        <div className="gradient-border mt-10 overflow-hidden rounded-3xl bg-card p-1.5 shadow-[0_40px_100px_-40px_rgba(26,11,46,0.35)] dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.8)]">
           <HLSVideoPlayer
             src={PROJECT_VIDEO.src}
-            poster={PROJECT_VIDEO.poster || undefined}
+            poster={poster || undefined}
             width={1920}
             height={1080}
             controls
             playsInline
             preload="metadata"
-            className="block w-full"
+            className="block w-full overflow-hidden rounded-[1.15rem]"
           />
         </div>
       </div>

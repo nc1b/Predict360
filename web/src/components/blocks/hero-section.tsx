@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '@/auth-context';
+import { useIsDark } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import { CompactDownload } from '@/components/download-desktop';
 
@@ -28,11 +29,13 @@ function useScrollTilt() {
 export function HeroSection() {
   const { user } = useAuth();
   const tilt = useScrollTilt();
+  const dark = useIsDark();
 
   return (
     <section id="home" className="relative overflow-hidden px-6 pb-16 pt-32 md:pt-40">
       {/* Soft background glow */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[46rem]">
+        <div className="bg-grid absolute inset-0" />
         <div className="absolute left-1/2 top-[-12rem] h-[40rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(15,128,101,0.22),transparent)]" />
         <div className="absolute left-[62%] top-[4rem] h-[30rem] w-[44rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(97,62,152,0.30),transparent)] dark:bg-[radial-gradient(closest-side,rgba(74,45,120,0.55),transparent)]" />
         <div className="absolute left-[30%] top-[10rem] h-[22rem] w-[30rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(26,11,46,0.10),transparent)] dark:bg-[radial-gradient(closest-side,rgba(26,11,46,0.9),transparent)]" />
@@ -42,7 +45,7 @@ export function HeroSection() {
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
         <a
           href="#model"
-          className="hero-in group inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+          className="hero-in gradient-border group inline-flex items-center gap-2 rounded-full bg-card/70 px-4 py-1.5 text-xs text-muted-foreground shadow-sm shadow-violet-950/5 backdrop-blur transition-colors hover:text-foreground"
         >
           <Sparkles className="size-3.5 text-emerald-400" aria-hidden="true" />
           Veritas AI Hackathon 2026 finalist · powered by Claude
@@ -69,7 +72,7 @@ export function HeroSection() {
             {user ? 'Open your dashboard' : 'Get started free'}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
-          <a href="#how-it-works" className="inline-flex h-12 items-center rounded-xl border border-border bg-secondary/50 px-6 text-base font-medium backdrop-blur transition-colors hover:bg-accent">
+          <a href="#how-it-works" className="inline-flex h-12 items-center rounded-xl border border-border bg-card/70 px-6 text-base font-medium shadow-sm shadow-violet-950/5 backdrop-blur transition-colors hover:bg-accent dark:bg-secondary/50">
             See how it works
           </a>
         </div>
@@ -89,13 +92,14 @@ export function HeroSection() {
       <div className="hero-in hero-delay-4 relative mx-auto mt-16 max-w-6xl">
         <div aria-hidden="true" className="absolute inset-x-[8%] -top-10 bottom-10 -z-10 rounded-[3rem] bg-[radial-gradient(closest-side,rgba(15,128,101,0.34),rgba(97,62,152,0.30),transparent)] blur-2xl" />
         <div ref={tilt} className="origin-top will-change-transform" style={{ transform: 'perspective(1800px) rotateX(14deg) scale(0.94)' }}>
-          <div className="rounded-2xl border border-violet-950/10 bg-violet-950/[0.03] p-1.5 dark:border-white/10 dark:bg-white/[0.03] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] backdrop-blur md:rounded-3xl md:p-2">
+          <div className="gradient-border rounded-2xl bg-card/60 p-1.5 shadow-[0_50px_120px_-40px_rgba(26,11,46,0.35)] backdrop-blur md:rounded-3xl md:p-2 dark:bg-white/[0.03] dark:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)]">
             <img
-              src="/app-dashboard.webp"
+              key={dark ? 'dark' : 'light'}
+              src={dark ? '/app-dashboard.webp' : '/app-dashboard-light.webp'}
               alt="The Predict 360 dashboard: similarity score and key-hold gauges, streak, score trend, a Claude daily analysis and preferences"
               width={2880}
               height={1800}
-              className={cn('h-auto w-full rounded-xl md:rounded-2xl')}
+              className={cn('h-auto w-full rounded-xl ring-1 ring-black/5 md:rounded-2xl dark:ring-white/5')}
               loading="eager"
               fetchPriority="high"
             />

@@ -17,7 +17,7 @@
 
   --background: #f3f0ea;
   --foreground: #1a0b2e;
-  --card: #fbf9f5;
+  --card: #fffdfa;
   --card-foreground: #1a0b2e;
   --popover: #fdfcf9;
   --popover-foreground: #1a0b2e;
@@ -37,9 +37,11 @@
   --brand: #045f4b;
   --brand-foreground: #f3f0ea;
   --gauge: #066e57;
-  --chart: #613e98;
-  --panel-from: #fbf9f5;
-  --panel-to: #f6f2ec;
+  --chart: #7a55b5;
+  --panel-from: #ffffff;
+  --panel-to: #fcfaf6;
+  --panel-shadow: 0 0 0 1px rgba(26, 11, 46, 0.015), 0 1px 2px rgba(26, 11, 46, 0.05), 0 14px 32px -18px rgba(26, 11, 46, 0.16);
+  --grid-line: rgba(26, 11, 46, 0.06);
 
   --near: #dcefe7;
   --near-foreground: #045f4b;
@@ -47,6 +49,18 @@
   --some-foreground: #7a4708;
   --large: #e9e1f4;
   --large-foreground: #4a2d78;
+
+  /* Accent shades used as text/icons are darker on cream so they stay readable. */
+  --color-emerald-300: #0f8065;
+  --color-emerald-400: #066e57;
+  --color-violet-300: #7a55b5;
+  --color-violet-400: #613e98;
+  --color-sky-300: #7a55b5;
+  --color-sky-400: #7a55b5;
+  --color-pink-400: #7a55b5;
+  --color-amber-300: #b7700c;
+  --color-amber-400: #d48a12;
+  --color-amber-500: #a8640a;
 }
 
 .dark {
@@ -75,6 +89,8 @@
   --chart: #9a7bd0;
   --panel-from: #16131b;
   --panel-to: #111014;
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --grid-line: rgba(243, 240, 234, 0.045);
 
   --near: #0b2620;
   --near-foreground: #7fd0b6;
@@ -82,6 +98,17 @@
   --some-foreground: #e9c27f;
   --large: #1f1531;
   --large-foreground: #c2aee8;
+
+  --color-emerald-300: #5fc0a3;
+  --color-emerald-400: #34a586;
+  --color-violet-300: #b49bdf;
+  --color-violet-400: #9a7bd0;
+  --color-sky-300: #cfc2ec;
+  --color-sky-400: #b9a6e6;
+  --color-pink-400: #c7a6e8;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
 }
 
 /*
@@ -263,7 +290,35 @@
 /* Dashboard panels: soft vertical gradient with a faint top highlight. */
 .panel {
   background: linear-gradient(180deg, var(--panel-from), var(--panel-to));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--panel-shadow);
+}
+
+/* Faint square grid that fades out from the top centre; sits behind hero content. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 35%, transparent 75%);
+}
+
+/* A 1px gradient hairline border (violet → emerald) around any rounded box. */
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-violet-500) 55%, transparent), var(--border) 45%, color-mix(in srgb, var(--color-emerald-500) 55%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Landing page motion: soft fade-up on load, and sections that reveal as they scroll in. */

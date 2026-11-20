@@ -33,7 +33,7 @@ export function ModesSection() {
         <Eyebrow>Two ways to track</Eyebrow>
         <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Pick how you check in</h2>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Write two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
+          Type today&apos;s two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
           result is labelled by mode and compared with your own baseline.
         </p>
 
@@ -225,7 +225,7 @@ export function SignalsSection() {
 
 const STEPS = [
   { icon: UserRoundCheck, title: 'Open the check-in', body: 'Sign in on a laptop or desktop. It works in any browser with a physical keyboard.' },
-  { icon: PenLine, title: 'Write two sentences', body: 'Say how your shift is going. End the first sentence with a period.' },
+  { icon: PenLine, title: 'Type two sentences', body: 'Copy the day’s two short sentences at your usual pace. Typos are fine; only timing counts.' },
   { icon: Timer, title: 'Timing is measured', body: 'Key holds, the pause between sentences, and rhythm. The words are discarded.' },
   { icon: Keyboard, title: 'Compare with your usual', body: 'After three check-ins you get a score from 0 to 100 against your own baseline.' },
 ];
