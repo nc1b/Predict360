@@ -65,6 +65,28 @@ We ran two descriptive checks on public timing measurements. Neither dataset ent
 
 The audit compares individual timing measures. It cannot estimate classifier accuracy, clinical false alarms, or fatigue detection.
 
+## 6. Condition-screening research model (not deployed)
+
+`scripts/condition-screening-eval.py` trains per-person classifiers to separate self-reported Parkinson's from no Parkinson's in the Tappy data, using seven timing features (hold, latency and flight medians and spreads, and left/right hold asymmetry). Each participant is one row, and evaluation is 5-fold stratified cross-validation repeated 10 times, so no person appears in both training and test data. Results are in [research/condition-screening-eval.json](research/condition-screening-eval.json).
+
+| Model (192 people: 143 with, 49 without) | ROC-AUC | Detected at 90% specificity |
+|---|---:|---:|
+| Chance | 0.50 | 10% |
+| Logistic regression | 0.52 | 14% |
+| Random forest | 0.50 | 13% |
+
+**neuroQWERTY (clinician labels).** `scripts/neuroqwerty-eval.py` repeats this on the public neuroQWERTY MIT-CS1PD and MIT-CS2PD data ([Giancardo et al. 2016](https://doi.org/10.1038/srep34468); PhysioNet, ODC-By 1.0): 85 people, 42 with clinician-diagnosed early Parkinson's, about 15 minutes of free typing each. Features are hold-time quantiles, a 50 ms hold-time histogram and flight-time spread. Results are in [research/neuroqwerty-eval.json](research/neuroqwerty-eval.json).
+
+| neuroQWERTY test | ROC-AUC |
+|---|---:|
+| Random forest, held-out people (5-fold CV × 20) | 0.81 (folds 0.64–0.96) |
+| Logistic regression, held-out people | 0.76 |
+| Same model, one 70-keystroke window per held-out person | 0.73 |
+| Trained on all of neuroQWERTY, tested unchanged on 183 Tappy people | 0.62 |
+| Authors' published nQi score, for reference (developed on this data) | 0.81 |
+
+The within-study result matches the published one, but it falls to 0.62 on different people, devices and self-reported labels. Typing timing alone did not separate the Tappy groups. No condition model is therefore used in the app, which shows it as "coming soon · in research". Releasing condition screening would need clinician-confirmed labels from the same typing task and independent clinical validation.
+
 ## Why unspecified Kaggle/Hugging Face datasets were not imported
 
 Kaggle and Hugging Face are hosting platforms. “Keystroke biometrics,” “fatigue,” or “cognitive fatigue” do not identify a specific licensed, compatible dataset. Research located generic processed typing data and fatigue reproduction results, but did not establish an additional source with verified keystroke event definitions, suitable clinical labels, and demonstrated external validity for this app. Original CMU, Tappy, and SWELL sources were preferred over unverified reuploads.

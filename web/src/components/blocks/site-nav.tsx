@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Activity, ArrowRight, CircleHelp, FlaskConical, Home, ListChecks, Menu, X } from 'lucide-react';
+import { Activity, ArrowRight, Brain, CircleHelp, FlaskConical, Home, ListChecks, Menu, X } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { ThemeToggle } from '@/components/blocks/theme-toggle';
 import { Logo } from '@/components/logo';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 const SECTIONS = [
   { id: 'home', name: 'Home', icon: Home },
+  { id: 'model', name: 'The AI', icon: Brain },
   { id: 'signals', name: 'Signals', icon: Activity },
   { id: 'how-it-works', name: 'How it works', icon: ListChecks },
   { id: 'evidence', name: 'Evidence', icon: FlaskConical },

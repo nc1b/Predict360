@@ -14,6 +14,8 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      SIGNING_CONFIGURED: ${{ secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_SIGNING_PROFILE != '' }}
     defaults:
       run:
         working-directory: desktop
@@ -29,10 +31,31 @@ jobs:
           npm ci --prefix ..
           npm ci
 
-      - name: Build the Windows installer
+      # Unsigned builds trigger Microsoft Defender SmartScreen ("Windows protected your PC").
+      # Add the Azure Trusted Signing secrets below to sign the installer and the app.
+      - name: Build the Windows installer (unsigned)
+        if: env.SIGNING_CONFIGURED != 'true'
         run: npm run dist
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Build and sign the Windows installer (Azure Trusted Signing)
+        if: env.SIGNING_CONFIGURED == 'true'
+        shell: bash
+        run: >
+          npm run dist --
+          -c.win.azureSignOptions.publisherName="$AZURE_SIGNING_PUBLISHER"
+          -c.win.azureSignOptions.endpoint="$AZURE_SIGNING_ENDPOINT"
+          -c.win.azureSignOptions.codeSigningAccountName="$AZURE_SIGNING_ACCOUNT"
+          -c.win.azureSignOptions.certificateProfileName="$AZURE_SIGNING_PROFILE"
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SIGNING_PUBLISHER: ${{ secrets.AZURE_SIGNING_PUBLISHER }}
+          AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          AZURE_SIGNING_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
 
       - name: Upload the .exe as a build artifact
         uses: actions/upload-artifact@v4

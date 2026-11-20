@@ -11,57 +11,37 @@ import { ProjectVideo } from '@/components/blocks/project-video';
 import { ModesSection, ResearchMapSection } from '@/components/blocks/landing-sections';
 import { SiteFooter } from '@/components/blocks/site-footer';
 import { SiteNav } from '@/components/blocks/site-nav';
+import { ModelSection } from '@/components/blocks/model-section';
+import { ScreeningComingSoon } from '@/components/screening-coming-soon';
 
-function useScrollBackdrop() {
+/** Fades each section below the hero in as it scrolls into view. */
+function useRevealSections() {
   React.useEffect(() => {
-    const body = document.body;
-    const previous = body.style.cssText;
-    const paint = (y: number) => {
-      body.style.backgroundImage = `radial-gradient(60rem 42rem at 50% ${y}%, color-mix(in oklab, var(--foreground) 8%, transparent), transparent 62%)`;
-      body.style.backgroundAttachment = 'fixed';
-      body.style.backgroundRepeat = 'no-repeat';
-    };
-
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
-      paint(28);
-      return () => {
-        body.style.cssText = previous;
-      };
-    }
-
-    body.style.transition = 'background-position 0.25s linear';
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      paint(8 + p * 82);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      body.style.cssText = previous;
-    };
+    const sections = [...document.querySelectorAll<HTMLElement>('main > section:not(#home), main > div > section')];
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    sections.forEach((el) => el.classList.add('reveal'));
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target); } }),
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.08 }
+    );
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 }
 
 export default function Landing() {
-  useScrollBackdrop();
+  useRevealSections();
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
       <main>
         <HeroSection />
+        <ModelSection />
         <ModesSection />
         <ResearchMapSection />
+        <section id="screening" className="scroll-mt-24 px-6 py-12">
+          <ScreeningComingSoon className="mx-auto max-w-5xl" />
+        </section>
         <ProjectVideo />
         <SignalsSection />
         <HowItWorksSection />

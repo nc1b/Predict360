@@ -106,7 +106,7 @@ export function ResultCard({
       )}
       {score !== null && <p className="text-xs text-muted-foreground">Similarity to your usual timing (100 = same as usual)</p>}
       <div className="mt-1 flex flex-wrap items-baseline gap-3">
-        <span className="text-7xl font-bold leading-none tracking-tight tabular-nums text-foreground">
+        <span className="font-display text-8xl leading-none tabular-nums text-foreground">
           {score === null ? '–' : score}
         </span>
         <StatusBadge status={result.status} />

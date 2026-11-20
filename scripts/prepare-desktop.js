@@ -6,6 +6,16 @@ async function main() {
   const root = path.join(__dirname, '..'), target = path.join(root, 'desktop/assets');
   fs.mkdirSync(target, { recursive: true });
   fs.copyFileSync(path.join(root, 'web/public/logo.svg'), path.join(target, 'logo.svg'));
+  // Bundle the same typefaces as the website so the app works offline and under its strict CSP.
+  const fonts = path.join(target, 'fonts');
+  fs.mkdirSync(fonts, { recursive: true });
+  for (const [from, to] of [
+    ['web/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2', 'inter.woff2'],
+    ['web/node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2', 'instrument-serif.woff2'],
+  ]) {
+    if (fs.existsSync(path.join(root, from))) fs.copyFileSync(path.join(root, from), path.join(fonts, to));
+    else console.warn(`Font not found (run npm install --prefix web): ${from}`);
+  }
   fs.copyFileSync(path.join(root, 'config/public.json'), path.join(target, 'public.json'));
   fs.copyFileSync(path.join(root, 'src/activity.js'), path.join(target, 'activity-analyzer.cjs'));
   const workday = fs.readFileSync(path.join(root, 'src/workday.mjs'), 'utf8').replace('export function createWorkdayPlan', 'function createWorkdayPlan');

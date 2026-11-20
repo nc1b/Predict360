@@ -130,7 +130,8 @@ test('busy explanations return 429 while health and analysis keep working', asyn
 });
 
 test('POST /api/explain returns 503 when no AI key is configured', async () => {
-  const prev = process.env.HACKCLUB_AI_KEY;
+  const prev = process.env.ANTHROPIC_API_KEY, prevHc = process.env.HACKCLUB_AI_KEY;
+  delete process.env.ANTHROPIC_API_KEY;
   delete process.env.HACKCLUB_AI_KEY;
   try {
     await withServer(async (base) => {
@@ -139,12 +140,13 @@ test('POST /api/explain returns 503 when no AI key is configured', async () => {
       assert.equal((await res.json()).error.code, 'ai_unconfigured');
     });
   } finally {
-    if (prev !== undefined) process.env.HACKCLUB_AI_KEY = prev;
+    if (prev !== undefined) process.env.ANTHROPIC_API_KEY = prev;
+    if (prevHc !== undefined) process.env.HACKCLUB_AI_KEY = prevHc;
   }
 });
 
 test('POST /api/explain rejects a body with no usable summary', async () => {
-  process.env.HACKCLUB_AI_KEY = 'test-key';
+  process.env.ANTHROPIC_API_KEY = 'test-key';
   try {
     await withServer(async (base) => {
       const res = await post(base, { summary: 'nope' });
@@ -152,23 +154,22 @@ test('POST /api/explain rejects a body with no usable summary', async () => {
       assert.equal((await res.json()).error.code, 'invalid_request');
     });
   } finally {
-    delete process.env.HACKCLUB_AI_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
   }
 });
 
-test('POST /api/explain forwards only numbers to the proxy and returns its text', async () => {
-  process.env.HACKCLUB_AI_KEY = 'test-key';
+test('POST /api/explain sends only numbers to Claude Opus 5.5 and returns its text', async () => {
+  process.env.ANTHROPIC_API_KEY = 'test-key';
   const realFetch = global.fetch;
   let sentBody = null;
   global.fetch = (url, opts) => {
-    if (String(url).includes('ai.hackclub.com')) {
+    if (String(url).includes('api.anthropic.com')) {
       sentBody = JSON.parse(opts.body);
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({
-          choices: [{ message: { content: 'Your pause was longer than usual today. This is a prototype, not medical advice.' } }],
-        }),
-      });
+      return Promise.resolve(new Response(JSON.stringify({
+        id: 'msg_1', type: 'message', role: 'assistant', model: sentBody.model, stop_reason: 'end_turn',
+        content: [{ type: 'text', text: 'Your pause was longer than usual today. This is a prototype, not medical advice.' }],
+        usage: { input_tokens: 1, output_tokens: 1 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } }));
     }
     return realFetch(url, opts);
   };
@@ -178,13 +179,13 @@ test('POST /api/explain forwards only numbers to the proxy and returns its text'
       assert.equal(res.status, 200);
       const { text } = await res.json();
       assert.match(text, /not medical advice/);
-      const userMessage = sentBody.messages.find((m) => m.role === 'user').content;
-      assert.match(userMessage, /4220 ms/);
-      const wire = JSON.stringify(sentBody);
-      assert.ok(!/keystrokes|downMs|upMs|journal/i.test(wire));
-    });
+      assert.equal(sentBody.model, 'claude-opus-5-5');
+      assert.equal(sentBody.fallbacks, 'default');
+      assert.match(sentBody.messages[0].content, /4220 ms/);
+      assert.ok(!/keystrokes|downMs|upMs|journal/i.test(JSON.stringify(sentBody)));
+    }, { authenticateAi: async () => true });
   } finally {
     global.fetch = realFetch;
-    delete process.env.HACKCLUB_AI_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
   }
 });

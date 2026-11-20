@@ -4,7 +4,7 @@ Predict 360 is an opt-in desktop activity tracker and website dashboard for a ha
 
 The desktop app starts paused. It never saves typed words, key values, pointer coordinates, screenshots, or application names. Tracking is visible in the system tray and pauses on screen lock or sleep.
 
-AI explanations use the existing **Hack Club AI** proxy and `HACKCLUB_AI_KEY` already configured in Vercel. The key stays server-side, and explanation requests require a verified website or desktop account. Public CMU, Tappy, and SWELL-KW reference summaries are reproducible from public data; optional Open-Meteo pressure is contextual only. See [Sources and research limits](SOURCES.md). No disease detector was trained, no clinical accuracy improvement is established, and computer activity cannot establish hydration or readiness to work.
+AI explanations, chat and the daily analysis all use **Claude Opus 5.5** (`anthropic/claude-opus-5.5`) through the Hack Club AI proxy, with the existing `HACKCLUB_AI_KEY` in Vercel. If `ANTHROPIC_API_KEY` is set instead, `src/ai.js` calls the Anthropic API directly with the same model and server-side refusal fallbacks. The key stays server-side, and explanation requests require a verified website or desktop account. Public CMU, Tappy, and SWELL-KW reference summaries are reproducible from public data; optional Open-Meteo pressure is contextual only. See [Sources and research limits](SOURCES.md). No disease detector was trained, no clinical accuracy improvement is established, and computer activity cannot establish hydration or readiness to work.
 
 ## Setup
 
@@ -59,9 +59,9 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
 - **Sign-in**: [Clerk](https://clerk.com). Set `VITE_CLERK_PUBLISHABLE_KEY` in `web/.env.local`
   for local development (see `web/.env.example`). The check-in requires signing in.
 - **AI explanation**: the check-in page has an "Explain" button that calls `POST /api/explain`,
-  a server-side proxy to the [Hack Club AI](https://ai.hackclub.com) API. Only the numeric result
+  a server-side call to the [Anthropic API](https://docs.anthropic.com/) (`src/ai.js`). Only the numeric result
   summary is sent (score and the three feature values vs. the user's usual) — never text or
-  keystrokes. The key lives only on the server as `HACKCLUB_AI_KEY` (see `.env.example`); it is
+  keystrokes. The key lives only on the server as `ANTHROPIC_API_KEY` (see `.env.example`); it is
   never in the browser bundle. Without the key the feature is simply unavailable.
 - **Capture**: `web/src/lib/capture.ts` pairs keydown and keyup, drops modifier keys, shortcuts
   and auto-repeat, and keeps only `kind`, `downMs` and `upMs`. The typed text is never stored
@@ -76,7 +76,7 @@ curl -s -X POST http://localhost:3000/api/analyze -H "Content-Type: application/
 
 `vercel.json` builds `web/` as a static site and runs the Express app as one serverless
 function (`api/index.js`) behind `/api/*` and `/health`. The Clerk publishable key for deployed
-builds is in `web/.env.production`; the `HACKCLUB_AI_KEY` secret is set in the Vercel project
+builds is in `web/.env.production`; the `ANTHROPIC_API_KEY` secret is set in the Vercel project
 environment (never committed).
 
 ### Desktop app

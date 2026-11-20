@@ -54,7 +54,7 @@ export async function explain(result: AnalyzeResponse, weather: WeatherContext |
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ summary, ...(weather ? { weather: { meanHpa: weather.meanHpa, minHpa: weather.minHpa, maxHpa: weather.maxHpa, changeHpa: weather.changeHpa } } : {}) }),
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(45000),
     });
   } catch {
     throw new ApiError("Can't reach the backend for an explanation.");
@@ -99,7 +99,7 @@ export async function chat(messages: ChatMessage[], history: ChatHistoryItem[], 
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ messages, history }),
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(45000),
     });
   } catch {
     throw new ApiError("Can't reach the assistant.");
@@ -117,5 +117,52 @@ export async function chat(messages: ChatMessage[], history: ChatHistoryItem[], 
   }
   const text = (json as { text?: string } | null)?.text;
   if (typeof text !== 'string') throw new ApiError("The assistant couldn't reply right now.");
+  return text;
+}
+
+export interface DailyAnalysisInput {
+  today: AnalyzeResponse | null;
+  history: ChatHistoryItem[];
+  energy: 'low' | 'steady' | 'good' | null;
+  activity?: { activeMinutesToday: number; usualActiveMinutes: number | null; keyPressesToday: number } | null;
+}
+
+/** Claude Opus compares today with the user's own history. Numbers only; words never leave the browser. */
+export async function dailyAnalysis(input: DailyAnalysisInput, token: string): Promise<string> {
+  const today = input.today && {
+    readinessScore: input.today.readinessScore,
+    status: input.today.status,
+    features: {
+      dwellMs: { value: input.today.features.dwellMs.value },
+      sentencePauseMs: { value: input.today.features.sentencePauseMs.value },
+      flightVolatilityMs: { value: input.today.features.flightVolatilityMs.value },
+    },
+    comparisons: input.today.comparisons,
+    drivers: input.today.drivers,
+  };
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/api/daily-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ today, history: input.history, energy: input.energy, activity: input.activity ?? undefined }),
+      signal: AbortSignal.timeout(100000),
+    });
+  } catch {
+    throw new ApiError("Can't reach the backend for your daily analysis.");
+  }
+  let json: unknown = null;
+  try {
+    json = await res.json();
+  } catch {
+  }
+  if (!res.ok) {
+    const code = (json as { error?: { code?: string } } | null)?.error?.code;
+    const message = (json as { error?: { message?: string } } | null)?.error?.message;
+    if (code === 'ai_unconfigured') throw new AiUnconfiguredError(message ?? 'AI analysis is not configured.');
+    throw new ApiError(message ?? "Couldn't write your analysis right now.");
+  }
+  const text = (json as { text?: string } | null)?.text;
+  if (typeof text !== 'string') throw new ApiError("Couldn't write your analysis right now.");
   return text;
 }

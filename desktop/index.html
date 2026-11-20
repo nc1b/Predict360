@@ -5,101 +5,165 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'"
     />
     <title>Predict 360</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <div class="brand"><img src="assets/logo.svg" alt="" width="24" height="24" /><strong>Predict 360</strong></div>
-      <div class="header-actions">
-        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle light or dark theme">Light</button>
-        <button data-action="website" class="icon-btn">Website ↗</button>
-      </div>
-    </header>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <!-- Icon set (Lucide, ISC licence), referenced with <use>. -->
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+      <symbol id="i-battery" viewBox="0 0 24 24"><rect width="16" height="10" x="2" y="7" rx="2"/><path d="M22 11v2"/><path d="M6 11v2M10 11v2"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+      <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24"><path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    </svg>
 
-    <main>
-      <div class="eyebrow">YOUR DAILY ACTIVITY</div>
-      <h1>Your day at a glance.</h1>
-      <p class="intro">Computer activity across your apps, synced to your account.</p>
-
-      <section class="control">
-        <div>
-          <span class="status" id="status">Paused</span>
-          <h2 id="connection">Connect your account to begin</h2>
-          <p id="sync-message" role="status">Nothing is being recorded.</p>
-        </div>
-        <div class="actions">
-          <button data-action="connect" id="connect" class="primary">Connect</button>
-          <button data-action="start" id="start" class="primary" hidden>Start</button>
-          <button data-action="pause" id="pause" hidden>Pause</button>
-        </div>
-      </section>
-
-      <p id="error" role="alert" hidden></p>
-
-      <div class="metrics">
-        <section><p>Clicks</p><strong id="clicks">0</strong></section>
-        <section><p>Key presses</p><strong id="keys">0</strong></section>
-        <section><p>Active time</p><strong id="active">0m</strong></section>
-        <section><p>Idle time</p><strong id="idle">0m</strong></section>
-      </div>
-
-      <section class="panel">
-        <div class="heading">
-          <div><h2>Today, hour by hour</h2><p id="date"></p></div>
-          <button data-action="sync" id="sync" disabled>Sync now</button>
-        </div>
-        <div class="chart" id="chart" aria-label="Active minutes by hour"></div>
-        <div class="axis"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
-        <p id="summary">Your activity appears here after you start tracking.</p>
-      </section>
-
-      <section class="panel">
-        <div class="heading"><h2>AI summary of today's counts</h2><button data-action="explain">Explain my day</button></div>
-        <p id="ai-text">Written by GPT-4o mini (via Hack Club AI) from numeric counts only. It can be wrong.</p>
-      </section>
-
-      <section class="panel workday">
-        <div class="eyebrow">FOR YOU, PRIVATELY</div>
-        <h2>Your energy and today's activity</h2>
-        <fieldset>
-          <legend>How is your energy right now?</legend>
-          <div class="actions energy-options">
-            <button data-energy="low" aria-pressed="false">Running low</button>
-            <button data-energy="steady" aria-pressed="false">About usual</button>
-            <button data-energy="good" aria-pressed="false">Feeling good</button>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><img src="assets/logo.svg" alt="" width="26" height="26" /><span>Predict 360</span><span class="beta">beta</span></div>
+        <nav aria-label="Sections">
+          <button class="nav-item active" data-scroll="overview"><svg class="icon"><use href="#i-home"/></svg>Overview</button>
+          <button class="nav-item" data-scroll="hourly"><svg class="icon"><use href="#i-activity"/></svg>Hour by hour</button>
+          <button class="nav-item" data-scroll="ai"><svg class="icon"><use href="#i-sparkles"/></svg>AI summary</button>
+          <button class="nav-item" data-scroll="energy"><svg class="icon"><use href="#i-battery"/></svg>Energy</button>
+          <button class="nav-item" data-scroll="privacy"><svg class="icon"><use href="#i-shield"/></svg>Privacy &amp; account</button>
+        </nav>
+        <p class="nav-label">Website</p>
+        <nav aria-label="Website">
+          <button class="nav-item" data-action="website"><svg class="icon"><use href="#i-external"/></svg>Open dashboard</button>
+        </nav>
+        <div class="side-bottom">
+          <button id="theme-toggle" class="theme-card" type="button" aria-label="Toggle light or dark theme">
+            <span><span class="tiny muted">Theme</span><span id="theme-name">Midnight</span></span>
+            <svg class="icon muted"><use href="#i-moon"/></svg>
+          </button>
+          <div class="cta-card">
+            <p class="cta-title" id="cta-title">Start tracking</p>
+            <p class="tiny muted" id="cta-sub">Counts only. Never your words.</p>
+            <button data-action="connect" id="connect" class="brand-btn"><svg class="icon"><use href="#i-link"/></svg>Connect account</button>
+            <button data-action="start" id="start" class="brand-btn" hidden><svg class="icon"><use href="#i-play"/></svg>Start tracking</button>
+            <button data-action="pause" id="pause" class="chip-btn full" hidden><svg class="icon"><use href="#i-pause"/></svg>Pause</button>
           </div>
-        </fieldset>
-        <p class="small">Optional. This answer stays in this app session and is not shared with your employer.</p>
-        <div id="plan" aria-live="polite"></div>
-        <p id="plan-context" class="small"></p>
-      </section>
-
-      <section class="panel privacy">
-        <h2>You stay in control.</h2>
-        <p>
-          Tracking counts clicks, key presses, and scroll events across applications. Mouse movement marks active time. It
-          never saves your words, key values, mouse positions, screenshots, or app names.
-        </p>
-        <p>
-          After 60 seconds without input, time is counted as idle. Sleep and screen lock pause tracking. Tracking always
-          starts paused when you open the app.
-        </p>
-        <p>
-          While tracking, closing this window keeps it running in the system tray. Use the tray to pause or quit. Your saved
-          hourly counts sync automatically about once a minute.
-        </p>
-        <div class="actions">
-          <button data-action="disconnect" id="disconnect" disabled>Disconnect account</button>
-          <button data-action="delete" id="delete" class="danger" disabled>Delete activity</button>
         </div>
-        <p id="credentials" hidden>On this computer, you will need to reconnect when the app restarts.</p>
-      </section>
+      </aside>
 
-      <footer>Activity describes computer use. It does not measure productivity, hydration, or health.</footer>
-    </main>
+      <div class="main">
+        <header class="topbar">
+          <div>
+            <p class="tiny muted" id="date"></p>
+            <h1>Overview</h1>
+          </div>
+          <div class="pill" id="pill">
+            <span class="dot" aria-hidden="true"></span>
+            <div>
+              <p class="status" id="status">Paused</p>
+              <p class="tiny muted" id="connection">Connect your account to begin</p>
+            </div>
+          </div>
+        </header>
+
+        <p id="error" role="alert" hidden></p>
+
+        <section class="grid" id="overview">
+          <article class="card welcome">
+            <div class="wire" aria-hidden="true"></div>
+            <p class="muted">Today on this computer</p>
+            <h2 class="big" id="headline">Good morning.</h2>
+            <ul class="status-list">
+              <li><span class="dot" id="dot-tracking"></span><div><b>Tracking</b><span class="tiny muted" id="line-tracking">Paused</span></div></li>
+              <li><span class="dot" id="dot-account"></span><div><b>Account</b><span class="tiny muted" id="line-account">Not connected</span></div></li>
+              <li><span class="dot" id="dot-sync"></span><div><b>Sync</b><span class="tiny muted" id="sync-message" role="status">Nothing is being recorded.</span></div></li>
+              <li><span class="dot" id="dot-energy"></span><div><b>Energy</b><span class="tiny muted" id="line-energy">Not set</span></div></li>
+            </ul>
+          </article>
+
+          <article class="card metric">
+            <div class="metric-head">
+              <div>
+                <h3>Active time</h3>
+                <p class="tiny muted">Input in the last 60 s</p>
+                <p class="state"><span class="dot good"></span><strong id="active">0m</strong></p>
+              </div>
+              <div class="gauge" role="img" aria-label="Active share of tracked time">
+                <svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="40"/><circle class="value" id="gauge-active" cx="50" cy="50" r="40"/></svg>
+                <div class="gauge-label"><span id="active-pct">0%</span><span class="tiny muted">active</span></div>
+              </div>
+            </div>
+            <div class="meter"><span class="muted">Idle</span><b id="idle">0m</b></div>
+            <div class="bar"><i id="bar-idle"></i></div>
+          </article>
+
+          <article class="card small">
+            <div class="row-between"><h3>Clicks</h3><svg class="icon sky"><use href="#i-mouse"/></svg></div>
+            <p class="tiny muted">Mouse buttons today</p>
+            <p class="number" id="clicks">0</p>
+          </article>
+
+          <article class="card small">
+            <div class="row-between"><h3>Key presses</h3><svg class="icon violet"><use href="#i-keyboard"/></svg></div>
+            <p class="tiny muted">Counts only, never keys</p>
+            <p class="number" id="keys">0</p>
+          </article>
+
+          <article class="card wide" id="hourly">
+            <div class="row-between">
+              <div><h3>Hour by hour</h3><p class="tiny muted" id="summary">Your activity appears here after you start tracking.</p></div>
+              <button data-action="sync" id="sync" class="chip-btn"><svg class="icon"><use href="#i-refresh"/></svg>Sync now</button>
+            </div>
+            <div class="chart" id="chart" aria-label="Active minutes by hour"></div>
+            <div class="axis"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
+          </article>
+
+          <article class="card" id="ai">
+            <div class="row-between"><div class="title-icon"><svg class="icon violet"><use href="#i-sparkles"/></svg><h3>AI summary</h3></div></div>
+            <p class="tiny muted">Claude Opus 5.5 · counts only</p>
+            <p id="ai-text" class="ai-text muted">A short summary of today's counts.</p>
+            <button data-action="explain" class="chip-btn">Explain my day<svg class="icon"><use href="#i-chevron"/></svg></button>
+          </article>
+
+          <article class="card" id="energy">
+            <div class="title-icon"><svg class="icon amber"><use href="#i-battery"/></svg><h3>Your energy</h3></div>
+            <p class="tiny muted">For you, privately. Never shared.</p>
+            <div class="segmented" role="group" aria-label="Your energy right now">
+              <button data-energy="low" aria-pressed="false">Running low</button>
+              <button data-energy="steady" aria-pressed="false">About usual</button>
+              <button data-energy="good" aria-pressed="false">Feeling good</button>
+            </div>
+            <div id="plan" aria-live="polite"></div>
+            <p id="plan-context" class="tiny muted"></p>
+          </article>
+
+          <article class="card" id="privacy">
+            <div class="title-icon"><svg class="icon emerald"><use href="#i-lock"/></svg><h3>Privacy &amp; account</h3></div>
+            <ul class="checks">
+              <li>Counts clicks, key presses and scrolls only</li>
+              <li>Never words, key values, screenshots or app names</li>
+              <li>Keeps running in the tray when you close the window</li>
+              <li>Starts with your computer once you start tracking</li>
+            </ul>
+            <div class="row">
+              <button data-action="disconnect" id="disconnect" class="chip-btn">Disconnect</button>
+              <button data-action="delete" id="delete" class="chip-btn danger">Delete activity</button>
+            </div>
+            <p id="credentials" class="tiny muted" hidden>On this computer, you will need to reconnect when the app restarts.</p>
+          </article>
+        </section>
+        <footer class="tiny muted">Activity describes computer use. It does not measure productivity or health.</footer>
+      </div>
+    </div>
     <script src="renderer.js"></script>
   </body>
 </html>

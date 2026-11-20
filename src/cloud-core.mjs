@@ -18,6 +18,21 @@ function validCheckin(body, validateFeatures) {
     Array.isArray(body.flags) && body.flags.length <= 3 && body.flags.every((flag) => flags.includes(flag));
 }
 
+const day = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+const energies = ['low', 'steady', 'good'];
+function validProfile(body) {
+  if (!fieldsOnly(body, ['displayName', 'timezone', 'client'])) return false;
+  return (body.displayName === undefined || (typeof body.displayName === 'string' && body.displayName.length <= 100)) &&
+    (body.timezone === undefined || (typeof body.timezone === 'string' && /^[A-Za-z0-9_+\-/]{1,64}$/.test(body.timezone))) &&
+    ['web', 'desktop'].includes(body.client);
+}
+function validDaily(body) {
+  if (!fieldsOnly(body, ['day', 'energy', 'analysis']) || !day(body.day)) return false;
+  if (body.energy === undefined && body.analysis === undefined) return false;
+  return (body.energy === undefined || body.energy === null || energies.includes(body.energy)) &&
+    (body.analysis === undefined || (typeof body.analysis === 'string' && body.analysis.length > 0 && body.analysis.length <= 4000));
+}
+
 export async function readLimited(request, limit) {
   if (!request.body) return new Uint8Array();
   const reader = request.body.getReader(), chunks = [];
@@ -52,6 +67,7 @@ export function createCloudHandler({ repository, verifyWebToken, validateDay, va
         const token = `p360_${random()}`;
         const expiresAt = new Date(now() + 30 * 86400000).toISOString();
         await repository.saveSession({ token_hash: await hash(token), user_id: record.user_id, expires_at: expiresAt });
+        await repository.recordLogin?.(record.user_id, { client: 'desktop' });
         return json({ token, userId: record.user_id, expiresAt });
       }
 
@@ -101,7 +117,22 @@ export function createCloudHandler({ repository, verifyWebToken, validateDay, va
         await repository.saveCheckin(userId, body);
         return json({ ok: true });
       }
-      if (route === 'checkins' && request.method === 'DELETE') { await repository.deleteCheckins(userId); return json({ ok: true }); }
+      if (route === 'checkins' && request.method === 'DELETE') {
+        await repository.deleteCheckins(userId);
+        await repository.deleteDaily(userId);
+        return json({ ok: true });
+      }
+      if (route === 'profile' && request.method === 'GET') return json({ profile: (await repository.getProfile(userId)) ?? null });
+      if (route === 'profile' && request.method === 'POST') {
+        if (!validProfile(body)) return fail('Invalid profile.');
+        return json({ profile: await repository.recordLogin(userId, body) });
+      }
+      if (route === 'daily' && request.method === 'GET') return json({ days: await repository.listDaily(userId) });
+      if (route === 'daily' && request.method === 'PUT') {
+        if (!validDaily(body)) return fail('Invalid daily entry.');
+        await repository.saveDaily(userId, body);
+        return json({ ok: true });
+      }
       return fail('Unknown sync route.', 404);
     } catch {
       return fail('Sync is temporarily unavailable. Your local data is safe.', 503);
