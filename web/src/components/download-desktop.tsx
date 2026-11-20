@@ -105,12 +105,12 @@ export function CompactDownload({ className }: { className?: string }) {
   return (
     <div className={className}>
       {mac ? (
-        <a href={MAC_DOWNLOAD_URL} className={buttonClass({ variant: 'chip', size: 'sm', className: 'w-full' })}>
-          <Download className="size-4" aria-hidden="true" /> Download for Mac
+        <a href={MAC_DOWNLOAD_URL} className={buttonClass({ variant: 'chip', size: 'sm', className: 'w-full min-w-0 h-auto min-h-9 whitespace-normal px-3 py-2 text-center leading-tight' })}>
+          <Download className="size-4 shrink-0" aria-hidden="true" /> Get it for Mac
         </a>
       ) : (
-        <Button variant="chip" size="sm" className="w-full" onClick={windows} disabled={busy}>
-          <Download className="size-4" aria-hidden="true" /> {busy ? `Downloading ${progress}%` : progress === 100 ? 'Downloaded' : 'Download for Windows'}
+        <Button variant="chip" size="sm" className="w-full min-w-0 h-auto min-h-9 whitespace-normal px-3 py-2 text-center leading-tight" onClick={windows} disabled={busy}>
+          <Download className="size-4 shrink-0" aria-hidden="true" /> {busy ? `Downloading ${progress}%` : progress === 100 ? 'Downloaded' : 'Get it for Windows'}
         </Button>
       )}
       <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
