@@ -18,6 +18,7 @@ import { NotificationStack, useNotices } from '@/components/ui/notifications';
 import { ActivityDashboard } from '@/components/activity-dashboard';
 import { WeatherContextPanel, type WeatherContext } from '@/components/weather-context';
 import { DailyCheckInDialog, type CheckInOutcome } from '@/components/daily-checkin-dialog';
+import { CompactDownload } from '@/components/download-desktop';
 import { analyze, ApiError, AiUnconfiguredError, dailyAnalysis, explain } from '@/lib/api';
 import { AnalysisText } from '@/components/daily-analysis';
 import { ResearchConditions, WhatItDetects } from '@/components/research-conditions';
@@ -304,35 +305,29 @@ export default function CheckIn() {
     <div className="min-h-screen bg-background text-foreground lg:p-4">
       <div className="lg:flex lg:gap-4">
         {/* Sidebar */}
-        <aside className="panel sticky top-4 hidden h-[calc(100vh-2rem)] w-60 shrink-0 flex-col rounded-2xl border border-border p-4 lg:flex">
+        <aside className="panel sticky top-4 hidden max-h-[calc(100vh-2rem)] w-60 shrink-0 flex-col overflow-y-auto rounded-2xl border border-border p-4 [scrollbar-width:thin] lg:flex">
           <a href="/app" className="flex items-center gap-2 px-2 py-1">
             <LogoMark className="size-7" />
             <span className="text-lg font-bold tracking-tight">Predict 360</span>
             <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">beta</span>
           </a>
-          <nav aria-label="Dashboard" className="mt-6 space-y-1">
+          <nav aria-label="Dashboard" className="mt-5 space-y-0.5">
             {TABS.map((t) => <SideItem key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
           </nav>
-          <p className="mt-6 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Tools</p>
-          <nav aria-label="Tools" className="mt-2 space-y-1">
+          <p className="mt-5 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Tools</p>
+          <nav aria-label="Tools" className="mt-1.5 space-y-0.5">
             <SideItem icon={PenLine} label="Daily check-in" onClick={() => setDailyOpen(true)} />
             <SideItem icon={Brain} label="Daily analysis" onClick={() => scrollTo('daily-analysis')} />
             <SideItem icon={Settings2} label="Preferences" onClick={() => scrollTo('preferences')} />
             <SideItem icon={FileText} label="Sources & limits" href="/sources" />
             <SideItem icon={ShieldCheck} label="Privacy" href="/privacy" />
           </nav>
-          <div className="mt-auto space-y-3">
-            <button
-              type="button"
-              onClick={() => setTheme(dark ? 'light' : 'dark')}
-              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-border bg-secondary/60 px-3 py-2.5 text-left hover:bg-accent"
-            >
-              <span>
-                <span className="block text-[11px] text-muted-foreground">Theme</span>
-                <span className="text-sm font-medium">{dark ? 'Midnight' : 'Daylight'}</span>
-              </span>
-              {dark ? <Moon className="size-4 text-muted-foreground" aria-hidden="true" /> : <Sun className="size-4 text-muted-foreground" aria-hidden="true" />}
-            </button>
+          <div className="mt-auto space-y-2.5 pt-5">
+            <div className="rounded-xl border border-sky-500/20 bg-gradient-to-b from-sky-500/10 to-transparent p-3">
+              <p className="flex items-center gap-2 text-sm font-semibold"><Download className="size-4 text-sky-400" aria-hidden="true" />Get the desktop app</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Tracks activity across all your apps, even when closed</p>
+              <CompactDownload className="mt-3" />
+            </div>
             <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent p-3">
               <p className="text-sm font-semibold">{doneToday ? 'Checked in today' : 'Daily check-in'}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">{doneToday ? 'Check in again after a shift' : 'Two sentences · about 30 s'}</p>
@@ -340,6 +335,14 @@ export default function CheckIn() {
                 <PenLine className="size-4" aria-hidden="true" /> {doneToday ? 'Check in again' : 'Start check-in'}
               </Button>
             </div>
+            <button
+              type="button"
+              onClick={() => setTheme(dark ? 'light' : 'dark')}
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <span className="flex items-center gap-2">{dark ? <Moon className="size-4" aria-hidden="true" /> : <Sun className="size-4" aria-hidden="true" />}{dark ? 'Midnight theme' : 'Daylight theme'}</span>
+              <span className="text-[11px]">Switch</span>
+            </button>
           </div>
         </aside>
 
@@ -557,8 +560,11 @@ export default function CheckIn() {
                     <div className="relative">
                       <div className="flex items-center gap-2"><Download className="size-5 text-emerald-400" aria-hidden="true" /><h2 className="text-xl font-bold tracking-tight">Desktop app</h2></div>
                       <p className="text-xs text-muted-foreground">Track activity across your apps</p>
-                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone="good" />Windows · macOS</p>
-                      <ChipButton className="mt-4" onClick={() => setTab('activity')}>Activity</ChipButton>
+                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><StatusDot tone="good" />Windows · macOS · free</p>
+                      <div className="mt-4 flex flex-wrap items-start gap-3">
+                        <CompactDownload className="w-52" />
+                        <ChipButton onClick={() => setTab('activity')}>Activity</ChipButton>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -684,7 +690,7 @@ export default function CheckIn() {
 
 function SideItem({ icon: Icon, label, active, onClick, href }: { icon: typeof House; label: string; active?: boolean; onClick?: () => void; href?: string }) {
   const cls = cn(
-    'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     active
       ? 'border border-emerald-500/25 bg-gradient-to-r from-emerald-500/15 to-transparent text-foreground'
       : 'border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
