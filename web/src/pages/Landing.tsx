@@ -11,6 +11,7 @@ import { ProjectVideo } from '@/components/blocks/project-video';
 import { ModesSection, ResearchMapSection } from '@/components/blocks/landing-sections';
 import { SiteFooter } from '@/components/blocks/site-footer';
 import { SiteNav } from '@/components/blocks/site-nav';
+import { ModelSection } from '@/components/blocks/model-section';
 import { ScreeningComingSoon } from '@/components/screening-coming-soon';
 
 /** Fades each section below the hero in as it scrolls into view. */
@@ -35,6 +36,7 @@ export default function Landing() {
       <SiteNav />
       <main>
         <HeroSection />
+        <ModelSection />
         <ModesSection />
         <ResearchMapSection />
         <section id="screening" className="scroll-mt-24 px-6 py-12">

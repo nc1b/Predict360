@@ -39,11 +39,11 @@ export function HeroSection() {
 
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
         <a
-          href="#signals"
+          href="#model"
           className="hero-in group inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
         >
           <Sparkles className="size-3.5 text-emerald-400" aria-hidden="true" />
-          New: daily check-ins with Claude analysis
+          Veritas AI Hackathon 2026 finalist · powered by Claude
           <span className="inline-flex items-center gap-1 text-foreground">
             Read more <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </span>

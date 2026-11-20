@@ -167,3 +167,9 @@ footer { text-align: center; padding: 14px 0 4px; }
   .sidebar { width: 190px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Thin scrollbar that matches the theme (Windows and Linux show a bright default otherwise). */
+.main { scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
+.main::-webkit-scrollbar { width: 8px; }
+.main::-webkit-scrollbar-thumb { background: var(--track); border-radius: 8px; }
+.main::-webkit-scrollbar-track { background: transparent; }

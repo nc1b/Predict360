@@ -1,6 +1,6 @@
 {
   "name": "predict360-desktop",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "Opt-in daily activity tracking with website account sync.",
   "main": "main.js",
