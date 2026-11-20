@@ -13,11 +13,15 @@ export interface AppUser {
 interface AuthState {
   user: AppUser | null;
   loaded: boolean;
+  /** Identifies the current sign-in, so per-login prompts reset on the next login. */
+  sessionId: string | null;
   getToken: () => Promise<string | null>;
 }
 
-const signedOut: AuthState = { user: null, loaded: true, getToken: async () => null };
+const signedOut: AuthState = { user: null, loaded: true, sessionId: null, getToken: async () => null };
 const AuthContext = React.createContext<AuthState>(signedOut);
+
+export const clerkEnabled = () => Boolean(CLERK_KEY) && !(import.meta.env.DEV && import.meta.env.VITE_PREVIEW_USER === '1');
 
 export function useAuth(): AuthState {
   return React.useContext(AuthContext);
@@ -29,6 +33,7 @@ function ClerkBridge({ children }: { children: React.ReactNode }) {
   const value = React.useMemo<AuthState>(
     () => ({
       loaded: isLoaded,
+      sessionId: session?.id ?? null,
       getToken: async () => session?.getToken() ?? null,
       user:
         isLoaded && isSignedIn && user
@@ -58,8 +63,14 @@ export const clerkAppearance = {
   },
 } as const;
 
+// Dev-only: `VITE_PREVIEW_USER=1 npm run dev` signs in a local preview user without Clerk.
+// `import.meta.env.DEV` is false in production builds, so this branch is removed there.
+const PREVIEW_USER = import.meta.env.DEV && import.meta.env.VITE_PREVIEW_USER === '1';
+const preview: AuthState = { user: { id: 'preview', name: 'Alex' }, loaded: true, sessionId: null, getToken: async () => null };
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  if (PREVIEW_USER) return <AuthContext.Provider value={preview}>{children}</AuthContext.Provider>;
   if (!CLERK_KEY) {
     return <AuthContext.Provider value={signedOut}>{children}</AuthContext.Provider>;
   }
