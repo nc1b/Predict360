@@ -1,0 +1,64 @@
+{
+  "dataset": "neuroQWERTY MIT-CS1PD + MIT-CS2PD (PhysioNet)",
+  "license": "ODC-By 1.0",
+  "labels": "Clinician diagnosis of early Parkinson's disease vs controls",
+  "participants": 85,
+  "with_parkinsons": 42,
+  "without": 43,
+  "features": [
+    "hold_median",
+    "hold_iqr",
+    "hold_p90",
+    "hold_sd",
+    "flight_median",
+    "flight_iqr",
+    "hold_hist_0_50ms",
+    "hold_hist_50_100ms",
+    "hold_hist_100_150ms",
+    "hold_hist_150_200ms",
+    "hold_hist_200_250ms",
+    "hold_hist_250_300ms",
+    "hold_hist_300_350ms",
+    "hold_hist_350_400ms",
+    "hold_hist_400_450ms",
+    "hold_hist_450_500ms"
+  ],
+  "validation": "5-fold stratified CV repeated 20 times; one row per person.",
+  "models": {
+    "chance": {
+      "roc_auc_mean": 0.5
+    },
+    "logistic_regression": {
+      "roc_auc_mean": 0.762,
+      "roc_auc_fold_range": [
+        0.597,
+        0.931
+      ],
+      "sensitivity_at_90pct_specificity": 0.524
+    },
+    "random_forest": {
+      "roc_auc_mean": 0.81,
+      "roc_auc_fold_range": [
+        0.639,
+        0.958
+      ],
+      "sensitivity_at_90pct_specificity": 0.595
+    }
+  },
+  "short_sample_roc_auc": {
+    "70_keystrokes": 0.729,
+    "300_keystrokes": 0.778,
+    "1000_keystrokes": 0.802
+  },
+  "short_sample_note": "Random forest trained on full sessions, tested on one random window per held-out person. 70 keystrokes is about one two-sentence check-in.",
+  "external_test_on_tappy": {
+    "participants": 183,
+    "with_parkinsons": 137,
+    "roc_auc": 0.619
+  },
+  "external_note": "Random forest trained on all neuroQWERTY people, then tested unchanged on Tappy (different people, devices and self-reported labels).",
+  "published_nqScore_auc": 0.807,
+  "published_nqScore_note": "The authors' own nQi score from the dataset files, for reference. It was developed on this data, so it is not an independent test.",
+  "deployed": false,
+  "limits": "Small cohort (85 people) from one research group; 15 minutes of free typing per session, not a two-sentence check-in; no external validation. Not clinically validated and not used in the app."
+}
