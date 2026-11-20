@@ -15,6 +15,16 @@ let win, tray, store, hook, session = null, pendingLogin = null;
 let tracker = new ActivityTracker();
 let revision = 0, syncing = false, syncMessage = 'Sign in to connect your website account.', quitting = false, aiText = '', credentialsAvailable = false, energy = null;
 const sessionFile = () => path.join(app.getPath('userData'), 'account.enc.json');
+// Remembers whether the user wants tracking on, so it survives closing the window, sleep and restarts.
+const prefsFile = () => path.join(app.getPath('userData'), 'preferences.json');
+const prefs = { resumeTracking: false };
+function loadPrefs() { try { Object.assign(prefs, { resumeTracking: read(prefsFile(), {}).resumeTracking === true }); } catch { } }
+function savePrefs() { try { atomicWrite(prefsFile(), prefs); } catch { } }
+const launchedHidden = () => process.argv.includes('--hidden') || (process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAtLogin);
+function setLaunchAtLogin(enabled) {
+  if (process.platform !== 'win32' && process.platform !== 'darwin') return;
+  try { app.setLoginItemSettings({ openAtLogin: enabled, openAsHidden: true, args: ['--hidden'] }); } catch { }
+}
 const sha = (value) => createHash('sha256').update(value).digest('base64url');
 const secureCredentials = () => credentialsAvailable;
 async function cloud(route, method = 'GET', body, token = session?.token) {
@@ -52,11 +62,21 @@ function publish() {
   tray?.setContextMenu(Menu.buildFromTemplate([
     { label: tracker.running ? 'Tracking is on' : 'Tracking is paused', enabled: false },
     { label: 'Open Predict 360', click: () => { win.show(); win.focus(); } },
-    { label: 'Pause tracking', enabled: tracker.running, click: pause },
-    { type: 'separator' }, { label: 'Quit and stop tracking', click: () => app.quit() },
+    tracker.running
+      ? { label: 'Pause tracking', click: userPause }
+      : { label: 'Start tracking', enabled: !!session, click: () => userStart().catch((error) => { syncMessage = error.message; publish(); }) },
+    { type: 'separator' }, { label: 'Quit and stop tracking', click: () => { quitting = true; app.quit(); } },
   ]));
 }
 function pause() { tracker.pause(); hook?.stop(); persist(); publish(); }
+// User-initiated start/pause also remember the choice and register launch at login.
+async function userStart() { await start(); prefs.resumeTracking = true; savePrefs(); setLaunchAtLogin(true); }
+function userPause() { pause(); prefs.resumeTracking = false; savePrefs(); setLaunchAtLogin(false); }
+async function resumeIfWanted() {
+  if (!prefs.resumeTracking || !session || tracker.running) return;
+  try { await start(); syncMessage = 'Tracking resumed in the background.'; } catch (error) { syncMessage = error.message; }
+  publish();
+}
 async function start() {
   if (tracker.running) return;
   if (!session) throw new Error('Connect your website account first.');
@@ -116,6 +136,7 @@ else {
     if (link) handleLink(link);
     if (win) { win.show(); win.focus(); }
   });
+  app.on('activate', () => { if (win) { win.show(); win.focus(); } });
   app.on('open-url', (event, url) => { event.preventDefault(); handleLink(url); });
   app.whenReady().then(async () => {
     store = createStore(app.getPath('userData'), validateDay);
@@ -127,7 +148,8 @@ else {
     if (process.defaultApp) app.setAsDefaultProtocolClient('predict360', process.execPath, [path.resolve(process.argv[1])]);
     else app.setAsDefaultProtocolClient('predict360');
     Menu.setApplicationMenu(null);
-    win = new BrowserWindow({ width: 520, height: 800, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
+    loadPrefs();
+    win = new BrowserWindow({ show: !launchedHidden(), width: 520, height: 800, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
       backgroundColor: nativeTheme.shouldUseDarkColors ? '#121110' : '#f7f5f0', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', trafficLightPosition: { x: 18, y: 18 },
       // Windows/Linux: draw native window controls over the app's own title bar so there is one seamless header.
       ...(process.platform !== 'darwin' && { titleBarOverlay: { color: nativeTheme.shouldUseDarkColors ? '#121110' : '#f7f5f0', symbolColor: nativeTheme.shouldUseDarkColors ? '#f4f1ea' : '#1c1b19', height: 52 } }),
@@ -135,14 +157,17 @@ else {
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('will-navigate', (event) => event.preventDefault());
     win.loadFile(path.join(__dirname, 'index.html'), { query: { platform: process.platform } });
-    win.on('close', (event) => { if (tracker.running && !quitting) { event.preventDefault(); win.hide(); } else if (!quitting) app.quit(); });
+    // Closing the window never stops tracking: the app keeps running in the tray until Quit.
+    win.on('close', (event) => { if (!quitting) { event.preventDefault(); win.hide(); if (process.platform === 'darwin') app.dock?.hide(); } });
+    win.on('show', () => { if (process.platform === 'darwin') app.dock?.show(); });
     tray = new Tray(path.join(assets, 'icon.png'));
     tray.on('double-click', () => win.show());
+    tray.on('click', () => { if (process.platform === 'win32') { win.show(); win.focus(); } });
     const action = (name, fn) => ipcMain.handle(name, async (event, ...args) => {
       if (event.sender !== win.webContents || event.senderFrame !== win.webContents.mainFrame) throw new Error('Untrusted frame');
       try { await fn(...args); return { ok: true, state: state() }; } catch (error) { return { ok: false, message: error.message }; }
     });
-    action('activity:get', () => {}); action('activity:start', start); action('activity:pause', pause);
+    action('activity:get', () => {}); action('activity:start', userStart); action('activity:pause', userPause);
     action('activity:connect', connect); action('activity:sync', sync);
     action('activity:energy', (value) => { if (![null, 'low', 'steady', 'good'].includes(value)) throw new Error('Choose an energy option.'); energy = value; publish(); });
     action('activity:explain', async () => {
@@ -156,17 +181,18 @@ else {
       aiText = result.text; publish();
     });
     action('activity:website', () => shell.openExternal(new URL('/app', site).href));
-    action('activity:disconnect', async () => { pause(); if (session) { await sync(); if (session) { await cloud('session', 'DELETE'); store.clear(session.userId); } } await setAccount(null); syncMessage = 'Disconnected. Synced history remains on the website.'; publish(); });
+    action('activity:disconnect', async () => { userPause(); if (session) { await sync(); if (session) { await cloud('session', 'DELETE'); store.clear(session.userId); } } await setAccount(null); syncMessage = 'Disconnected. Synced history remains on the website.'; publish(); });
     action('activity:delete', async () => {
       const choice = await dialog.showMessageBox(win, { type: 'warning', buttons: ['Cancel', 'Delete activity'], defaultId: 0, cancelId: 0, message: 'Delete activity from this computer and your account?', detail: 'Tracking will stop on all connected desktops. They will need to reconnect.' });
       if (choice.response !== 1) return;
-      pause(); if (session) { await cloud('activity', 'DELETE'); store.clear(session.userId); }
+      userPause(); if (session) { await cloud('activity', 'DELETE'); store.clear(session.userId); }
       tracker.clear(); await setAccount(null); syncMessage = 'Activity deleted. Reconnect to start again.'; publish();
     });
     powerMonitor.on('suspend', pause); powerMonitor.on('lock-screen', pause);
+    powerMonitor.on('resume', resumeIfWanted); powerMonitor.on('unlock-screen', resumeIfWanted);
     setInterval(() => { if (tracker.running) { persist(); publish(); } }, 5000).unref();
     setInterval(sync, 60000).unref();
-    publish(); if (session) sync();
+    publish(); if (session) { sync(); resumeIfWanted(); }
   });
   app.on('before-quit', () => { quitting = true; tracker.pause(); hook?.stop(); if (store) persist(); });
 }
