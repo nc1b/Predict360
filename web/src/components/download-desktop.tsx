@@ -89,3 +89,38 @@ function OtherWindows() {
     </button>
   );
 }
+
+/** One button for this computer's OS, plus a small link for the other one. Fits the sidebar. */
+export function CompactDownload({ className }: { className?: string }) {
+  const os = useOS();
+  const mac = os === 'mac';
+  const [progress, setProgress] = React.useState<number | null>(null);
+  const [error, setError] = React.useState('');
+  const busy = progress !== null && progress < 100;
+  const windows = () => {
+    setError('');
+    setProgress(0);
+    downloadDesktop(setProgress).catch((e) => { setProgress(null); setError(e instanceof Error ? e.message : 'Please try again.'); });
+  };
+  return (
+    <div className={className}>
+      {mac ? (
+        <a href={MAC_DOWNLOAD_URL} className={buttonClass({ variant: 'chip', size: 'sm', className: 'w-full' })}>
+          <Download className="size-4" aria-hidden="true" /> Download for Mac
+        </a>
+      ) : (
+        <Button variant="chip" size="sm" className="w-full" onClick={windows} disabled={busy}>
+          <Download className="size-4" aria-hidden="true" /> {busy ? `Downloading ${progress}%` : progress === 100 ? 'Downloaded' : 'Download for Windows'}
+        </Button>
+      )}
+      <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+        {mac ? (
+          <button type="button" onClick={windows} className="cursor-pointer underline-offset-4 hover:text-foreground hover:underline">Windows version</button>
+        ) : (
+          <a href={MAC_DOWNLOAD_URL} className="underline-offset-4 hover:text-foreground hover:underline">Mac version</a>
+        )}
+      </p>
+      {error && <p role="alert" className="mt-1 text-[11px] text-destructive">{error}</p>}
+    </div>
+  );
+}

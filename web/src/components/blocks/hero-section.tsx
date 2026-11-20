@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '@/auth-context';
 import { cn } from '@/lib/utils';
+import { CompactDownload } from '@/components/download-desktop';
 
 /** Tilts the product shot back slightly and flattens it as the page scrolls. */
 function useScrollTilt() {
@@ -70,6 +71,10 @@ export function HeroSection() {
           <a href="#how-it-works" className="inline-flex h-12 items-center rounded-xl border border-border bg-secondary/50 px-6 text-base font-medium backdrop-blur transition-colors hover:bg-accent">
             See how it works
           </a>
+        </div>
+
+        <div className="hero-in hero-delay-3 mt-5 w-56">
+          <CompactDownload />
         </div>
 
         <ul className="hero-in hero-delay-3 mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
