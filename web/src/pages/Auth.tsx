@@ -46,7 +46,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
             Accounts are handled by Clerk. Your timing summaries sync with your account. This project is a prototype and is not
             medical advice.
           </p>
-          <p className="mt-3 text-xs text-muted-foreground"><a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Use</a></p>
+          <p className="mt-3 text-xs text-muted-foreground">By continuing, you agree to our <a href="/terms" className="underline">Terms of Service</a> and <a href="/privacy" className="underline">Privacy Policy</a>.</p>
         </main>
       </div>
 

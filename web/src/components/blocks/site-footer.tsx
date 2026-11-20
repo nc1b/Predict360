@@ -43,7 +43,7 @@ export function SiteFooter() {
               <Link to="/evaluation" className={linkClass}>Model evaluation</Link>
               <Link to="/sources" className={linkClass}>Sources & research limits</Link>
               <Link to="/privacy" className={linkClass}>Privacy Policy</Link>
-              <Link to="/terms" className={linkClass}>Terms of Use</Link>
+              <Link to="/terms" className={linkClass}>Terms of Service</Link>
             </div>
           </nav>
 

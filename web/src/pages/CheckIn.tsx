@@ -658,7 +658,7 @@ export default function CheckIn() {
               <div>
                 <ActivityDashboard energy={energy} onEnergy={setEnergy} />
                 <p className="mt-4 text-xs text-muted-foreground">
-                  Your words are never recorded · <a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Use</a>
+                  Your words are never recorded · <a href="/privacy" className="underline">Privacy Policy</a> · <a href="/terms" className="underline">Terms of Service</a>
                 </p>
               </div>
             )}

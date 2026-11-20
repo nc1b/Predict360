@@ -36,6 +36,8 @@ export default function App() {
       <Route path="/evaluation" element={<Evaluation />} />
       <Route path="/privacy" element={<Legal kind="privacy" />} />
       <Route path="/terms" element={<Legal kind="terms" />} />
+      <Route path="/tos" element={<Legal kind="terms" />} />
+      <Route path="/terms-of-use" element={<Legal kind="terms" />} />
       <Route
         path="/app"
         element={
