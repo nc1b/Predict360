@@ -1,0 +1,45 @@
+{
+  "dataset": "Tappy Keystroke Data v1.0.0 (PhysioNet)",
+  "license": "ODC-By 1.0",
+  "sha256": {
+    "users": "a15f5eeac9004aaba0aa3c31b81d791256b6012bc8ae64f6fc556cd607df77fd",
+    "data": "d5fb550625211deed5a712705316bb4c79593d752f8403d9dc25e58c8230e580"
+  },
+  "labels": "Self-reported Parkinson's diagnosis (True/False)",
+  "participants": 192,
+  "with_parkinsons": 143,
+  "without": 49,
+  "features": [
+    "hold_median",
+    "hold_iqr",
+    "latency_median",
+    "latency_iqr",
+    "flight_median",
+    "flight_iqr",
+    "hand_hold_asymmetry"
+  ],
+  "validation": "5-fold stratified CV repeated 10 times; one row per person, so no person is in both train and test.",
+  "models": {
+    "chance": {
+      "roc_auc_mean": 0.5
+    },
+    "logistic_regression": {
+      "roc_auc_mean": 0.524,
+      "roc_auc_fold_range": [
+        0.386,
+        0.655
+      ],
+      "sensitivity_at_90pct_specificity": 0.14
+    },
+    "random_forest": {
+      "roc_auc_mean": 0.502,
+      "roc_auc_fold_range": [
+        0.369,
+        0.642
+      ],
+      "sensitivity_at_90pct_specificity": 0.126
+    }
+  },
+  "deployed": false,
+  "limits": "Self-reported labels; uncontrolled devices, medication and age; small cohort; free typing not two-sentence check-ins. Not clinically validated. Results do not transfer to Predict 360 users and must not be shown as a diagnosis."
+}

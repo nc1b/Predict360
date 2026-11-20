@@ -21,6 +21,8 @@ import { DailyCheckInDialog, type CheckInOutcome } from '@/components/daily-chec
 import { analyze, ApiError, AiUnconfiguredError, dailyAnalysis, explain } from '@/lib/api';
 import { AnalysisText } from '@/components/daily-analysis';
 import { ResearchConditions, WhatItDetects } from '@/components/research-conditions';
+import { SignalTracker } from '@/components/signal-tracker';
+import { ScreeningComingSoon } from '@/components/screening-coming-soon';
 import { toHistoryItems } from '@/components/chat';
 import type { Keystroke } from '@/lib/capture';
 import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
@@ -561,6 +563,8 @@ export default function CheckIn() {
                   </Card>
                 </div>
 
+                <SignalTracker history={history} />
+
                 {shown && (
                   <div className="grid items-start gap-4 xl:grid-cols-12">
                     <ResultCard className="xl:col-span-7" result={shown.result} baselineCount={shown.baselineCount} caption={shown.caption} />
@@ -637,6 +641,8 @@ export default function CheckIn() {
 
             {tab === 'research' && (
               <div className="space-y-8">
+                <SignalTracker history={history} />
+                <ScreeningComingSoon />
                 <WhatItDetects />
                 <ResearchConditions />
               </div>

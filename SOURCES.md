@@ -65,6 +65,18 @@ We ran two descriptive checks on public timing measurements. Neither dataset ent
 
 The audit compares individual timing measures. It cannot estimate classifier accuracy, clinical false alarms, or fatigue detection.
 
+## 6. Condition-screening research model (not deployed)
+
+`scripts/condition-screening-eval.py` trains per-person classifiers to separate self-reported Parkinson's from no Parkinson's in the Tappy data, using seven timing features (hold, latency and flight medians and spreads, and left/right hold asymmetry). Each participant is one row, and evaluation is 5-fold stratified cross-validation repeated 10 times, so no person appears in both training and test data. Results are in [research/condition-screening-eval.json](research/condition-screening-eval.json).
+
+| Model (192 people: 143 with, 49 without) | ROC-AUC | Detected at 90% specificity |
+|---|---:|---:|
+| Chance | 0.50 | 10% |
+| Logistic regression | 0.52 | 14% |
+| Random forest | 0.50 | 13% |
+
+Typing timing alone did not separate the groups in this data. The model is therefore not used in the app, which shows it as "coming soon · in research". Releasing condition screening would need clinician-confirmed labels from the same typing task and independent clinical validation.
+
 ## Why unspecified Kaggle/Hugging Face datasets were not imported
 
 Kaggle and Hugging Face are hosting platforms. “Keystroke biometrics,” “fatigue,” or “cognitive fatigue” do not identify a specific licensed, compatible dataset. Research located generic processed typing data and fatigue reproduction results, but did not establish an additional source with verified keystroke event definitions, suitable clinical labels, and demonstrated external validity for this app. Original CMU, Tappy, and SWELL sources were preferred over unverified reuploads.
