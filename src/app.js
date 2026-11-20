@@ -32,7 +32,7 @@ function jsonBody(limit) {
 }
 
 function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*', staticDir = null,
-  aiClient = ai, aiTimeoutMs = 15000, maxAiConcurrent = 4, authenticateAi = verifyAiRequest } = {}) {
+  aiClient = ai, aiTimeoutMs = 30000, maxAiConcurrent = 4, authenticateAi = verifyAiRequest } = {}) {
   const app = express();
   let aiInFlight = 0;
   app.disable('x-powered-by');
@@ -169,7 +169,7 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
       const onClose = () => { if (!res.writableEnded) controller.abort(); };
       res.on('close', onClose);
       try {
-        const text = await aiClient.chat(prepared.messages, { signal: controller.signal });
+        const text = await aiClient.chat(prepared, { signal: controller.signal });
         res.json({ text });
       } catch (err) {
         log('error ai');
@@ -178,6 +178,44 @@ function createApp({ log = () => {}, corsOrigin = process.env.CORS_ORIGIN || '*'
           res
             .status(timedOut ? 504 : 502)
             .json(errorBody(timedOut ? 'ai_timeout' : 'ai_error', "The assistant couldn't reply right now. Please try again."));
+        }
+      } finally {
+        clearTimeout(timer);
+        res.off('close', onClose);
+        aiInFlight--;
+      }
+    }
+  );
+
+  app.post(
+    '/api/daily-analysis',
+    jsonBody(LIMITS.maxExplainBodyBytes),
+    async (req, res) => {
+      if (!aiClient.isConfigured()) {
+        return res.status(503).json(errorBody('ai_unconfigured', 'AI analysis is not configured on this server.'));
+      }
+      try {
+        if (!await authenticateAi(req)) return res.status(401).json(errorBody('unauthorized', 'Sign in to get your daily analysis.'));
+      } catch { return res.status(503).json(errorBody('auth_unavailable', 'Could not verify your account. Please try again.')); }
+      const text = aiClient.buildDailyText(req.body);
+      if (!text) return res.status(400).json(errorBody('invalid_request', 'Do a check-in first, then ask for your daily analysis.'));
+      if (aiInFlight >= maxAiConcurrent) {
+        res.set('Retry-After', '5');
+        return res.status(429).json(errorBody('ai_busy', 'Analysis is busy. Please try again shortly.'));
+      }
+      aiInFlight++;
+      const controller = new AbortController();
+      // The deeper model can take longer than a quick explanation.
+      const timer = setTimeout(() => controller.abort(), aiTimeoutMs * 3);
+      const onClose = () => { if (!res.writableEnded) controller.abort(); };
+      res.on('close', onClose);
+      try {
+        res.json({ text: await aiClient.dailyAnalysis(text, { signal: controller.signal }) });
+      } catch {
+        log('error ai');
+        if (!res.destroyed) {
+          const timedOut = controller.signal.aborted;
+          res.status(timedOut ? 504 : 502).json(errorBody(timedOut ? 'ai_timeout' : 'ai_error', "Couldn't write your analysis right now. Please try again."));
         }
       } finally {
         clearTimeout(timer);

@@ -115,7 +115,7 @@ export function DailyCheckInDialog({
         e.preventDefault();
         if (!busy) close();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-3xl border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-[dialogIn_0.25s_ease-out]"
+      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-[2rem] border border-border/70 bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-[#1c1b19]/40 backdrop:backdrop-blur-sm open:animate-[dialogIn_0.25s_ease-out]"
     >
       <div className="flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ export function DailyCheckInDialog({
         {step === 'feel' && (
           <>
             <p className="text-sm text-muted-foreground">{dayFormat.format(new Date())}</p>
-            <h2 id="daily-title" className="mt-1 text-2xl font-bold tracking-tight">
+            <h2 id="daily-title" className="mt-1 font-display text-4xl leading-tight">
               Hi {name}, how&apos;s your energy?
             </h2>
             {streak > 0 && (
@@ -166,7 +166,7 @@ export function DailyCheckInDialog({
                     aria-checked={on}
                     onClick={() => onEnergy(on ? null : value)}
                     className={cn(
-                      'flex cursor-pointer flex-col items-center gap-2 rounded-2xl border px-2 py-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      'flex cursor-pointer flex-col items-center gap-2 rounded-3xl border px-2 py-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       on ? 'border-foreground bg-foreground text-background' : 'hover:bg-accent'
                     )}
                   >
@@ -190,7 +190,7 @@ export function DailyCheckInDialog({
 
         {step === 'type' && (
           <>
-            <h2 id="daily-title" className="text-2xl font-bold tracking-tight">
+            <h2 id="daily-title" className="font-display text-4xl leading-tight">
               Type two sentences
             </h2>
             <p id="daily-help" className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -252,12 +252,12 @@ export function DailyCheckInDialog({
             <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-near text-near-foreground">
               <Check className="size-7" aria-hidden="true" />
             </span>
-            <h2 id="daily-title" className="mt-4 text-2xl font-bold tracking-tight">
+            <h2 id="daily-title" className="mt-4 font-display text-4xl">
               You&apos;re checked in
             </h2>
             {outcome.result.readinessScore !== null ? (
               <div className="mt-4 flex items-center justify-center gap-3">
-                <span className="text-5xl font-bold tabular-nums">{outcome.result.readinessScore}</span>
+                <span className="font-display text-6xl tabular-nums">{outcome.result.readinessScore}</span>
                 <StatusBadge status={outcome.result.status} />
               </div>
             ) : (

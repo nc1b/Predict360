@@ -46,3 +46,27 @@ async function syncHistory(user: string, token: string): Promise<HistoryEntry[]>
   return loadHistory(localStorage, user);
 }
 export function clearPending(user: string) { localStorage.removeItem(pendingKey(user)); }
+
+export interface DailyRow { day: string; energy: 'low' | 'steady' | 'good' | null; analysis: string | null }
+
+/**
+ * Best-effort account sync for logins, energy and the daily analysis. Local storage stays the
+ * source of truth on this device, so a sync failure never blocks the user.
+ */
+export const accountSync = {
+  async recordLogin(user: string, sessionId: string | null, token: string, displayName: string) {
+    const key = `p360.login-recorded.${user}.${sessionId ?? 'tab'}`;
+    const store = sessionId ? localStorage : sessionStorage;
+    if (store.getItem(key)) return;
+    let timezone: string | undefined;
+    try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* optional */ }
+    await cloud('profile', token, 'POST', { client: 'web', displayName: displayName.slice(0, 100), ...(timezone && /^[A-Za-z0-9_+\-/]{1,64}$/.test(timezone) ? { timezone } : {}) });
+    store.setItem(key, '1');
+  },
+  async today(token: string, day: string): Promise<DailyRow | null> {
+    const { days } = await cloud<{ days: DailyRow[] }>('daily', token);
+    return days.find((d) => d.day === day) ?? null;
+  },
+  saveEnergy: (token: string, day: string, energy: DailyRow['energy']) => cloud('daily', token, 'PUT', { day, energy }),
+  saveAnalysis: (token: string, day: string, analysis: string) => cloud('daily', token, 'PUT', { day, analysis: analysis.slice(0, 4000) }),
+};

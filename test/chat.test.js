@@ -36,8 +36,9 @@ test('buildHistoryText and prepareChat use numbers only', () => {
 
   const prepared = ai.prepareChat({ messages: [{ role: 'user', content: 'summarise' }], history: sampleHistory });
   assert.ok(Array.isArray(prepared.messages));
-  assert.equal(prepared.messages[0].role, 'system');
-  const wire = JSON.stringify(prepared.messages);
+  assert.equal(prepared.messages[0].role, 'user');
+  assert.match(prepared.system, /Predict 360/);
+  const wire = JSON.stringify(prepared);
   assert.match(wire, /4200ms/);
   assert.match(wire, /summarise/);
   assert.ok(!/keystrokes|downMs|upMs|journal/i.test(wire));
@@ -61,5 +62,29 @@ test('POST /api/chat enforces config, auth, validation, then replies', async () 
     const res = await post(base, { messages: [{ role: 'user', content: 'summarise my week' }], history: sampleHistory });
     assert.equal(res.status, 200);
     assert.match((await res.json()).text, /not medical advice/);
+  });
+});
+
+test('daily analysis: numbers only, Opus model, auth and validation enforced', async () => {
+  const text = ai.buildDailyText({ history: sampleHistory, energy: 'low', activity: { activeMinutesToday: 95, usualActiveMinutes: 80, keyPressesToday: 4000 } });
+  assert.match(text, /4200ms/);
+  assert.match(text, /running low/);
+  assert.match(text, /95 active minutes/);
+  assert.equal(ai.buildDailyText({}), null);
+  assert.equal(ai.DEEP_MODEL, 'claude-opus-5-5');
+  assert.equal(ai.FAST_MODEL, 'claude-sonnet-5-5');
+
+  let sent = null;
+  const client = { isConfigured: () => true, buildDailyText: ai.buildDailyText, dailyAnalysis: async (t) => { sent = t; return 'Steady day.\n- Key hold close to usual.\nPrototype, not medical advice.'; } };
+  const call = (base, body) => fetch(`${base}/api/daily-analysis`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  await withServer({ aiClient: client, authenticateAi: async () => false }, async (base) => {
+    assert.equal((await call(base, { history: sampleHistory })).status, 401);
+  });
+  await withServer({ aiClient: client, authenticateAi: async () => true }, async (base) => {
+    assert.equal((await call(base, {})).status, 400);
+    const res = await call(base, { history: sampleHistory, journal: 'secret words' });
+    assert.equal(res.status, 200);
+    assert.match((await res.json()).text, /Steady day/);
+    assert.ok(!sent.includes('secret words'));
   });
 });

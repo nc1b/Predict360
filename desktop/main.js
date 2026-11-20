@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, Menu, Tray, ipcMain, shell, safeStorage, powerMonitor, dialog, systemPreferences } = require('electron');
+const { app, BrowserWindow, Menu, Tray, ipcMain, shell, safeStorage, powerMonitor, dialog, systemPreferences, nativeTheme } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { randomBytes, createHash } = require('node:crypto');
@@ -127,8 +127,10 @@ else {
     if (process.defaultApp) app.setAsDefaultProtocolClient('predict360', process.execPath, [path.resolve(process.argv[1])]);
     else app.setAsDefaultProtocolClient('predict360');
     Menu.setApplicationMenu(null);
-    win = new BrowserWindow({ width: 500, height: 760, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
-      backgroundColor: '#0b0b0c', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default', trafficLightPosition: { x: 18, y: 20 },
+    win = new BrowserWindow({ width: 520, height: 800, minWidth: 420, minHeight: 600, title: 'Predict 360', icon: path.join(assets, 'icon.png'),
+      backgroundColor: nativeTheme.shouldUseDarkColors ? '#121110' : '#f7f5f0', autoHideMenuBar: true, titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden', trafficLightPosition: { x: 18, y: 18 },
+      // Windows/Linux: draw native window controls over the app's own title bar so there is one seamless header.
+      ...(process.platform !== 'darwin' && { titleBarOverlay: { color: nativeTheme.shouldUseDarkColors ? '#121110' : '#f7f5f0', symbolColor: nativeTheme.shouldUseDarkColors ? '#f4f1ea' : '#1c1b19', height: 52 } }),
       webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('will-navigate', (event) => event.preventDefault());

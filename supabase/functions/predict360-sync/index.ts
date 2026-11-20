@@ -30,6 +30,13 @@ const repository = {
   listCheckins: async (user: string) => (await run(db.from('checkin_summaries').select('summary').eq('user_id', user).order('at', { ascending: false }).limit(30))).reverse().map((row: any) => row.summary),
   saveCheckin: (user: string, summary: any) => run(db.from('checkin_summaries').upsert({ user_id: user, id: summary.id, at: summary.at, summary }, { onConflict: 'user_id,id' })),
   deleteCheckins: (user: string) => run(db.from('checkin_summaries').delete().eq('user_id', user)),
+  getProfile: async (user: string) => (await run(db.from('profiles').select('user_id,display_name,timezone,first_seen_at,last_login_at,login_count,last_client').eq('user_id', user).limit(1)))?.[0],
+  recordLogin: async (user: string, p: { displayName?: string; timezone?: string; client: string }) =>
+    run(db.rpc('record_login', { p_user_id: user, p_display_name: p.displayName ?? null, p_timezone: p.timezone ?? null, p_client: p.client }).single()),
+  listDaily: (user: string) => run(db.from('daily_entries').select('day,energy,analysis,updated_at').eq('user_id', user).order('day', { ascending: false }).limit(90)),
+  saveDaily: (user: string, e: { day: string; energy?: string | null; analysis?: string }) =>
+    run(db.rpc('save_daily_entry', { p_user_id: user, p_day: e.day, p_set_energy: e.energy !== undefined, p_energy: e.energy ?? null, p_analysis: e.analysis ?? null })),
+  deleteDaily: (user: string) => run(db.from('daily_entries').delete().eq('user_id', user)),
 };
 const handler = createCloudHandler({ repository, validateDay: activity.validateDay,
   validateFeatures: (features: any) => validation.validateAnalyzeRequest({ keystrokes: [{ kind: 'character', downMs: 0, upMs: 1 }], baseline: { sessions: [{ features }] } }).errors.length === 0,

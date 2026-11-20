@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { UserButton } from '@clerk/react';
-import { Activity, CalendarDays, Check, ChevronDown, Flame, History as HistoryIcon, PenLine, Sparkles, Sun, Target } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Check, ChevronDown, Flame, History as HistoryIcon, PenLine, Sparkles, Sun, Target } from 'lucide-react';
 import type { Energy } from '../../../src/workday.mjs';
 import { clerkEnabled, useAuth } from '@/auth-context';
 import { Logo } from '@/components/logo';
@@ -16,7 +16,10 @@ import { NotificationStack, useNotices } from '@/components/ui/notifications';
 import { ActivityDashboard } from '@/components/activity-dashboard';
 import { WeatherContextPanel, type WeatherContext } from '@/components/weather-context';
 import { DailyCheckInDialog, type CheckInOutcome } from '@/components/daily-checkin-dialog';
-import { analyze, ApiError, AiUnconfiguredError, explain } from '@/lib/api';
+import { analyze, ApiError, AiUnconfiguredError, dailyAnalysis, explain } from '@/lib/api';
+import { DailyAnalysisCard } from '@/components/daily-analysis';
+import { ResearchConditions, WhatItDetects } from '@/components/research-conditions';
+import { toHistoryItems } from '@/components/chat';
 import type { Keystroke } from '@/lib/capture';
 import { DEMO_SESSIONS, loadDemoRequest, type DemoName } from '@/lib/demo';
 import {
@@ -29,9 +32,9 @@ import {
   MIN_BASELINE_SESSIONS,
   type HistoryEntry,
 } from '@/lib/history';
-import { checkedInOn, daysThisWeek, dismissDaily, loadEnergy, localDay, saveEnergy, shouldPromptDaily, streak as streakOf } from '@/lib/daily';
+import { checkedInOn, daysThisWeek, dismissDaily, loadAnalysis, loadEnergy, localDay, saveAnalysis, saveEnergy, shouldPromptDaily, streak as streakOf } from '@/lib/daily';
 import type { AnalyzeResponse } from '@/lib/types';
-import { cloud, clearPending, queueCheckin, syncCheckins } from '@/lib/cloud';
+import { accountSync, cloud, clearPending, queueCheckin, syncCheckins } from '@/lib/cloud';
 import { cn } from '@/lib/utils';
 
 function greeting(now = new Date()) {
@@ -47,6 +50,7 @@ const TABS = [
   { id: 'today', label: 'Today', icon: Sun },
   { id: 'history', label: 'History', icon: HistoryIcon },
   { id: 'activity', label: 'Activity', icon: Activity },
+  { id: 'research', label: 'Research', icon: BookOpen },
 ] as const;
 type Tab = (typeof TABS)[number]['id'];
 
@@ -73,10 +77,33 @@ export default function CheckIn() {
   const [historySync, setHistorySync] = React.useState('');
   const [weather, setWeather] = React.useState<WeatherContext | null>(null);
   const [energy, setEnergyState] = React.useState<Energy>(() => loadEnergy(localStorage, userId));
+  const [analysis, setAnalysis] = React.useState<string | null>(() => loadAnalysis(localStorage, userId));
+  const [analysisBusy, setAnalysisBusy] = React.useState(false);
+  const [analysisError, setAnalysisError] = React.useState<string | null>(null);
+  const [analysisOff, setAnalysisOff] = React.useState(false);
+  const todayResult = React.useRef<AnalyzeResponse | null>(null);
   const setEnergy = (next: Energy) => {
     setEnergyState(next);
     saveEnergy(localStorage, userId, next);
+    void getToken().then((token) => token && accountSync.saveEnergy(token, localDay(), next)).catch(() => {});
   };
+
+  // Record this sign-in on the account and pull today's energy and analysis from another device.
+  React.useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        await accountSync.recordLogin(userId, sessionId, token, user!.name).catch(() => {});
+        const row = await accountSync.today(token, localDay());
+        if (!mounted || !row) return;
+        if (row.energy && !loadEnergy(localStorage, userId)) { setEnergyState(row.energy); saveEnergy(localStorage, userId, row.energy); }
+        if (row.analysis && !loadAnalysis(localStorage, userId)) { setAnalysis(row.analysis); saveAnalysis(localStorage, userId, row.analysis); }
+      } catch { /* offline or not yet migrated: local data still works */ }
+    })();
+    return () => { mounted = false; };
+  }, [userId, sessionId, getToken]);
 
   // "Not now" lasts for this sign-in only; a new login asks again until today's check-in is done.
   const dismissStore = sessionId ? localStorage : sessionStorage;
@@ -130,6 +157,7 @@ export default function CheckIn() {
       const nextUsable = next.filter((h) => h.deviceId === deviceId && isUsable(h.features)).length;
       setHistory(next);
       setShown({ result, baselineCount: nextUsable, caption: 'Today’s check-in, compared with your usual typing' });
+      todayResult.current = result;
       void (async () => {
         try {
           const token = await getToken();
@@ -147,7 +175,49 @@ export default function CheckIn() {
   function closeDaily(finished: boolean) {
     if (!finished) dismissDaily(dismissStore, userId, sessionKey);
     setDailyOpen(false);
-    if (finished) setTab('today');
+    if (finished) {
+      setTab('today');
+      // One automatic analysis per day; later check-ins can refresh it by hand.
+      if (!loadAnalysis(localStorage, userId) && !analysisOff) void runAnalysis();
+    }
+  }
+
+  async function activityForAnalysis(token: string) {
+    try {
+      const { days } = await cloud<{ days: { day: string; summary: { buckets: { activeMs: number; keyPresses: number }[] } }[] }>('activity', token);
+      if (!days.length) return null;
+      const minutes = (day: string) => days.filter((d) => d.day === day).flatMap((d) => d.summary.buckets).reduce((sum, b) => sum + b.activeMs, 0) / 60000;
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const earlier = [...new Set(days.map((d) => d.day))].filter((d) => d !== todayKey).map(minutes).sort((a, b) => a - b);
+      return {
+        activeMinutesToday: minutes(todayKey),
+        usualActiveMinutes: earlier.length >= 3 ? earlier[Math.floor(earlier.length / 2)] : null,
+        keyPressesToday: days.filter((d) => d.day === todayKey).flatMap((d) => d.summary.buckets).reduce((sum, b) => sum + b.keyPresses, 0),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async function runAnalysis() {
+    setAnalysisBusy(true);
+    setAnalysisError(null);
+    try {
+      const token = await getToken();
+      if (!token) throw new ApiError('Sign in again to get your daily analysis.');
+      const text = await dailyAnalysis(
+        { today: todayResult.current, history: toHistoryItems(loadHistory(localStorage, userId)), energy, activity: await activityForAnalysis(token) },
+        token
+      );
+      setAnalysis(text);
+      saveAnalysis(localStorage, userId, text);
+      void accountSync.saveAnalysis(token, localDay(), text).catch(() => {});
+    } catch (err) {
+      if (err instanceof AiUnconfiguredError) setAnalysisOff(true);
+      else setAnalysisError(err instanceof Error ? err.message : 'Could not write your analysis.');
+    } finally {
+      setAnalysisBusy(false);
+    }
   }
 
   async function runDemo(name: DemoName, label: string) {
@@ -228,10 +298,10 @@ export default function CheckIn() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Logo to="/app" />
-          <nav aria-label="Dashboard" className="hidden items-center gap-1 rounded-xl bg-muted p-1 sm:flex">
+          <nav aria-label="Dashboard" className="hidden items-center gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm sm:flex">
             {TABS.map((t) => <TabButton key={t.id} tab={t} active={tab === t.id} onClick={() => setTab(t.id)} />)}
           </nav>
           <div className="flex items-center gap-2">
@@ -239,15 +309,15 @@ export default function CheckIn() {
             {clerkEnabled() && <UserButton />}
           </div>
         </div>
-        <nav aria-label="Dashboard" className="mx-auto flex max-w-6xl gap-1 px-4 pb-3 sm:hidden">
-          {TABS.map((t) => <TabButton key={t.id} tab={t} active={tab === t.id} onClick={() => setTab(t.id)} className="flex-1" />)}
+        <nav aria-label="Dashboard" className="mx-auto grid max-w-6xl grid-cols-4 gap-1 px-4 pb-3 sm:hidden">
+          {TABS.map((t) => <TabButton key={t.id} tab={t} active={tab === t.id} onClick={() => setTab(t.id)} className="flex-col gap-0.5 px-1 py-1.5 text-xs" />)}
         </nav>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h1 className="font-display text-4xl leading-tight md:text-6xl">
               {greeting()}, {user!.name}
             </h1>
             <p className="mt-2 text-muted-foreground">
@@ -276,7 +346,7 @@ export default function CheckIn() {
                   </span>
                   <div className="min-w-0">
                     <dt className="text-xs text-muted-foreground">{label}</dt>
-                    <dd className="mt-0.5 text-lg font-semibold leading-tight">{value}</dd>
+                    <dd className="mt-0.5 font-display text-2xl leading-tight">{value}</dd>
                     <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
                   </div>
                 </Card>
@@ -293,7 +363,7 @@ export default function CheckIn() {
                     {lastToday ? (
                       <>
                         <div className="mt-3 flex flex-wrap items-baseline gap-3">
-                          <span className="text-6xl font-bold leading-none tabular-nums">{lastToday.readinessScore ?? '–'}</span>
+                          <span className="font-display text-7xl leading-none tabular-nums">{lastToday.readinessScore ?? '–'}</span>
                           <StatusBadge status={lastToday.status} />
                         </div>
                         <p className="mt-3 text-sm text-muted-foreground">
@@ -303,7 +373,7 @@ export default function CheckIn() {
                       </>
                     ) : (
                       <>
-                        <p className="mt-2 text-xl font-bold">You haven’t checked in today</p>
+                        <p className="mt-2 font-display text-3xl">You haven’t checked in today</p>
                         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                           {baselineReady
                             ? 'Type two sentences to see how today compares with your usual typing.'
@@ -325,6 +395,9 @@ export default function CheckIn() {
               </div>
 
               <div className="space-y-6 lg:col-span-2">
+                {!analysisOff && (
+                  <DailyAnalysisCard text={analysis} busy={analysisBusy} error={analysisError} canRun={history.length > 0} onRun={runAnalysis} />
+                )}
                 <Card className="p-6">
                   <h2 className="text-lg font-semibold">Your energy today</h2>
                   <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Your energy today">
@@ -426,6 +499,13 @@ export default function CheckIn() {
           </div>
         )}
 
+        {tab === 'research' && (
+          <div className="mt-8 space-y-8">
+            <WhatItDetects />
+            <ResearchConditions />
+          </div>
+        )}
+
         {tab === 'activity' && (
           <div className="mt-8">
             <ActivityDashboard energy={energy} onEnergy={setEnergy} />
@@ -467,8 +547,8 @@ function TabButton({
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        active ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground',
         className
       )}
     >

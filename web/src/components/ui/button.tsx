@@ -7,7 +7,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const base =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors cursor-pointer ' +
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors cursor-pointer ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ' +
   'focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50';
 
@@ -19,9 +19,9 @@ const variants = {
 };
 
 const sizes = {
-  default: 'h-10 px-4',
+  default: 'h-10 px-5',
   sm: 'h-9 px-3',
-  lg: 'h-11 px-6 text-base',
+  lg: 'h-12 px-7 text-base',
 };
 
 export function buttonClass({

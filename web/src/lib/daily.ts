@@ -76,3 +76,19 @@ export function shouldPromptDaily(
 export function dismissDaily(storage: StorageLike, userId: string, sessionKey: string, now = new Date()): void {
   storage.setItem(dismissKey(userId, sessionKey, now), '1');
 }
+
+const analysisKey = (userId: string) => `p360.analysis.${userId}`;
+
+/** Today's AI analysis, cached on this device (and mirrored to the account by cloud sync). */
+export function loadAnalysis(storage: StorageLike, userId: string, now = new Date()): string | null {
+  try {
+    const saved = JSON.parse(storage.getItem(analysisKey(userId)) ?? 'null');
+    return saved && saved.day === localDay(now) && typeof saved.text === 'string' ? saved.text : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveAnalysis(storage: StorageLike, userId: string, text: string, now = new Date()): void {
+  storage.setItem(analysisKey(userId), JSON.stringify({ day: localDay(now), text }));
+}

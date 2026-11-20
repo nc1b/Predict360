@@ -1,22 +1,22 @@
 'use strict';
 document.documentElement.dataset.platform = new URLSearchParams(location.search).get('platform') || '';
 (function () {
+  const root = document.documentElement;
+  const osDark = window.matchMedia('(prefers-color-scheme: dark)');
   try {
     const saved = localStorage.getItem('p360.desktop.theme');
-    if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
   } catch (e) {}
+  const isDark = () => (root.getAttribute('data-theme') || (osDark.matches ? 'dark' : 'light')) === 'dark';
   const btn = document.getElementById('theme-toggle');
-  const sync = () => {
-    if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? 'Dark' : 'Light';
-  };
+  const sync = () => { if (btn) btn.textContent = isDark() ? 'Light mode' : 'Dark mode'; };
   sync();
+  osDark.addEventListener('change', sync);
   if (btn)
     btn.addEventListener('click', () => {
-      const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      try {
-        localStorage.setItem('p360.desktop.theme', next);
-      } catch (e) {}
+      const next = isDark() ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('p360.desktop.theme', next); } catch (e) {}
       sync();
     });
 })();
@@ -48,11 +48,14 @@ const chartBars = Array.from({ length: 24 }, (_, hour) => {
 });
 function render(state) {
   lastState = state;
-  element('status').textContent = state.running ? '● Tracking is on' : 'Paused';
-  element('status').className = state.running ? 'status running' : 'status';
-  element('connection').textContent = state.connected ? 'Connected to your website account' : 'Connect your account to begin';
+  element('status').textContent = state.running ? 'Tracking' : state.connected ? 'Paused' : 'Not connected';
+  element('pill').classList.toggle('running', state.running);
+  element('connection').textContent = state.connected ? (state.running ? 'Counting activity across your apps' : 'Connected to your account') : 'Connect your account to begin';
+  const hour = new Date().getHours();
+  element('headline').textContent = state.running ? 'Quietly counting your day.' : `${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}.`;
   element('sync-message').textContent = state.syncMessage;
-  element('ai-text').textContent = state.aiText ? state.aiText + ' (AI-written from counts; can be wrong.)' : 'Get a short summary written by GPT-4o mini (via Hack Club AI) from your activity counts. Only numbers are sent, and it can be wrong.';
+  element('ai-text').textContent = state.aiText ? state.aiText + ' (Written by Claude Sonnet from counts; it can be wrong.)' : 'A short summary written by Claude Sonnet from your activity counts. Only numbers are sent, and it can be wrong.';
+  element('ai-text').classList.toggle('muted', !state.aiText);
   element('connect').hidden = state.connected;
   element('start').hidden = !state.connected || state.running;
   element('pause').hidden = !state.running;

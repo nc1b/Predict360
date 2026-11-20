@@ -66,7 +66,7 @@ export const clerkAppearance = {
 // Dev-only: `VITE_PREVIEW_USER=1 npm run dev` signs in a local preview user without Clerk.
 // `import.meta.env.DEV` is false in production builds, so this branch is removed there.
 const PREVIEW_USER = import.meta.env.DEV && import.meta.env.VITE_PREVIEW_USER === '1';
-const preview: AuthState = { user: { id: 'preview', name: 'Alex' }, loaded: true, sessionId: null, getToken: async () => null };
+const preview: AuthState = { user: { id: 'preview', name: 'Alex' }, loaded: true, sessionId: null, getToken: async () => 'preview-token' };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();

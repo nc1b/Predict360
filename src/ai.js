@@ -1,8 +1,13 @@
 'use strict';
 
+const Anthropic = require('@anthropic-ai/sdk').default;
 
-const AI_ENDPOINT = 'https://ai.hackclub.com/proxy/v1/chat/completions';
-const AI_MODEL = 'openai/gpt-4o-mini';
+// Sonnet answers the quick, per-check-in requests (explanations and chat).
+// Opus writes the once-a-day analysis that compares today with the user's history.
+const FAST_MODEL = 'claude-sonnet-5-5';
+const DEEP_MODEL = 'claude-opus-5-5';
+// If a model declines, the API reruns the request on a suitable fallback model in the same call.
+const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 const { LIMITS, SCORING, STATUS_BANDS } = require('./config');
 const STATUSES = [...STATUS_BANDS.map((band) => band.status), 'baseline_missing', 'baseline_insufficient', 'insufficient_samples'];
 const { typingResearchContext, activityResearchContext } = require('./research');
@@ -34,7 +39,34 @@ const FEATURE_LABELS = {
 };
 
 function isConfigured() {
-  return typeof process.env.HACKCLUB_AI_KEY === 'string' && process.env.HACKCLUB_AI_KEY.trim().length > 0;
+  return typeof process.env.ANTHROPIC_API_KEY === 'string' && process.env.ANTHROPIC_API_KEY.trim().length > 0;
+}
+
+let client = null;
+function getClient() {
+  // Resolve fetch at call time so tests can stub global fetch.
+  if (!client) client = new Anthropic({ fetch: (...args) => globalThis.fetch(...args), maxRetries: 1 });
+  return client;
+}
+
+/** One Messages API call; returns the reply text or throws. */
+async function complete({ model, system, messages, effort, maxTokens, signal }) {
+  const response = await getClient().beta.messages.create(
+    {
+      model,
+      max_tokens: maxTokens,
+      system,
+      messages,
+      output_config: { effort },
+      betas: [FALLBACK_BETA],
+      fallbacks: 'default',
+    },
+    { signal }
+  );
+  if (response.stop_reason === 'refusal') throw new Error('refused');
+  const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
+  if (!text) throw new Error('empty completion');
+  return text;
 }
 
 const num = (v, max = LIMITS.maxTimestampMs) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= max ? v : null);
@@ -87,30 +119,15 @@ function buildActivitySummaryText(result) {
 }
 
 async function callAi(summaryText, { signal, mode = 'typing' } = {}) {
-  const res = await fetch(AI_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.HACKCLUB_AI_KEY}`,
-      'Content-Type': 'application/json',
-    },
+  return complete({
+    model: FAST_MODEL,
+    system: mode === 'activity' ? ACTIVITY_PROMPT : SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: `Here are today's numbers:\n${summaryText}\n\nExplain them to me.` }],
+    effort: 'low',
+    maxTokens: 4000,
     signal,
-    body: JSON.stringify({
-      model: AI_MODEL,
-      temperature: 0.4,
-      max_tokens: 200,
-      messages: [
-        { role: 'system', content: mode === 'activity' ? ACTIVITY_PROMPT : SYSTEM_PROMPT },
-        { role: 'user', content: `Here are today's numbers:\n${summaryText}\n\nExplain them to me.` },
-      ],
-    }),
   });
-  if (!res.ok) throw new Error(`upstream ${res.status}`);
-  const data = await res.json();
-  const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-  if (typeof text !== 'string' || text.trim().length === 0) throw new Error('empty completion');
-  return text.trim();
 }
-
 
 const CHAT_SYSTEM_PROMPT = [
   'You are the assistant for Predict 360, an experimental two-sentence typing check-in.',
@@ -166,29 +183,63 @@ function prepareChat(body) {
   if (messages[messages.length - 1].role !== 'user') return { error: 'The last message must be from the user.' };
   const historyText = buildHistoryText(body.history);
   const system = [
-    { role: 'system', content: CHAT_SYSTEM_PROMPT },
-    {
-      role: 'system',
-      content: historyText
-        ? `The user's recent check-ins (numbers only, oldest first):\n${historyText}\n\nPublic research context (not diagnostic thresholds):\n${typingResearchContext()}`
-        : 'The user has no saved check-ins yet.',
-    },
-  ];
-  return { messages: [...system, ...messages] };
+    CHAT_SYSTEM_PROMPT,
+    historyText
+      ? `The user's recent check-ins (numbers only, oldest first):\n${historyText}\n\nPublic research context (not diagnostic thresholds):\n${typingResearchContext()}`
+      : 'The user has no saved check-ins yet.',
+  ].join('\n\n');
+  return { system, messages };
 }
 
-async function chat(messages, { signal } = {}) {
-  const res = await fetch(AI_ENDPOINT, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.HACKCLUB_AI_KEY}`, 'Content-Type': 'application/json' },
+async function chat(prepared, { signal } = {}) {
+  return complete({ model: FAST_MODEL, system: prepared.system, messages: prepared.messages, effort: 'low', maxTokens: 6000, signal });
+}
+
+const DAILY_PROMPT = [
+  'You write the daily analysis for Predict 360, an experimental two-sentence typing check-in.',
+  "You receive numbers only: today's check-in compared with the user's own usual, their recent check-in history, an optional self-reported energy level, and optional computer-activity totals. You never see what they typed.",
+  'Compare today with their recent pattern. Point out what changed, what stayed steady, and any trend across days, using the actual numbers.',
+  'Format: one short headline sentence on its own line, then 2 to 4 lines that each start with "- ". Under 130 words in total. Plain, warm language.',
+  'Rules you must follow:',
+  '- This is about typing timing and computer use only. Never give medical advice.',
+  '- Never name or imply any illness, condition, disorder or diagnosis, and never say the person has or may have one.',
+  '- Never say whether the person is healthy, unwell, or fit to work.',
+  '- A difference is just a difference from their usual, with ordinary possible causes such as distraction, a different keyboard, or tiredness.',
+  '- If they reported low energy, you may suggest a short break; otherwise do not give generic wellness advice.',
+  '- Use only the supplied numbers. Never invent accuracy, thresholds or causes.',
+  '- End with: "Prototype, not medical advice."',
+].join('\n');
+
+const ENERGY_TEXT = { low: 'running low', steady: 'about usual', good: 'feeling good' };
+
+function buildDailyText(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return null;
+  const parts = [];
+  const today = body.today ? buildSummaryText(body.today) : null;
+  parts.push(today ? `Today's check-in:\n${today}` : 'No scored check-in yet today.');
+  const historyText = buildHistoryText(body.history);
+  parts.push(historyText ? `Recent check-ins (oldest first):\n${historyText}` : 'No earlier check-ins.');
+  if (Object.hasOwn(ENERGY_TEXT, body.energy)) parts.push(`Self-reported energy today: ${ENERGY_TEXT[body.energy]}.`);
+  const a = body.activity;
+  if (a && typeof a === 'object') {
+    const active = num(a.activeMinutesToday, 24 * 60);
+    const usual = num(a.usualActiveMinutes, 24 * 60);
+    const keys = num(a.keyPressesToday, 10_000_000);
+    if (active !== null) parts.push(`Computer activity today: ${Math.round(active)} active minutes${keys !== null ? `, ${Math.round(keys)} key presses` : ''}${usual !== null ? `; recent median ${Math.round(usual)} active minutes` : ''}.`);
+  }
+  if (!today && !historyText) return null;
+  return parts.join('\n\n');
+}
+
+async function dailyAnalysis(text, { signal } = {}) {
+  return complete({
+    model: DEEP_MODEL,
+    system: DAILY_PROMPT,
+    messages: [{ role: 'user', content: `${text}\n\nWrite today's analysis.` }],
+    effort: 'medium',
+    maxTokens: 12000,
     signal,
-    body: JSON.stringify({ model: AI_MODEL, temperature: 0.5, max_tokens: 400, messages }),
   });
-  if (!res.ok) throw new Error(`upstream ${res.status}`);
-  const data = await res.json();
-  const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-  if (typeof text !== 'string' || text.trim().length === 0) throw new Error('empty completion');
-  return text.trim();
 }
 
 module.exports = {
@@ -199,6 +250,8 @@ module.exports = {
   prepareChat,
   chat,
   callAi,
-  AI_ENDPOINT,
-  AI_MODEL,
+  buildDailyText,
+  dailyAnalysis,
+  FAST_MODEL,
+  DEEP_MODEL,
 };

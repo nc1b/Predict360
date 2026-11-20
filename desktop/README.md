@@ -10,7 +10,7 @@ An opt-in activity tracker across applications, connected to your website accoun
 4. Sign in with your usual account, choose **Connect this account**, then **Return to desktop**. Allow the browser to open Predict 360.
 5. Choose **Start tracking**. Pause at any time in the window or system tray.
 
-The dashboard shows clicks, key presses, scroll counts, and active/idle time. Activity is grouped by local day and hour, saved locally, and synced about once a minute. The website dashboard refreshes about once a minute. **Explain my day** uses the existing Hack Club AI integration on the website, with numeric summaries and public research context.
+The dashboard shows clicks, key presses, scroll counts, and active/idle time. Activity is grouped by local day and hour, saved locally, and synced about once a minute. The website dashboard refreshes about once a minute. **Explain my day** asks Claude Sonnet (through the website backend) for a short summary, sending only numeric counts and public research context.
 
 The app never saves typed words, key values, pointer coordinates, screenshots, or application names. Mouse movement marks activity. No input for 60 seconds counts as idle. Tracking pauses on sleep or screen lock, and remains paused when the app restarts. Closing the window while tracking leaves the app in the system tray; **Quit and stop tracking** ends it.
 

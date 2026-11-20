@@ -7,7 +7,7 @@ const { validateAnalyzeRequest } = require('../src/validate');
 async function setup() {
   const { createCloudHandler, hash } = await import('../src/cloud-core.mjs');
   let time = Date.now();
-  const codes = new Map(), sessions = new Map(), days = new Map(), checkins = new Map();
+  const codes = new Map(), sessions = new Map(), days = new Map(), checkins = new Map(), profiles = new Map(), daily = new Map();
   const repository = {
     saveCode: async (row) => codes.set(row.code_hash, row),
     consumeCode: async (key, challenge, now) => { const value = codes.get(key); if (!value || value.challenge !== challenge || value.expires_at <= now) return null; codes.delete(key); return value; },
@@ -22,11 +22,16 @@ async function setup() {
     listCheckins: async (user) => [...checkins.values()].filter((entry) => entry.user === user).map((entry) => entry.summary),
     saveCheckin: async (user, summary) => checkins.set(`${user}/${summary.id}`, { user, summary }),
     deleteCheckins: async (user) => { for (const [key, value] of checkins) if (value.user === user) checkins.delete(key); },
+    getProfile: async (user) => profiles.get(user),
+    recordLogin: async (user, { displayName, timezone, client }) => { const old = profiles.get(user); const row = { user_id: user, display_name: displayName ?? old?.display_name ?? null, timezone: timezone ?? old?.timezone ?? null, login_count: (old?.login_count ?? 0) + 1, last_client: client }; profiles.set(user, row); return row; },
+    listDaily: async (user) => [...daily.values()].filter((row) => row.user_id === user),
+    saveDaily: async (user, entry) => { const key = `${user}/${entry.day}`; daily.set(key, { ...daily.get(key), user_id: user, day: entry.day, ...(entry.energy !== undefined && { energy: entry.energy }), ...(entry.analysis !== undefined && { analysis: entry.analysis }) }); },
+    deleteDaily: async (user) => { for (const [key, value] of daily) if (value.user_id === user) daily.delete(key); },
   };
   const handle = createCloudHandler({ repository, validateDay,
     validateFeatures: (features) => !validateAnalyzeRequest({ keystrokes: [{ kind: 'character', downMs: 0, upMs: 1 }], baseline: { sessions: [{ features }] } }).errors.length,
     verifyWebToken: async (token) => { if (token === 'webA') return 'user_A'; if (token === 'webB') return 'user_B'; throw new Error('invalid'); }, now: () => time });
-  return { hash, codes, sessions, advance: (ms) => { time += ms; },
+  return { hash, codes, sessions, profiles, advance: (ms) => { time += ms; },
     async request(route, method = 'GET', body, token = 'webA') {
       const response = await handle(new Request(`https://example.test?route=${route}`, { method, headers: token ? { Authorization: `Bearer ${token}` } : {}, body: body === undefined ? undefined : JSON.stringify(body) }));
       return { status: response.status, data: await response.json() };
@@ -76,4 +81,33 @@ test('cloud check-ins accept only valid feature summaries and remain private', a
   assert.equal((await app.request('checkins', 'POST', { ...entry, keystrokes: [] })).status, 400);
   assert.equal((await app.request('checkins', 'POST', { ...entry, features: {} })).status, 400);
   await app.request('checkins', 'DELETE'); assert.deepEqual((await app.request('checkins')).data.entries, []);
+});
+
+test('logins, energy and daily analyses sync per user and are validated', async () => {
+  const app = await setup();
+  assert.equal((await app.request('profile', 'POST', { client: 'web' }, null)).status, 401);
+  assert.equal((await app.request('profile', 'POST', { client: 'web', email: 'x@y.z' })).status, 400);
+  await app.request('profile', 'POST', { client: 'web', displayName: 'Sam', timezone: 'America/New_York' });
+  const second = await app.request('profile', 'POST', { client: 'web' });
+  assert.equal(second.data.profile.login_count, 2);
+  assert.equal(second.data.profile.display_name, 'Sam');
+  assert.equal((await app.request('profile', 'GET', undefined, 'webB')).data.profile, null);
+
+  assert.equal((await app.request('daily', 'PUT', { day: '2026-11-20', energy: 'tired' })).status, 400);
+  assert.equal((await app.request('daily', 'PUT', { day: '2026-11-20' })).status, 400);
+  assert.equal((await app.request('daily', 'PUT', { day: '2026-11-20', energy: 'low', journal: 'words' })).status, 400);
+  assert.equal((await app.request('daily', 'PUT', { day: '2026-11-20', energy: 'low' })).status, 200);
+  assert.equal((await app.request('daily', 'PUT', { day: '2026-11-20', analysis: 'Steady day.' })).status, 200);
+  const days = (await app.request('daily')).data.days;
+  assert.equal(days.length, 1); assert.equal(days[0].energy, 'low'); assert.equal(days[0].analysis, 'Steady day.');
+  assert.equal((await app.request('daily', 'GET', undefined, 'webB')).data.days.length, 0);
+  await app.request('checkins', 'DELETE');
+  assert.equal((await app.request('daily')).data.days.length, 0);
+});
+
+test('a desktop sign-in is recorded as a desktop login', async () => {
+  const app = await setup(), verifier = randomBytes(32).toString('base64url');
+  const auth = await app.request('authorize', 'POST', { challenge: await app.hash(verifier) });
+  await app.request('exchange', 'POST', { code: auth.data.code, verifier }, null);
+  assert.equal(app.profiles.get('user_A').last_client, 'desktop');
 });

@@ -7,7 +7,7 @@ import type { HistoryEntry } from '@/lib/history';
 
 const SUGGESTIONS = ['Summarise my check-ins', 'How has my sentence pause changed?', 'Any trend this week?'];
 
-function toHistoryItems(history: HistoryEntry[]): ChatHistoryItem[] {
+export function toHistoryItems(history: HistoryEntry[]): ChatHistoryItem[] {
   return history.map((h) => ({
     date: h.at,
     readinessScore: h.readinessScore,
