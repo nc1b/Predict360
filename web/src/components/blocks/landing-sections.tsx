@@ -33,7 +33,7 @@ export function ModesSection() {
         <Eyebrow>Two ways to track</Eyebrow>
         <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Pick how you check in</h2>
         <p className="mt-4 max-w-xl text-muted-foreground">
-          Type today&apos;s two sentences during a break on your shift, or opt into all-day tracking on Windows or Mac. Switch whenever you want — each
+          Type today&apos;s two sentences whenever suits you, or let the Windows or Mac app track your typing across the whole day. Switch whenever you want — each
           result is labelled by mode and compared with your own baseline.
         </p>
 
@@ -94,7 +94,7 @@ export function ResearchMapSection() {
         <h2 className="mt-3 max-w-2xl text-balance text-3xl font-bold md:text-5xl">Typing timing changes when people are worn down</h2>
         <p className="mt-4 max-w-2xl text-muted-foreground">
           Researchers have measured how typing timing shifts when people are groggy, stressed or overloaded. Predict 360
-          tracks the same three signals against your own usual, so a change is easier to notice at the end of a long shift.
+          tracks the same three signals against your own usual, so a change is easier to notice at any point in your day.
         </p>
 
         <ol className="mt-12 space-y-3">
@@ -131,7 +131,7 @@ export function ResearchMapSection() {
 
         <p className="mt-6 max-w-2xl rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">Important:</span> these studies were run on other people
-          under controlled conditions. Predict 360 has not been tested on nurses, and it cannot tell why your typing
+          under controlled conditions. Predict 360 has not been tested in real workplaces, and it cannot tell why your typing
           changed. A change is a prompt to notice how you are doing, not a result. This project is a prototype and is not
           medical advice.
         </p>
@@ -355,7 +355,7 @@ const FAQS: FaqItem[] = [
   {
     question: 'Has it been tested on people?',
     answer:
-      'Partly. The model is trained and tested on real typing from 51 people in a public dataset, but the changes it detects there were injected by us. It has not been tested on nurses, and nothing shows that a flagged change means tiredness.',
+      'Partly. The model is trained and tested on real typing from 51 people in a public dataset, but the changes it detects there were injected by us. It has not been tested in real workplaces, and nothing shows that a flagged change means tiredness.',
   },
 ];
 
