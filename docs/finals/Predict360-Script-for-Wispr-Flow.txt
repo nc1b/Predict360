@@ -1,0 +1,39 @@
+PREDICT 360 — FINALS SCRIPT (Sahaj 3:00 · Divij 2:00)
+
+SLIDE 1: Predict 360
+  DIVIJ (0:00–0:15): Hi, I'm Divij, and this is Sahaj. Our project is Predict 360, in the AI and Health track. It follows your typing rhythm all day, and tells you when it has drifted from your own usual.
+
+SLIDE 2: The problem
+  DIVIJ (0:15–0:40): Late in a long workday, it's hard to notice when you're slowing down. That's true for nurses on long shifts, and for anyone who types all day. Predict 360 checks your typing all day, using only key timing. It compares you only with yourself, and your words never leave your device. Sahaj will show you how it works, live.
+
+SLIDE 3: Live demo
+  [Divij ACTION] Switch the shared tab to predict360.vercel.app/evaluation. Click each button when Sahaj names it. Switch back to the slides when Sahaj says “back to the slides”.
+  SAHAJ (0:40–2:10): Thanks, Divij. This page runs the exact model the app uses, on real typing from people it never trained on. First, ordinary typing [Divij clicks Ordinary typing]: close to usual. Now the same person with their keys held down longer [Divij clicks Longer key holds]: the model flags a changed pattern. And here's one it misses [Divij clicks Missed timing change]: the rhythm is 55 percent more uneven, and it still says usual. We show this on purpose, and we'll explain why in a minute. In the real app, you'd type two sentences, or let the desktop app track your day in the background. Back to the slides. Divij will walk you through how it works.
+
+SLIDE 4: How it works
+  DIVIJ (2:10–2:45): Here's how it works, left to right. We record only when keys go down and come up. We turn that into three signals: key hold, pauses, and rhythm. We compare them with your own usual. Then a small model, with just four weights and trained on real typing, gives the score. Claude only explains the numbers in plain words. Sahaj, how well does it work?
+
+SLIDE 5: Results
+  SAHAJ (2:45–3:30): We tested on 3,060 check-ins from 51 people, split by person so the model never saw the test typists. Every method is held at the same 10 percent false alarms. Always saying usual catches nothing. A hand-set rule catches 37 percent. Our first model, trained on simulated typists, also 37. The live model catches 59 percent, with a 95 percent interval of 57 to 61. On the right: ROC-AUC is 0.83, against 0.79 for the rule. And when key holds are 20 percent longer, it catches them 90 percent of the time.
+
+SLIDE 6: Where it fails
+  SAHAJ (3:30–4:15): But it still misses 41 percent of changes. Top left: mostly rhythm changes, because rhythm wobbles 26 percent for the same person on a normal day, while key hold wobbles only 4. Top right: our first model scored 88 percent on simulated typists and was no better than the rule on real people. That's why we retrained on real typing. Bottom left: people differ a lot. The rule's false alarms ranged from 10 to 43 percent per person, so we only compare you with yourself. And bottom right: a flag means a change, not tiredness. We injected the changes, because no public typing data has fatigue labels. Divij, what's next?
+
+SLIDE 7: What comes next
+  DIVIJ (4:15–4:47): On the left, the impact: private, all-day tracking on the computer you already use. There's no boss dashboard, and your words are never saved. On the right, what's next: a pilot with volunteers, starting with nurses, who rate their own tiredness. To be transparent: we added the desktop app after submission. The model and results we showed are what we submitted.
+
+SLIDE 8: Try the prototype
+  DIVIJ (4:47–5:00): Visit our website to try a prototype of our app, at predict360.vercel.app, or scan the code. This project is a prototype and is not medical advice. Thank you! We're happy to take questions.
+
+Q&A — DIVIJ'S ANSWERS
+  Q: What data do you store? / Is it private?
+  A: Only timing numbers, never the words you type. There's no employer dashboard. The user owns their data.
+  Q: Why typing instead of a smartwatch?
+  A: Everyone already types. There's no new device and no cost.
+  Q: What would you do next / with more time?
+  A: Run a pilot with real volunteers, starting with nurses, so we can test it on real tiredness instead of changes we added ourselves.
+  Q: What does Claude do?
+  A: It only explains the numbers in plain words. Our own model makes the score.
+  For anything else, Divij can say: "Sahaj built most of the model, so I'll let Sahaj take that one."
+
+Visit our website to try a prototype of our app: predict360.vercel.app
