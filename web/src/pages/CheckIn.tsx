@@ -330,7 +330,7 @@ export default function CheckIn() {
             </div>
             <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent p-3">
               <p className="text-sm font-semibold">{doneToday ? 'Checked in today' : 'Daily check-in'}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{doneToday ? 'Check in again after a shift' : 'Two sentences · about 30 s'}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{doneToday ? 'Check in again later today' : 'Two sentences · about 30 s'}</p>
               <Button variant="brand" size="sm" className="mt-3 w-full" onClick={() => setDailyOpen(true)} disabled={busy}>
                 <PenLine className="size-4" aria-hidden="true" /> {doneToday ? 'Check in again' : 'Start check-in'}
               </Button>

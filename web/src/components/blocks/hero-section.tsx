@@ -48,20 +48,20 @@ export function HeroSection() {
           className="hero-in gradient-border group inline-flex items-center gap-2 rounded-full bg-card/70 px-4 py-1.5 text-xs text-muted-foreground shadow-sm shadow-violet-950/5 backdrop-blur transition-colors hover:text-foreground"
         >
           <Sparkles className="size-3.5 text-emerald-400" aria-hidden="true" />
-          Veritas AI Hackathon 2026 finalist · powered by Claude
+          All-day typing insights · Windows, Mac and web
           <span className="inline-flex items-center gap-1 text-foreground">
             Read more <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </span>
         </a>
 
         <h1 className="hero-in hero-delay-1 mt-8 max-w-4xl bg-gradient-to-b from-foreground via-foreground to-violet-700 bg-clip-text dark:to-violet-300/80 text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-transparent md:text-6xl lg:text-7xl">
-          A 30-second typing check-in
-          <br className="hidden md:block" /> for the end of a long shift
+          Your typing rhythm,
+          <br className="hidden md:block" /> followed all day long
         </h1>
 
         <p className="hero-in hero-delay-2 mt-6 max-w-2xl text-pretty text-base text-muted-foreground md:text-lg">
-          Type two sentences on a break. Predict 360 compares your typing rhythm with your own usual, using a model trained on real
-          typing, and your words never leave the browser.
+          Predict 360 tracks how you type across the whole day, from a quick 30-second check-in to quiet background tracking
+          on your computer, and compares it only with your own usual. A model trained on real typing does the scoring, and your words never leave your device.
         </p>
 
         <div className="hero-in hero-delay-3 mt-10 flex flex-wrap items-center justify-center gap-3">

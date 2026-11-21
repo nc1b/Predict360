@@ -56,7 +56,7 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           <figure className="absolute inset-x-6 bottom-6 rounded-2xl border border-white/15 bg-black/50 p-5 text-white backdrop-blur-md">
             <blockquote className="text-lg font-semibold leading-snug">
-              Two sentences during a break on your shift. Compared with your own usual, never with anyone else.
+              Track your typing across the whole day. Compared with your own usual, never with anyone else.
             </blockquote>
             <figcaption className="mt-2 text-sm text-white/70">Only key timing is measured. Your words stay on your device.</figcaption>
           </figure>
